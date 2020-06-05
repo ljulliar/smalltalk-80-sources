@@ -17,12 +17,15 @@ Class {
 		'FreePointerList',
 		'HeaderSize',
 		'HeapSegmentCount',
+		'HeapSpaceStop',
 		'HugeSize',
 		'LastFreeChunkList',
 		'LastHeapSegment',
 		'MethodClass',
+		'NilPointer',
 		'NonPointer',
 		'ObjectTableSegment',
+		'ObjectTableSize',
 		'ObjectTableStart'
 	],
 	#category : #'Smalltalk-80 VM'
@@ -34,8 +37,51 @@ ObjectMemory class >> initialize [
 	NonPointer := 2**16 - 1
 ]
 
-{ #category : #allocation }
+{ #category : #'private - compaction' }
+ObjectMemory >> abandonFreeChunksInSegment: segment [
+	"Computes lowWaterMark and also finds all deallocated chunks, recycles their object table entries onto the list of free pointers using the subroutine releasePointer:, and changes their class fields to the distinguished value NonPointer. During the subsequent sweep, when the compacter encounters objects so marked it can recognize them as deallocated chunks."
+
+	| lowWaterMark objectPointer nextPointer |
+	lowWaterMark := HeapSpaceStop.	"first assume that no chunk is free"
+	HeaderSize to: BigSize do: [ :size | 
+		"for each free-chunk list"
+		objectPointer := self headOfFreeChunkList: size inSegment: segment.
+		[ objectPointer = NonPointer ]
+			whileFalse: [ lowWaterMark := lowWaterMark
+					min: (self locationBitsOf: objectPointer).
+				nextPointer := self classBitsOf: objectPointer.	"link to next free chunk"
+				self classBitsOf: objectPointer put: NonPointer.	"distinguish for sweep"
+				self releasePointer: objectPointer.	"add entry to free-pointer list"
+				objectPointer := nextPointer ].
+		self resetFreeChunkList: size inSegment: segment ].
+	^ lowWaterMark
+]
+
+{ #category : #'private - allocation' }
+ObjectMemory >> allocate: size odd: oddBit pointer: pointerBit extra: extraWord class: classPointer [
+	"Memory allocation to store objects. The way memory is allocated depends on the pointer-fields bit of the object table entry:
+	when that bit is 1, the data consist of object pointers; 
+	when that bit is 0, the data consist of positive 8- or 16-bit integers. 
+	When there are an odd number of bytes of data in a nonpointer object, the final byte of the last word is 0 (a slight waste of space), and the odd-length bit of the object table entry, which is normally 0, is set to 1. To support nonpointer objects, the allocator needs two additional parameters, pointerBit and oddBit. In the case of a nonpointer object (pointerBit = 0), the default initial value of the elements is 0 instead of nil."
+
+	| objectPointer default |
+	self countUp: classPointer.
+	objectPointer := self allocateChunk: size + extraWord.
+	self oddBitOf: objectPointer put: oddBit.
+	self pointerBitOf: objectPointer put: pointerBit.
+	self classBitsOf: objectPointer put: classPointer.
+	default := pointerBit = 0
+		ifTrue: [ 0 ]
+		ifFalse: [ NilPointer ].
+	HeaderSize to: size - 1 do: [ :i | self heapChunkOf: objectPointer word: i put: default ].
+	self sizeBitsOf: objectPointer put: size.
+	^ objectPointer
+]
+
+{ #category : #'private - allocation' }
 ObjectMemory >> allocateChunk: size [
+	"Allocate a chunk of memory and Attempts a marking collection if compaction of all segments has failed to yield enough space to satisfy an allocation request."
+
 	| objectPointer |
 	objectPointer := self attemptToAllocateChunk: size.
 	objectPointer isNil
@@ -47,8 +93,11 @@ ObjectMemory >> allocateChunk: size [
 	self outOfMemoryError	"give up"
 ]
 
-{ #category : #allocation }
+{ #category : #'private - allocation' }
 ObjectMemory >> attemptToAllocateChunk: size [
+	"First tries to allocate chunk in currentSegment, the segment currently targeted for allocations. 
+If it fails (returns nil), then the routine compacts the next segment and retries the allocation there. This procedure continues until the original segment has been compacted and searched. If no space can be found anywhere, the routine returns nil. "
+
 	| objectPointer |
 	objectPointer := self attemptToAllocateChunkInCurrentSegment: size.
 	objectPointer isNil
@@ -64,31 +113,29 @@ ObjectMemory >> attemptToAllocateChunk: size [
 	^ nil
 ]
 
-{ #category : #allocation }
+{ #category : #'private - allocation' }
 ObjectMemory >> attemptToAllocateChunkInCurrentSegment: size [
+	"Searches the current heap segment's free-chunk lists for the first chunk that is the right size or that can be subdivided to yield a chunk of the right size"
+
 	| objectPointer predecessor next availableSize excessSize newPointer |
+	objectPointer := nil.
 	size < BigSize
 		ifTrue: [ objectPointer := self removeFromFreeChunkList: size ].
 	objectPointer notNil
 		ifTrue: [ ^ objectPointer ].	"small chunk of exact size handy so use it"
-	predecessor := NonPointer.
-	"remember predecessor of chunk under consideration"
+	predecessor := NonPointer.	"remember predecessor of chunk under consideration"
 	objectPointer := self
-		headOfFreeChunkList: LastFreeChunkList
+		headOfFreeChunkList: BigSize
 		inSegment: currentSegment.
 	"the search loop stops when the end of the linked list is encountered"
 	[ objectPointer = NonPointer ]
 		whileFalse: [ availableSize := self sizeBitsOf: objectPointer.
 			availableSize = size
-				ifTrue: [ "exact fit - remove from free chunk list and return"
-					next := self classBitsOf: objectPointer.
-					"the link to the next chunk"
+				ifTrue: [ "exact fit -- remove from free chunk list and return"
+					next := self classBitsOf: objectPointer.	"the link to the next chunk"
 					predecessor = NonPointer
-						ifTrue: [ "it was the head of the list; make the next item the head"
-							self
-								headOfFreeChunkList: LastFreeChunkList
-								inSegment: currentSegment
-								put: next ]
+						ifTrue:
+							[ "it was the head of the list; make the next item the head" self headOfFreeChunkList: BigSize inSegment: currentSegment put: next ]
 						ifFalse: [ "it was between two chunks; link them together" self classBitsOf: predecessor put: next ].
 					^ objectPointer ].
 			"this chunk was either too big or too small; inspect the amount of variance"
@@ -128,6 +175,20 @@ ObjectMemory >> classBitsOf: objectPointer put: value [
 	^ self heapChunkOf: objectPointer word: 1 put: value
 ]
 
+{ #category : #'private - compaction' }
+ObjectMemory >> compactCurrentSegment [
+	"invokes the other compaction routines in the proper order and then creates the single free chunk at the top of the heap segment"
+
+	| lowWaterMark bigSpace |
+	lowWaterMark := self abandonFreeChunksInSegment: currentSegment.
+	lowWaterMark < HeapSpaceStop
+		ifTrue: [ self reverseHeapPointersAbove: lowWaterMark.
+			bigSpace := self sweepCurrentSegmentFrom: lowWaterMark.
+			self
+				deallocate:
+					(self obtainPointer: HeapSpaceStop + 1 - bigSpace location: bigSpace) ]
+]
+
 { #category : #'private - object table entries' }
 ObjectMemory >> countBitsOf: objectPointer [
 	^ self ot: objectPointer bits: 0 to: 7
@@ -136,6 +197,16 @@ ObjectMemory >> countBitsOf: objectPointer [
 { #category : #'private - object table entries' }
 ObjectMemory >> countBitsOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 0 to: 7 put: value
+]
+
+{ #category : #'private - deallocation' }
+ObjectMemory >> deallocate: objectPointer [
+	"chunk is recycled on a free-chunk list. The following routine expects the count field to have been reset to zero by a higher-level routine. deallocated objects have no provision for an extra word not counted in the size field."
+
+	| space |
+	space := self spaceOccupiedBy: objectPointer.
+	self sizeBitsOf: objectPointer put: space.
+	self toFreeChunkList: (space min: BigSize) add: objectPointer
 ]
 
 { #category : #'reference counting' }
@@ -181,13 +252,13 @@ ObjectMemory >> freeBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 10 to: 10 put: value
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'private - object table entries' }
 ObjectMemory >> headOfFreeChunkList: size inSegment: segment [
 	"Get the head of free chunk list in segment"
 	^ wordMemory segment: segment word: FirstFreeChunkList + size
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'private - object table entries' }
 ObjectMemory >> headOfFreeChunkList: size inSegment: segment put: objectPointer [
 	"Set the head of free chunk list in segment"
 	^ wordMemory
@@ -283,14 +354,17 @@ ObjectMemory >> locationBitsOf: objectPointer put: value [
 		put: value
 ]
 
-{ #category : #allocation }
+{ #category : #'private - allocation' }
 ObjectMemory >> obtainPointer: size location: location [
+	"Obtain a free object table entry, zeroes its free entry bit as well as the rest of the first word of the entry, points the entry at the specified location, and sets the size field of the header to the specified size"
+
 	| objectPointer |
 	objectPointer := self removeFromFreePointerList.
 	objectPointer isNil
 		ifTrue: [ ^ nil ].
 	self ot: objectPointer put: 0.
-	self segmentBitsOf: objectPointer put: currentSegment.
+	self segmentBitsOf: objectPointer put.
+	currentSegment.
 	self locationBitsOf: objectPointer put: location.
 	self sizeBitsOf: objectPointer put: size.
 	^ objectPointer
@@ -361,6 +435,14 @@ ObjectMemory >> pointerBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 9 to: 9 put: value
 ]
 
+{ #category : #'private - compaction' }
+ObjectMemory >> releasePointer: objectPointer [
+	"Recycles their object table entries onto the list of free pointers"
+
+	self freeBitOf: objectPointer put: 1.
+	self toFreePointerListAdd: objectPointer
+]
+
 { #category : #'private - object table entries' }
 ObjectMemory >> removeFromFreeChunkList: size [
 	"Remove a block of given size from free chunk list"
@@ -396,6 +478,23 @@ ObjectMemory >> resetFreeChunkList: size inSegment: segment [
 	"resets the specified free-chunk list to an empty list"
 
 	self headOfFreeChunkList: size inSegment: segment put: NonPointer
+]
+
+{ #category : #'private - compaction' }
+ObjectMemory >> reverseHeapPointersAbove: lowWaterMark [
+	"Pointers are reversed before starting to sweep through a heap segment. During compaction, instead of the usual arrangement in which the object table entry points to the header in the heap, the header points temporarily to the object table entry."
+
+	| size |
+	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | 
+		(self freeBitOf: objectPointer) = 0
+			ifTrue: [ "the Object Table entry is in use"
+				(self segmentBitsOf: objectPointer) = currentSegment
+					ifTrue: [ "the object is in this segment"
+						(self locationBitsOf: objectPointer) < lowWaterMark
+							ifFalse: [ "the object will be swept"
+								size := self sizeBitsOf: objectPointer.	"rescue the size"
+								self sizeBitsOf: objectPointer put: objectPointer.	"reverse the pointer"
+								self locationBitsOf: objectPointer put: size	"save the size" ] ] ] ]
 ]
 
 { #category : #'private - object table entries' }
@@ -457,7 +556,37 @@ ObjectMemory >> storeWord: fieldIndex ofObject: objectPointer withValue: valueWo
 		put: valueWord
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'private - compaction' }
+ObjectMemory >> sweepCurrentSegmentFrom: lowWaterMark [
+	"Swipe the current heap segment (after all preparations for compaction are complete)"
+
+	| si di objectPointer size space |
+	si := di := lowWaterMark.
+	[ si < HeapSpaceStop ]
+		whileTrue: [ "for each object, si"
+			(wordMemory segment: currentSegment word: si + 1) = NonPointer
+				ifTrue: [ "unallocated, so skip it"
+					size := wordMemory segment: currentSegment word: si.
+					si := si + size ]
+				ifFalse: [ "allocated, so keep it, but move it to compact storage"
+					objectPointer := wordMemory segment: currentSegment word: si.
+					size := self locationBitsOf: objectPointer.	"the reversed size"
+					self locationBitsOf: objectPointer put: di.	"point object table at new location"
+					self sizeBitsOf: objectPointer put: size.	"restore the size to its proper place"
+					si := si + 1.	"skip the size"
+					di := di + 1.	"skip the size"
+					2 to: (self spaceOccupiedBy: objectPointer) do: [ :i | 
+						"move the rest of the object"
+						wordMemory
+							segment: currentSegment
+							word: di
+							put: (wordMemory segment: currentSegment word: si).
+						si := si + 1.
+						di := di + 1 ] ] ].
+	^ di
+]
+
+{ #category : #'private - object table entries' }
 ObjectMemory >> toFreeChunkList: size add: objectPointer [
    "Add object pointer to free chunk list"
 	| segment |
