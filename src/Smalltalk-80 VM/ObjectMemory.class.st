@@ -275,7 +275,7 @@ ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predic
 							"save the offset either in the count field or in the extra word"
 							size < HugeSize
 								ifTrue: [ self countBitsOf: current put: offset ]
-								ifFalse: [ self heapChunkOf: current word: size + 1 put: offset ].
+								ifFalse: [ self heapChunkOf: current word: size put: offset ].
 							"compute prior, current, offset, and size to begin processing next"
 							prior := current.
 							current := next.
