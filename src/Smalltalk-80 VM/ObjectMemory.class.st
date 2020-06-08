@@ -125,19 +125,18 @@ ObjectMemory >> attemptToAllocateChunkInCurrentSegment: size [
 	objectPointer notNil
 		ifTrue: [ ^ objectPointer ].	"small chunk of exact size handy so use it"
 	predecessor := NonPointer.	"remember predecessor of chunk under consideration"
-	objectPointer := self
-		headOfFreeChunkList: BigSize
-		inSegment: currentSegment.
+	objectPointer := self	headOfFreeChunkList: BigSize inSegment: currentSegment.
 	"the search loop stops when the end of the linked list is encountered"
-	[ objectPointer = NonPointer ]
-		whileFalse: [ availableSize := self sizeBitsOf: objectPointer.
+	[ objectPointer = NonPointer ] whileFalse:
+      [ availableSize := self sizeBitsOf: objectPointer.
 			availableSize = size
-				ifTrue: [ "exact fit -- remove from free chunk list and return"
-					next := self classBitsOf: objectPointer.	"the link to the next chunk"
+				ifTrue: "exact fit -- remove from free chunk list and return"
+				   [ next := self classBitsOf: objectPointer.	"the link to the next chunk"
 					predecessor = NonPointer
-						ifTrue:
-							[ "it was the head of the list; make the next item the head" self headOfFreeChunkList: BigSize inSegment: currentSegment put: next ]
-						ifFalse: [ "it was between two chunks; link them together" self classBitsOf: predecessor put: next ].
+						ifTrue: "it was the head of the list; make the next item the head"
+							[ self headOfFreeChunkList: BigSize inSegment: currentSegment put: next ]
+						ifFalse: "it was between two chunks; link them together"
+						   [ self classBitsOf: predecessor put: next ].
 					^ objectPointer ].
 			"this chunk was either too big or too small; inspect the amount of variance"
 			excessSize := availableSize - size.
