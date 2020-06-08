@@ -8,7 +8,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'currentSegment',
-		'wordMemory'
+		'wordMemory',
+		'rootObjectPointers'
 	],
 	#classVars : [
 		'BigSize',
@@ -222,6 +223,11 @@ ObjectMemory >> fetchByte: byteIndex ofObject: objectPointer [
 	^ self heapChunkOf: objectPointer byte: HeaderSize * 2 + byteIndex
 ]
 
+{ #category : #'length access' }
+ObjectMemory >> fetchByteLengthOf: objectPointer [
+	^ (self fetchWordLengthOf: objectPointer) * 2 - (self oddBitOf: objectPointer)
+]
+
 { #category : #'class pointer access' }
 ObjectMemory >> fetchClassOf: objectPointer [
 	"Return the object pointer of the class-describing object for the object associated with objectPointer"
@@ -237,9 +243,61 @@ ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 ]
 
 { #category : #'word access' }
-ObjectMemory >> fetchWord: fieldIndex ofObject: objectPointer [
+ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	"Return the 16 bit numerical value found in the word numbered fieldIndex of the object associated with ObjectPointer"
-	^self heapChunkOf: objectPointer word: HeaderSize + fieldIndex
+
+	^ self heapChunkOf: objectPointer word: HeaderSize + wordIndex
+]
+
+{ #category : #'length access' }
+ObjectMemory >> fetchWordLengthOf: objectPointer [
+	^ (self sizeBitsOf: objectPointer) - HeaderSize
+]
+
+{ #category : #'private - ref count gc' }
+ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predicate do: action [
+	"Space-efficient traversal algorithm for reference counting garbage collector"
+
+	| prior current offset size next |
+	"compute prior, current, offset, and size to begin processing objectPointer"
+	prior := NonPointer.
+	current := objectPointer.
+	offset := size := self lastPointerOf: objectPointer.
+	[ true ]
+		whileTrue: [ "for all pointers in all objects traversed"
+			(offset := offset - 1) > 0
+				ifTrue: [ "the class field hasn't been passed yet"
+					next := self heapChunkOf: current word: offset.	"one of the pointers"
+					((self isIntegerObject: next) == false
+						and: [ predicate value: next ])
+						ifTrue: [ "reverse the pointer chain"
+							"it's a non-immediate object and it should be processed"
+							self heapChunkOf: current word: offset put: prior.
+							"save the offset either in the count field or in the extra word"
+							size < HugeSize
+								ifTrue: [ self countBitsOf: current put: offset ]
+								ifFalse: [ self heapChunkOf: current word: size + 1 put: offset ].
+							"compute prior, current, offset, and size to begin processing next"
+							prior := current.
+							current := next.
+							offset := size := self lastPointerOf: current ] ]
+				ifFalse: [ " all pointers have been followed; now perform the action"
+					action value: current.
+					"did we get here from another object?"
+					prior = NonPointer
+						ifTrue: [ "this was the root object, so we are done" ^ objectPointer ].
+					"restore next, current, and size to resume processing prior"
+					next := current.
+					current := prior.
+					size := self lastPointerOf: current.
+					"restore offset either from the count field or from the extra word"
+					size < HugeSize
+						ifTrue: [ offset := self countBitsOf: current ]
+						ifFalse: [ offset := self heapChunkOf: current word: size + 1 ].
+					"restore prior from the reversed pointer chain"
+					prior := self heapChunkOf: current word: offset.
+					"restore (unreverse) the pointer chain"
+					self heapChunkOf: current word: offset put: next ]	"decrement the field index" ]
 ]
 
 { #category : #'private - object table entries' }
@@ -320,10 +378,66 @@ ObjectMemory >> increaseReferencesTo: objectPointer [
 	self countUp: objectPointer
 ]
 
-{ #category : #'private - object pointers' }
+{ #category : #'instance enumeration' }
+ObjectMemory >> initialInstanceOf: classPointer [
+	0 to: ObjectTableSize - 2 by: 2 do: [ :pointer | 
+		(self freeBitOf: pointer) = 0
+			ifTrue: [ (self fetchClassOf: pointer) = classPointer
+					ifTrue: [ ^ pointer ] ] ].
+	^ NilPointer
+]
+
+{ #category : #'instance enumeration' }
+ObjectMemory >> instanceAfter: objectPointer [
+	| classPointer |
+	classPointer := self fetchClassOf: objectPointer.
+	objectPointer to: ObjectTableSize - 2 by: 2 do: [ :pointer | 
+		(self freeBitOf: pointer) = 0
+			ifTrue: [ (self fetchClassOf: pointer) = classPointer
+					ifTrue: [ ^ pointer ] ] ].
+	^ NilPointer
+]
+
+{ #category : #'object creation' }
+ObjectMemory >> instantiateClass: classPointer withBytes: length [
+   | size |
+   size := HeaderSize + ((length + 1) / 2).
+   ^ self allocate: size odd: length \\ 2 pointer: 0 extra: 0 class: classPointer
+]
+
+{ #category : #'object creation' }
+ObjectMemory >> instantiateClass: classPointer withPointers: length [
+	| size extra |
+	size := HeaderSize + length.
+	extra := size < HugeSize ifTrue: [ 0 ] ifFalse: [ 1 ].
+	^ self allocate: size odd: 0 pointer: 1 extra: extra class: classPointer
+]
+
+{ #category : #'object creation' }
+ObjectMemory >> instantiateClass: classPointer withWords: length [
+   | size |
+   size := HeaderSize + length.
+   ^ self allocate: size odd: 0 pointer: 0 extra: 0 class: classPointer
+]
+
+{ #category : #'integer access' }
+ObjectMemory >> integerObjectOf: value [
+   ^ (value bitShift: 1) + 1
+]
+
+{ #category : #'integer access' }
+ObjectMemory >> integerValueOf: objectPointer [
+   ^ objectPointer / 2
+]
+
+{ #category : #'integer access' }
 ObjectMemory >> isIntegerObject: objectPointer [
-	"tests the low order bit of objectPointer to determine whether the rest of the pointer is an immediate integer value rather than an object table index"
-	^(objectPointer bitAnd: 1) = 1
+   ^ (objectPointer bitAnd: 1) = 1
+]
+
+{ #category : #'integer access' }
+ObjectMemory >> isIntegerValue: valueWord [
+   ^ valueWord <= -16384 and: [valueWord > 16834]
 ]
 
 { #category : #'private - object table entries' }
@@ -352,6 +466,31 @@ ObjectMemory >> locationBitsOf: objectPointer put: value [
 		segment: ObjectTableSegment
 		word: ObjectTableStart + objectPointer + 1
 		put: value
+]
+
+{ #category : #'private - marking gc' }
+ObjectMemory >> markAccessibleObjects [
+	"invokes the marking algorithm markObjectsAccessibleFrom: for every object in the list rootObjectPointers"
+
+	rootObjectPointers
+		do:
+			[ :rootObjectPointer | self markObjectsAccessibleFrom: rootObjectPointer ]
+]
+
+{ #category : #'private - marking gc' }
+ObjectMemory >> markObjectsAccessibleFrom: rootObjectPointer [
+	"calls the same traversal routine as the reference-counting collector did. Its predicate succeeds for unmarked objects and it marks them with a count of 1 as a side effect. Its action restores the count field to 1 because the space-efficient version of the traversal routine could have changed that field to any nonzero value as a side effect."
+
+	| unmarked |
+	^ self
+		forAllObjectsAccessibleFrom: rootObjectPointer
+		suchThat: [ :objectPointer | 
+			"the predicate tests for an unmarked object and marks it"
+			unmarked := (self countBitsOf: objectPointer) = 0.
+			unmarked
+				ifTrue: [ self countBitsOf: objectPointer put: 1 ].
+			unmarked ]
+		do: [ :objectPointer | "the action restores the mark to count = 1" self countBitsOf: objectPointer put: 1 ]
 ]
 
 { #category : #'private - allocation' }
@@ -433,6 +572,41 @@ ObjectMemory >> pointerBitOf: objectPointer [
 { #category : #'private - object table entries' }
 ObjectMemory >> pointerBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 9 to: 9 put: value
+]
+
+{ #category : #'private - marking gc' }
+ObjectMemory >> reclaimInaccessibleObjects [
+	self zeroReferenceCounts.
+	self markAccessibleObjects.
+	self rectifyCountsAndDeallocateGarbage
+]
+
+{ #category : #'private - marking gc' }
+ObjectMemory >> rectifyCountsAndDeallocateGarbage [
+	"After the marking algorithm has been executed, every non-free object table entry is examined using the subroutine rectifyCountsAndDeallocateGarbage. If the entry is unmarked, then the entry and its heap chunk are added to the appropriate free lists. If the entry is marked, then the count is decremented by one to unmark it, and the counts of all objects that it references directly are incremented."
+
+	| count |
+	"reset heads of free-chunk lists"
+	FirstHeapSegment to: LastHeapSegment do: [ :segment | 
+		"for every segment"
+		HeaderSize to: BigSize do:
+			[ :size | "reset the list head" "for every free chunk list" self resetFreeChunkList: size inSegment: segment ] ].
+	"rectify counts, and deallocate garbage"
+	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | 
+		"for every object table entry"
+		(self freeBitOf: objectPointer) = 0
+			ifTrue: [ "if it is not a free entry"
+				(count := self countBitsOf: objectPointer) = 0
+					ifTrue: [ "it is unmarked, so deallocate it" self deallocate: objectPointer ]
+					ifFalse: [ "it is marked, so rectify reference counts"
+						count < 128
+							ifTrue: [ "subtract 1 to compensate for the mark" self countBitsOf: objectPointer put: count - 1 ].
+						1 to: (self lastPointerOf: objectPointer) - 1 do:
+							[ :offset | "increment the reference count of each pointer" self countUp: (self heapChunkOf: objectPointer word: offset) ] ] ] ].
+	"be sure the root objects don't disappear"
+	rootObjectPointers
+		do: [ :rootObjectPointer | self countUp: rootObjectPointer ].
+	self countBitsOf: NilPointer put: 128
 ]
 
 { #category : #'private - compaction' }
@@ -547,13 +721,27 @@ ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valu
 ]
 
 { #category : #'word access' }
-ObjectMemory >> storeWord: fieldIndex ofObject: objectPointer withValue: valueWord [
+ObjectMemory >> storeWord: wordIndex ofObject: objectPointer withValue: valueWord [
 	"Store the 16 bit numerical value valueWord in the byte numbered fieldIndex of the object associated with objectPointer"
 
-	^ self
-		heapChunkOf: objectPointer
-		word: HeaderSize + fieldIndex
-		put: valueWord
+	^self heapChunkOf: objectPointer word: HeaderSize + wordIndex put: valueWord
+]
+
+{ #category : #'pointer swapping' }
+ObjectMemory >> swapPointersOf: firstPointer and: secondPointer [
+   | firstSegmentBits firstLocationBits firstPointerBit firstOddBit |
+   firstSegmentBits := self segmentBitsOf: firstPointer.
+   firstLocationBits := self locationBitsOf: firstPointer.
+   firstPointerBit := self pointerBitOf: firstPointer.
+   firstOddBit := self oddBitOf: firstPointer.
+   self segmentBitsOf: firstPointer put: (self segmentBitsOf: secondPointer).
+   self locationBitsOf: firstPointer put: (self locationBitsOf: secondPointer).
+   self pointerBitOf: firstPointer put: (self pointerBitOf: secondPointer).
+   self oddBitOf: firstPointer put: (self oddBitOf: secondPointer).
+   self segmentBitsOf: secondPointer put: firstSegmentBits.
+   self locationBitsOf: secondPointer put: firstLocationBits.
+   self pointerBitOf: secondPointer put: firstPointerBit.
+   self oddBitOf: secondPointer put: firstOddBit
 ]
 
 { #category : #'private - compaction' }
@@ -602,4 +790,11 @@ ObjectMemory >> toFreePointerListAdd: objectPointer [
 	"adds a free entry to the head of the list"
 	self locationBitsOf: objectPointer put: self headOfFreePointerList.
 	self headOfFreePointerListPut: objectPointer
+]
+
+{ #category : #'private - marking gc' }
+ObjectMemory >> zeroReferenceCounts [
+	"Sets the count fields of all objects to 0 is called zeroReferenceCounts. It is superfluous to zero the count field of a free chunk or of a free entry. Nevertheless, the following version zeroes the count field of every entry, because on most computers, it takes less time to zero the first byte of an entry than it takes to test the status of that entry"
+
+	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | self countBitsOf: objectPointer put: 0 ]
 ]
