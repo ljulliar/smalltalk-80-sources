@@ -1,5 +1,5 @@
 "
-The function of the object memroy is to create, store, and destroy objects and to provide access to their fields.
+The function of the object memory is to create, store, and destroy objects and to provide access to their fields.
 
 This is a real-memory implementation meaning that all the objects in the environment reside in primary memory that is directly addressable by the program (as opposed to virtual memory)
 "
@@ -13,6 +13,7 @@ Class {
 	],
 	#classVars : [
 		'BigSize',
+		'ClassSmallInteger',
 		'FirstFreeChunkList',
 		'FirstHeapSegment',
 		'FreePointerList',
@@ -35,7 +36,12 @@ Class {
 { #category : #'class initialization' }
 ObjectMemory class >> initialize [
 	"A good value for NonPointer is 2^16 - 1, a value that is easily detected on most computers and that cannot be confused with an actual object table entry address because it is an odd number."
-	NonPointer := 2**16 - 1
+	NonPointer := 2**16 - 1.
+	
+	"These are known objects that are also defined in the Interpreter class"
+	"See Blue Book p 576 and Xerox St-80 Manual p 7 for Erratum"
+	NilPointer := 2.
+	ClassSmallInteger := 12
 ]
 
 { #category : #'private - compaction' }
@@ -231,8 +237,8 @@ ObjectMemory >> fetchByteLengthOf: objectPointer [
 ObjectMemory >> fetchClassOf: objectPointer [
 	"Return the object pointer of the class-describing object for the object associated with objectPointer"
 	(self isIntegerObject: objectPointer)
-		ifTrue: [^IntegerClass] "ERROR IntegerClass not defined"
-		ifFalse: [^self classBitsOf: objectPointer]
+		ifTrue: [^ ClassSmallInteger] "Constant is defined in ObjectMemory class << initialize"
+		ifFalse: [^ self classBitsOf: objectPointer]
 ]
 
 { #category : #'object pointer access' }
