@@ -20,7 +20,8 @@ Class {
 		'argumentCount',
 		'currentBytecode',
 		'methodCache',
-		'methodCacheSize'
+		'methodCacheSize',
+		'success'
 	],
 	#classVars : [
 		'BlockArgumentCountIndex',
@@ -33,10 +34,11 @@ Class {
 		'ClassCompiledMethod',
 		'ClassDisplayScreenPointer',
 		'ClassFloatPointer',
-		'ClassLargePositiveintegerPointer',
+		'ClassLargePositiveIntegerPointer',
 		'ClassMessagePointer',
 		'ClassMethodContextPointer',
 		'ClassPointPointer',
+		'ClassPointSize',
 		'ClassSemaphorePointer',
 		'ClassSmallInteger',
 		'ClassStringPointer',
@@ -71,6 +73,8 @@ Class {
 		'TruePointer',
 		'TwoPointer',
 		'ValueIndex',
+		'XIndex',
+		'YIndex',
 		'ZeroPointer'
 	],
 	#classInstVars : [
@@ -135,6 +139,33 @@ Interpreter >> argumentCountOfBlock: blockPointer [
 	^ self fetchInteger: BlockArgumentCountIndex ofObject: blockPointer
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> arithmeticSelectorPrimitive [
+   "A primitive routine will be accessed by a special arithmetic selector 
+   only if the receiver is a SmallInteger. The actual primitive routines 
+   will be described in the section on arithmetic primitives. (BB 619)"
+
+   self success: (memory isIntegerObject: (self stackValue: 1)).
+   self success
+   ifTrue: [currentBytecode = 176 ifTrue: [^self primitiveAdd].
+            currentBytecode = 177 ifTrue: [^self primitiveSubtract].
+            currentBytecode = 178 ifTrue: [^self primitiveLessThan].
+            currentBytecode = 179 ifTrue: [^self primitiveGreaterThan].
+            currentBytecode = 180 ifTrue: [^self primitiveLessOrEqual].
+            currentBytecode = 181 ifTrue: [^self primitiveGreaterOrEqual].
+            currentBytecode = 182 ifTrue: [^self primitiveEqual].
+            currentBytecode = 183 ifTrue: [^self primitiveNotEqual].
+            currentBytecode = 184 ifTrue: [^self primitiveMultiply].
+            currentBytecode = 185 ifTrue: [^self primitiveDivide].
+            currentBytecode = 186 ifTrue: [^self primitiveMod].
+            currentBytecode = 187 ifTrue: [^self primitiveMakePoint].
+            currentBytecode = 188 ifTrue: [^self primitiveBitShift].
+            currentBytecode = 189 ifTrue: [^self primitiveDiv].
+            currentBytecode = 190 ifTrue: [^self primitiveBitAnd].
+            currentBytecode = 191 ifTrue: [^self primitiveBitOr]]
+
+]
+
 { #category : #contexts }
 Interpreter >> caller [
 	"This routine fetch the caller field from contexts needed by the interpreter. Access is infrequent
@@ -142,6 +173,27 @@ enough that it is not cached in registers. The caller is the context to be retur
 BlockContext returns a value (at the end of the block) (BB 586)."
 
 	^ memory fetchPointer: SenderIndex ofObject: activeContext
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> commonSelectorPrimitive [
+   "If the receiver is not a SmallInteger then this routine is used to process
+   the call (BB 619)"
+
+   | receiverClass |
+   argumentCount := self fetchInteger: (currentBytecode - 176) * 2 + 1
+                         ofObject: SpecialSelectorsPointer.
+   receiverClass := memory fetchClassOf: (self stackValue: argumentCount).
+   currentBytecode = 198 ifTrue: [^self primitiveEquivalent].
+   currentBytecode = 199 ifTrue: [^self primitiveClass].
+   currentBytecode = 200
+   ifTrue: [self success: (receiverClass = ClassMethodContextPointer)
+                          | (receiverClass = ClassBlockContextPointer).
+   ^ self success ifTrue: [self primitiveBlockCopy]].
+   (currentBytecode = 201) | (currentBytecode = 202)
+      ifTrue: [self success: receiverClass = ClassBlockContextPointer.
+               ^ self success ifTrue: [self primitiveValue]].
+   self primitiveFail
 ]
 
 { #category : #classes }
@@ -190,7 +242,84 @@ Interpreter >> cycle [
 	self dispatchOnThisBytecode
 ]
 
-{ #category : #dispatch }
+{ #category : #'arithmetic primitives' }
+Interpreter >> dispatchArithmeticPrimitives [
+  "There are three sets of arithmetic primitive routines, one for SmallIntegers,
+  one for large integers (LargePositiveIntegers and LargeNegativeIntegers), and
+  one for Floats. The primitives for SmallIntegers and Floats must be implemented,
+  the primitives for large integers are optional. (BB 621)"
+
+   primitiveIndex < 20 ifTrue: [^self dispatchIntegerPrimitives].
+   primitiveIndex < 40 ifTrue: [^self dispatchLargeIntegerPrimitives].
+   primitiveIndex < 60 ifTrue: [^self dispatchFloatPrimitives]
+
+
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> dispatchFloatPrimitives [
+   "Instances of Float are represented in IEEE single-precision (32-bit) format.
+   This format represents a floating point quantity as a number between one and two, 
+   a power of two, and a sign. A Float is a word-size, nonpointer object. (BB 626)"
+   primitiveIndex = 40 ifTrue: [^self primitiveAsFloat].
+   primitiveIndex = 41 ifTrue: [^self primitiveFloatAdd].
+   primitiveIndex = 42 ifTrue: [^self primitiveFloatSubtract].
+   primitiveIndex = 43 ifTrue: [^self primitiveFloatLessThan].
+   primitiveIndex = 44 ifTrue: [^self primitiveFloatGreaterThan].
+   primitiveIndex = 45 ifTrue: [^self primitiveFloatLessOrEqual].
+   primitiveIndex = 46 ifTrue: [^self primitiveFloatGreaterOrEqual].
+   primitiveIndex = 47 ifTrue: [^self primitiveFloatEqual].
+   primitiveIndex = 48 ifTrue: [^self primitiveFloatNotEqual].
+   primitiveIndex = 49 ifTrue: [^self primitiveFloatMultiply].
+   primitiveIndex = 50 ifTrue: [^self primitiveFloatDivide].
+   primitiveIndex = 51 ifTrue: [^self primitiveTruncated].
+   primitiveIndex = 52 ifTrue: [^self primitiveFractionalPart].
+   primitiveIndex = 53 ifTrue: [^self primitiveExponent].
+   primitiveIndex = 54 ifTrue: [^self primitiveTimesTwoPower]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> dispatchIntegerPrimitives [
+   "The first set of arithmetic primitive routines all pop a receiver and 
+   argument off the stack and fail if they are not both SmallIntegers. The
+   routines then push on the stack either the integral result of a computation
+   or the Boolean result of a comparison. The routines that produce an integral
+   result fail if the value cannot be represented as a SmallInteger. (BB 621)"
+
+   primitiveIndex = 1 ifTrue: [^self primitiveAdd].
+   primitiveIndex = 2 ifTrue: [^self primitiveSubtract].
+   primitiveIndex = 3 ifTrue: [^self primitiveLessThan].
+   primitiveIndex = 4 ifTrue: [^self primitiveGreaterThan].
+   primitiveIndex = 5 ifTrue: [^self primitiveLessOrEqual].
+   primitiveIndex = 6 ifTrue: [^self primitiveGreaterOrEqual].
+   primitiveIndex = 7 ifTrue: [^self primitiveEqual].
+   primitiveIndex = 8 ifTrue: [^self primitiveNotEqual].
+   primitiveIndex = 9 ifTrue: [^self primitiveMultiply].
+   primitiveIndex = 10 ifTrue: [^self primitiveDivide].
+   primitiveIndex = 11 ifTrue: [^self primitiveMod].
+   primitiveIndex = 12 ifTrue: [^self primitiveDiv].
+   primitiveIndex = 13 ifTrue: [^self primitiveQuo].
+   primitiveIndex = 14 ifTrue: [^self primitiveBitAnd].
+   primitiveIndex = 15 ifTrue: [^self primitiveBitOr].
+   primitiveIndex = 16 ifTrue: [^self primitiveBitXor].
+   primitiveIndex = 17 ifTrue: [^self primitiveBitShift].
+   primitiveIndex = 18 ifTrue: [^self primitiveMakePoint]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> dispatchLargeIntegerPrimitives [
+	"The primitive indices 21 to 37 are the same as primitives 1 to 17 except
+	 that they perform their operations on large integers (instances of 
+	LargePositiveInteger and LargeNegativeInteger). There are adequate Smalltalk 
+	implementations for all of these operations so the primitive routines are 
+	optional and will not be specified in this chapter. To implement them, the 
+	corresponding Smalltalk methods should be translated into machine language 
+	routines. (BB 625)"
+
+	self primitiveFail
+]
+
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchOnThisBytecode [
    "Not all of the bytecodes of one type are contiguous, so the main dispatch has
     seven branches each of which calls one of four routines (stackBytecode, jumpBytecode,
@@ -202,6 +331,25 @@ Interpreter >> dispatchOnThisBytecode [
    (currentBytecode between: 135 and: 137) ifTrue: [^self stackBytecode].
    (currentBytecode between: 144 and: 175) ifTrue: [^self jumpBytecode].
    (currentBytecode between: 176 and: 255) ifTrue: [^self sendBytecode]
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> dispatchPrimitives [
+   "The six types of primitives in the formal specification deal with 
+   arithmetic, subscripting and streaming, storage management, control structures, 
+   input/output, and general system access. These correspond to six ranges of 
+   primitive indices. A range of primitive indices has been reserved for 
+   implementation-private primitive routines. They may be assigned any meaning, 
+   but cannot be depended upon from interpreter to interpreter. Since these are
+   not part of the specification, they cannot be described here. (BB 621)"
+
+   primitiveIndex < 60 ifTrue: [^self dispatchArithmeticPrimitives].
+   primitiveIndex < 68 ifTrue: [^self dispatchSubscriptAndStreamPrimitives].
+   primitiveIndex < 80 ifTrue: [^self dispatchStorageManagementPrimitives].
+   primitiveIndex < 90 ifTrue: [^self dispatchControlPrimitives].
+   primitiveIndex < 110 ifTrue: [^self dispatchInputOutputPrimitives].
+   primitiveIndex < 128 ifTrue: [^self dispatchSystemPrimitives].
+   primitiveIndex < 256 ifTrue: [^self dispatchPrivatePrimitives]
 ]
 
 { #category : #'send bytecodes' }
@@ -273,7 +421,7 @@ Interpreter >> extendedPushBytecode [
 	variableType = 3 ifTrue: [ ^ self pushLiteralVariable: variableIndex ]
 ]
 
-{ #category : #dispatch }
+{ #category : #'bytecode dispatch' }
 Interpreter >> extendedSendBytecode [
    "There are four extended-send bytecodes. The first two have the same effect
    as the literal-selector bytecodes except that the selector index and argument
@@ -329,6 +477,13 @@ Interpreter >> extractBits: firstBitIndex to: lastBitIndex of: anInteger [
 
 	^ (anInteger bitShift: lastBitIndex - 15)
 		bitAnd: (2 raisedTo: lastBitIndex - firstBitIndex + 1) - 1
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> failPrimitive [
+   "set the state of the success flag when a primitive routine cannot complete successfully (BB 616)"
+
+   success := false
 ]
 
 { #category : #'main loop' }
@@ -475,6 +630,13 @@ Interpreter >> highByteOf: anInteger [
 	^ self extractBits: 0 to: 7 of: anInteger
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> initPrimitive [
+   "initialize the state of the success flag before a primitive routine runs (BB 616)"
+
+   success := true
+]
+
 { #category : #'compiled method header access' }
 Interpreter >> initialInstructionPointerOfMethod: methodPointer [
 	"Returns the byte index of the first bytecode of a CompiledMethod. (BB 578)"
@@ -495,7 +657,8 @@ Interpreter >> initialize [
 		initializeMessageIndices;
 		initializeClassIndices;
 		initializeAssociationIndex;
-		initializeMethodCache 
+		initializeMethodCache;
+		initializePointIndices 
 ]
 
 { #category : #initialization }
@@ -566,7 +729,7 @@ Interpreter >> initializeGuaranteedPointers [
 	ClassMethodContextPointer := 22.
 	ClassBlockContextPointer  := 24.
 	ClassPointPointer := 26.
-	ClassLargePositiveintegerPointer := 28.
+	ClassLargePositiveIntegerPointer := 28.
 	ClassMessagePointer   := 32.
 	ClassCompiledMethod   := 34.
 	ClassSemaphorePointer := 38.
@@ -608,6 +771,14 @@ Interpreter >> initializeMethodIndices [
 
 	HeaderIndex := 0.
 	LiteralStart := 1
+]
+
+{ #category : #initialization }
+Interpreter >> initializePointIndices [
+   "initialize indices of the Point Class"
+    XIndex := 0.
+    YIndex := 1.
+    ClassPointSize := 2
 ]
 
 { #category : #initialization }
@@ -921,6 +1092,21 @@ Interpreter >> pop: number [
 	stackPointer := stackPointer - number
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> popInteger [
+   "Many of the primitives manipulate integer quantities, so the interpreter 
+   includes several routines that perform common functions. The popInteger 
+   routine is used when a primitive expects a SmallInteger on the top of 
+   the stack. If it is a SmallInteger, its value is returned; if not, 
+   a primitive failure is signaled. (BB 617)"
+
+   | integerPointer |
+   integerPointer := self popStack.
+   self success: (memory isIntegerObject: integerPointer).
+   self success
+      ifTrue: [^ memory integerValueOf: integerPointer]
+]
+
 { #category : #contexts }
 Interpreter >> popStack [
 	"pop the first object from the stack of the active context (BB 585)"
@@ -937,6 +1123,206 @@ Interpreter >> popStackBytecode [
    self popStack
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> positive16BitIntegerFor: integerValue [
+	"Since the largest indexable collections may have 65534 indexable elements, 
+   and SmallIntegers can only represent values up to 16383, primitive routines 
+   that deal with indices or sizes must be able to manipulate LargePositiveIntegers. 
+   This routine convert between 16-bit unsigned values and object pointers 
+   to SmallIntegers or LargePositiveIntegers. (BB 617)"
+
+	| newLargeInteger |
+	(self extractBits: 0 to: 1 of: integerValue) = 0
+		ifTrue: [ ^ memory integerObjectOf: integerValue ].
+	newLargeInteger := memory instantiateClass: ClassLargePositiveIntegerPointer
+		                       withBytes: 2.
+	memory storeByte: 0
+		    ofObject: newLargeInteger
+		    withValue: (self lowByteOf: integerValue).
+	memory storeByte: 1
+          ofObject: newLargeInteger
+          withValue: (self highByteOf: integerValue).
+	^ newLargeInteger
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> positive16BitValueOf: integerPointer [
+	"Since the largest indexable collections may have 65534 indexable elements, 
+   and SmallIntegers can only represent values up to 16383, primitive routines 
+   that deal with indices or sizes must be able to manipulate LargePositiveIntegers. 
+   This routine convert between from SmallIntegers or LargePositiveIntegers
+   16-bit unsigned values and object pointers. (BB 617)"
+
+	| value |
+	(memory isIntegerObject: integerPointer)
+		ifTrue: [ ^ memory integerValueOf: integerPointer ].
+	(memory fetchClassOf: integerPointer) = ClassLargePositiveIntegerPointer
+		ifFalse: [ ^ self primitiveFail ].
+	(memory fetchByteLengthOf: integerPointer) = 2
+		ifFalse: [ ^ self primitiveFail ].
+	value := memory fetchByte: 1 ofObject: integerPointer.
+	value := value * 256 + (memory fetchByte: 0 ofObject: integerPointer).
+	^ value
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveAdd [
+	"Primitive add operation (BB 622)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver + integerArgument.
+			       self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveBitAnd [
+	"Bit and of receiver and argument (BB 624)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver bitAnd: integerArgument ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveBitOr [
+	"Bit or of receiver and argument (BB 624)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver bitOr: integerArgument ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveBitShift [
+	"The primitive routine for shifting (associated with the selector bitShift:) 
+   returns a SmallInteger whose value represented in two's-complement is the 
+   receiver's value represented in two's-complement shifted left by the number
+   of bits indicated by the argument. Negative arguments shift right. Zeros are 
+   shifted in from the right in left shifts. The sign bit is extended in right
+   shifts. This primitive fails if the correct result cannot be represented 
+   as a SmallInteger. (BB 624)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver bitShift: integerArgument.
+		          self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveBitXor [
+	"Bit xor of receiver and argument (BB 624)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver bitXor: integerArgument ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveDiv [
+	"There are two primitive routines for rounding division (associated with 
+	 the selectors // and quo:). The result of // is always rounded down (toward 
+	 negative infinity). (BB 622)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success: integerArgument ~= 0.
+	self success
+		ifTrue: [ integerResult := integerReceiver // integerArgument.
+		          self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveDivide [
+	"The primitive routine for the modulo function (associated with the 
+	selector \\) gives the remainder of a division where the quotient is 
+	always rounded down (toward negative infinity). This primitive fails
+	if its argument is 0. (BB 623)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success: integerArgument ~= 0.
+	self success: integerReceiver \\ integerArgument = 0.
+	self success
+		ifTrue: [ integerResult := integerReceiver // integerArgument.
+			       self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self push: (memory integerObjectOf: integerResult) ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveEqual [
+	"Test two objects equality (=) (BB 623)"
+
+	| integerReceiver integerArgument |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerReceiver = integerArgument
+			          ifTrue: [ self push: TruePointer ]
+				       ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveGreaterOrEqual [
+	"Test if receiver >= argument (BB 623)"
+
+	| integerReceiver integerArgument |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerReceiver >= integerArgument
+			          ifTrue: [ self push: TruePointer ]
+				       ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveGreaterThan [
+	"Test if receiver > argument (BB 623)"
+
+	| integerReceiver integerArgument |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerReceiver > integerArgument
+			          ifTrue: [ self push: TruePointer ]
+				       ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
 { #category : #'compiled method header access' }
 Interpreter >> primitiveIndexOf: methodPointer [
 	"If the method header flag value is 7, the next to last literal is a header extension, 
@@ -950,6 +1336,138 @@ Interpreter >> primitiveIndexOf: methodPointer [
 		ifTrue: [ ^ self extractBits: 7 to: 14
 				           of: (self headerExtensionOf: methodPointer) ]
 		ifFalse: [ ^ 0 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveLessOrEqual [
+	"Test if receiver <= argument (BB 623)"
+
+	| integerReceiver integerArgument |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerReceiver <= integerArgument
+			          ifTrue: [ self push: TruePointer ]
+				       ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveLessThan [
+	"Test if receiver < argument (BB 623)"
+
+	| integerReceiver integerArgument |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerReceiver < integerArgument
+			          ifTrue: [ self push: TruePointer ]
+				       ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveMakePoint [
+	"The primitive routine associated with the selector @ returns a new Point 
+	whose x value is the receiver and whose y value is the argument. (BB 625)"
+
+	| integerReceiver integerArgument pointResult |
+	integerArgument := self popStack.
+	integerReceiver := self popStack.
+	self success: (memory isIntegerValue: integerReceiver).
+	self success: (memory isIntegerValue: integerArgument).
+	self success
+		ifTrue: [ pointResult := memory instantiateClass: ClassPointPointer
+				                          withPointers: ClassPointSize.
+			       memory storePointer: XIndex
+				           ofObject: pointResult
+				          withValue: integerReceiver.
+			       memory storePointer: YIndex
+				           ofObject: pointResult
+				           withValue: integerArgument.
+			       self push: pointResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveMultiply [
+	"Primitive multiply operation (BB 622)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver * integerArgument.
+			       self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveNotEqual [
+	"Test two objects inequality (~=) (BB 623)"
+
+	| integerReceiver integerArgument |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerReceiver ~= integerArgument
+			          ifTrue: [ self push: TruePointer ]
+				       ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveQuo [
+	"The result of quo: is truncated (rounded toward zero). (BB 622)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success: integerArgument ~= 0.
+	self success
+		ifTrue: [ integerResult := integerReceiver quo: integerArgument.
+			       self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> primitiveResponse [
+   "The presence of a primitive is detected by the primitiveResponse routine
+    called in executeNewMethod. The primitiveResponse routine is similar to 
+    the specialSelectorPrimitiveResponse routine in that it returns true if 
+    a primitive response was successfully made and false otherwise. (BB 620)"
+   | flagValue |
+   primitiveIndex = 0
+      ifTrue: [flagValue := self flagValueOf: newMethod.
+               flagValue = 5
+                  ifTrue: [self quickReturnSelf. 
+	                        ^ true].
+               flagValue = 6
+                  ifTrue: [self quickInstanceLoad.
+	                        ^ true].
+               ^ false]
+   ifFalse: [self initPrimitive.
+             self dispatchPrimitives.
+             ^ self success]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveSubstract [
+	"Primitive substract operation (BB 622)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ integerResult := integerReceiver - integerArgument.
+			       self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
 ]
 
 { #category : #contexts }
@@ -983,6 +1501,16 @@ Interpreter >> pushConstantBytecode [
    currentBytecode = 117 ifTrue: [^self push: ZeroPointer].
    currentBytecode = 118 ifTrue: [^self push: OnePointer].
    currentBytecode = 119 ifTrue: [^self push: TwoPointer]
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> pushInteger: integerValue [
+   "Recall that the fetchInteger:ofObject: routine signaled a primitive 
+   failure if the indicated field did not contain a SmallInteger. The 
+   pushInteger: routine converts a value to a SmallInteger and pushes 
+   it on the stack. (BB 617)"
+
+   self push: (memory integerObjectOf: integerValue)
 ]
 
 { #category : #'stack bytecodes' }
@@ -1059,6 +1587,23 @@ Interpreter >> pushTemporaryVariableBytecode [
 	| fieldIndex |
 	fieldIndex := self extractBits: 12 to: 15 of: currentBytecode.
 	self pushTemporaryVariable: fieldIndex
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> quickInstanceLoad [
+	"Returns an instance variable of the receiver (BB 620)"
+
+	| thisReceiver fieldIndex |
+	thisReceiver := self popStack.
+	fieldIndex := self fieldIndexOf: newMethod.
+	self push: (memory fetchPointer: fieldIndex ofObject: thisReceiver)
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> quickReturnSelf [
+   "Returning self is a no-op as far as the interpreter is concerned since 
+    self's object pointer occupies the same place on the stack as the message
+    receiver that it should occupy as the message response. (BB 620)"
 ]
 
 { #category : #'return bytecodes' }
@@ -1313,7 +1858,25 @@ Interpreter >> singleExtendedSuperBytecode [
 	self sendSelectorToClass: (self superclassOf: methodClass)
 ]
 
-{ #category : #dispatch }
+{ #category : #'primitive methods' }
+Interpreter >> specialSelectorPrimitiveResponse [
+	"The first path to a primitive routine was represented by the call on 
+   specialSelectorPrimitiveResponse in the sendSpecialSelectorBytecode routine.
+   The specialSelectorPrimitiveResponse routine selects an appropriate primitive
+   routine and returns true if a primitive response was successfully made 
+   and false otherwise. Recall that the sendSpecialSelectorBytecode routine 
+   looks up the special selector if specialSelectorPrimitiveResponse returns
+   false. (BB 618)"
+
+	self initPrimitive.
+	(currentBytecode between: 176 and: 191)
+		ifTrue: [ self arithmeticSelectorPrimitive ].
+	(currentBytecode between: 192 and: 207)
+		ifTrue: [ self commonSelectorPrimitive ].
+	^ self success
+]
+
+{ #category : #'bytecode dispatch' }
 Interpreter >> stackBytecode [
 	"This routine dispatches to the appropriate stack management routine
     for the current bytecode (BB 597)"
@@ -1446,6 +2009,19 @@ Interpreter >> storeStackPointerValue: value inContext: contextPointer [
 		storeInteger: StackPointerIndex
 		ofObject: contextPointer
 		withValue: value
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> success [
+   "test the state of the primitive success register (BB 616)"
+   ^ success
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> success: successValue [
+   "set the state of the primitive success register (BB 616)"
+
+   success := successValue & success
 ]
 
 { #category : #classes }
