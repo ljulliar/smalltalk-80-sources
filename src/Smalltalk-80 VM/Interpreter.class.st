@@ -21,13 +21,19 @@ Class {
 		'currentBytecode',
 		'methodCache',
 		'methodCacheSize',
-		'success'
+		'success',
+		'semaphoreIndex',
+		'semaphoreList',
+		'newProcessWaiting',
+		'newProcess'
 	],
 	#classVars : [
+		'ActiveProcessIndex',
 		'BlockArgumentCountIndex',
 		'CallerIndex',
 		'CannotReturnSelector',
 		'CharacterTablePointer',
+		'CharacterValueIndex',
 		'ClassArrayPointer',
 		'ClassBlockContextPointer',
 		'ClassCharacterPointer',
@@ -45,12 +51,15 @@ Class {
 		'ClassSymbolPointer',
 		'ClassUndefinedObject',
 		'DoesNotUnderstandSelector',
+		'ExcessSignalsIndex',
 		'FalsePointer',
+		'FirstLinkIndex',
 		'HeaderIndex',
 		'HomeIndex',
 		'InitialIPIndex',
 		'InstanceSpecificationIndex',
 		'InstructionPointerIndex',
+		'LastLinkIndex',
 		'LiteralStart',
 		'MessageArgumentsIndex',
 		'MessageDictionaryIndex',
@@ -60,15 +69,24 @@ Class {
 		'MethodIndex',
 		'MinusOnePointer',
 		'MustBeBooleanSelector',
+		'MyListIndex',
+		'NextLinkIndex',
 		'NilPointer',
 		'OnePointer',
+		'PriorityIndex',
+		'ProcessListsIndex',
 		'ReceiverIndex',
 		'SchedulerAssociationPointer',
 		'SelectorStart',
 		'SenderIndex',
 		'SpecialSelectorsPointer',
 		'StackPointerIndex',
+		'StreamArrayIndex',
+		'StreamIndexIndex',
+		'StreamReadLimitIndex',
+		'StreamWriteLimitIndex',
 		'SuperclassIndex',
+		'SuspendedContextIndex',
 		'TempFrameStart',
 		'TruePointer',
 		'TwoPointer',
@@ -114,6 +132,41 @@ Interpreter >> activateNewMethod [
    self pop: argumentCount + 1.
    self newActiveContext: newContext
 
+]
+
+{ #category : #'control primitives' }
+Interpreter >> activeProcess [
+   "Any routines desiring to know what the active process will be must take
+   into account the newProcessWaiting and newProcess registers. Therefore,
+   they use the following routine. (BB 644)"
+
+   newProcessWaiting
+      ifTrue: [^newProcess]
+      ifFalse: [^memory fetchPointer: ActiveProcessIndex
+                        ofObject: self schedulerPointer]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> addLastLink: aLink toList: aLinkedList [
+   "Routines removeFirstLinkOfList:, addLastLink:toList: and isEmptyList: 
+    are used to manipulate LinkedLists. (BB 645)"
+
+   | lastLink |
+   (self isEmptyList: aLinkedList)
+      ifTrue: [memory storePointer: FirstLinkIndex
+                      ofObject: aLinkedList
+                      withValue: aLink]
+      ifFalse: [lastLink := memory fetchPointer: LastLinkIndex
+                                   ofObject: aLinkedList.
+                memory storePointer: NextLinkIndex
+                       ofObject: lastLink
+                       withValue: aLink].
+   memory storePointer: LastLinkIndex
+          ofObject: aLinkedList
+          withValue: aLink.
+   memory storePointer: MyListIndex
+          ofObject: aLink
+          withValue: aLinkedList
 ]
 
 { #category : #'compiled method header access' }
@@ -173,6 +226,53 @@ enough that it is not cached in registers. The caller is the context to be retur
 BlockContext returns a value (at the end of the block) (BB 586)."
 
 	^ memory fetchPointer: SenderIndex ofObject: activeContext
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> checkIndexableBoundsOf: index in: array [
+	"Check the bounds on subscripting operations and to perform the subscripting
+   accesses. This routine takes a one-relative index and determines whether it is a legal 
+   subscript of an object. It must take into account any fixed fields. (BB 627)"
+
+	| class |
+	class := memory fetchClassOf: array.
+	self success: index >= 1.
+	self success: index + (self fixedFieldsOf: class) <= (self lengthOf: array)
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> checkInstanceVariableBoundsOf: index in: object [
+	"check that index is within the object size range. (BB 635)"
+
+	| class |
+	class := memory fetchClassOf: object. "TODO: this line seems to be useless"
+	self success: index >= 1.
+	self success: index <= (self lengthOf: object)
+]
+
+{ #category : #'control primitives' }
+Interpreter >> checkProcessSwitch [
+   "The checkProcessSwitch routine is called before each bytecode fetch (in 
+   the interpret routine) and performs the actual process switch if one has 
+   been called for. It stores the active context pointer in the old Process, 
+   stores the new Process in the ProcessorScheduler's active process field, 
+   and loads the new active context out of that Process. (BB 643)"
+
+   | activeProcess |
+   [semaphoreIndex > 0]
+      whileTrue: [self synchronousSignal: (semaphoreList at: semaphoreIndex).
+                  semaphoreIndex := semaphoreIndex - 1].
+      newProcessWaiting
+         ifTrue: [newProcessWaiting := false.
+                  activeProcess := self activeProcess.
+                  memory storePointer: SuspendedContextIndex
+                         ofObject: activeProcess
+                         withValue: activeContext.
+                  memory storePointer: ActiveProcessIndex
+                         ofObject: self schedulerPointer
+                         withValue: newProcess.
+                  self newActiveContext: (memory fetchPointer: SuspendedContextIndex
+                                                 ofObject: newProcess)]
 ]
 
 { #category : #'primitive methods' }
@@ -256,6 +356,25 @@ Interpreter >> dispatchArithmeticPrimitives [
 
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> dispatchControlPrimitives [
+   "The control primitives provide the control structures not provided by the
+   bytecodes. They include support for the behavior of BlockContexts, Processes,
+   and Semaphores. They also provide for messages with parameterized selectors. 
+  (BB 637)"
+
+   primitiveIndex = 80 ifTrue: [^self primitiveBlockCopy].
+   primitiveIndex = 81 ifTrue: [^self primitiveValue].
+   primitiveIndex = 82 ifTrue: [^self primitiveValueWithArgs].
+   primitiveIndex = 83 ifTrue: [^self primitivePerform].
+   primitiveIndex = 84 ifTrue: [^self primitivePerformWithArgs].
+   primitiveIndex = 85 ifTrue: [^self primitiveSignal].
+   primitiveIndex = 86 ifTrue: [^self primitiveWait].
+   primitiveIndex = 87 ifTrue: [^self primitiveResume].
+   primitiveIndex = 88 ifTrue: [^self primitiveSuspend].
+   primitiveIndex = 89 ifTrue: [^self primitiveFlushCache]
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> dispatchFloatPrimitives [
    "Instances of Float are represented in IEEE single-precision (32-bit) format.
@@ -263,7 +382,7 @@ Interpreter >> dispatchFloatPrimitives [
    a power of two, and a sign. A Float is a word-size, nonpointer object. (BB 626)"
    primitiveIndex = 40 ifTrue: [^self primitiveAsFloat].
    primitiveIndex = 41 ifTrue: [^self primitiveFloatAdd].
-   primitiveIndex = 42 ifTrue: [^self primitiveFloatSubtract].
+   primitiveIndex = 42 ifTrue: [^self primitiveFloatSubstract].
    primitiveIndex = 43 ifTrue: [^self primitiveFloatLessThan].
    primitiveIndex = 44 ifTrue: [^self primitiveFloatGreaterThan].
    primitiveIndex = 45 ifTrue: [^self primitiveFloatLessOrEqual].
@@ -287,7 +406,7 @@ Interpreter >> dispatchIntegerPrimitives [
    result fail if the value cannot be represented as a SmallInteger. (BB 621)"
 
    primitiveIndex = 1 ifTrue: [^self primitiveAdd].
-   primitiveIndex = 2 ifTrue: [^self primitiveSubtract].
+   primitiveIndex = 2 ifTrue: [^self primitiveSubstract].
    primitiveIndex = 3 ifTrue: [^self primitiveLessThan].
    primitiveIndex = 4 ifTrue: [^self primitiveGreaterThan].
    primitiveIndex = 5 ifTrue: [^self primitiveLessOrEqual].
@@ -309,7 +428,7 @@ Interpreter >> dispatchIntegerPrimitives [
 { #category : #'arithmetic primitives' }
 Interpreter >> dispatchLargeIntegerPrimitives [
 	"The primitive indices 21 to 37 are the same as primitives 1 to 17 except
-	 that they perform their operations on large integers (instances of 
+	that they perform their operations on large integers (instances of 
 	LargePositiveInteger and LargeNegativeInteger). There are adequate Smalltalk 
 	implementations for all of these operations so the primitive routines are 
 	optional and will not be specified in this chapter. To implement them, the 
@@ -350,6 +469,44 @@ Interpreter >> dispatchPrimitives [
    primitiveIndex < 110 ifTrue: [^self dispatchInputOutputPrimitives].
    primitiveIndex < 128 ifTrue: [^self dispatchSystemPrimitives].
    primitiveIndex < 256 ifTrue: [^self dispatchPrivatePrimitives]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> dispatchStorageManagementPrimitives [
+   "The storage management primitive routines manipulate the representation
+   of objects. They include primitives for manipulating object pointers, 
+   accessing fields, creating new instances of a class, and enumerating 
+   the instances of a class. (BB 633)"
+
+   primitiveIndex = 68 ifTrue: [^self primitiveObjectAt].
+   primitiveIndex = 69 ifTrue: [^self primitiveObjectAtPut].
+   primitiveIndex = 70 ifTrue: [^self primitiveNew].
+   primitiveIndex = 71 ifTrue: [^self primitiveNewWithArg].
+   primitiveIndex = 72 ifTrue: [^self primitiveBecome].
+   primitiveIndex = 73 ifTrue: [^self primitiveInstVarAt].
+   primitiveIndex = 74 ifTrue: [^self primitiveInstVarAtPut].
+   primitiveIndex = 75 ifTrue: [^self primitiveAsOop].
+   primitiveIndex = 76 ifTrue: [^self primitiveAsObject].
+   primitiveIndex = 77 ifTrue: [^self primitiveSomeInstance].
+   primitiveIndex = 78 ifTrue: [^self primitiveNextInstance].
+   primitiveIndex = 79 ifTrue: [^self primitiveNewMethod]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> dispatchSubscriptAndStreamPrimitives [
+   "Primitive routines for manipulating the indexable fields of objects both 
+   directly, by subscripting, and indirectly, by streaming. These routines 
+   make use of the 16-bit positive integer routines, since the limit on 
+   indexable fields is 65534. (BB 627)"
+
+	primitiveIndex = 60 ifTrue: [^self primitiveAt].
+	primitiveIndex = 61 ifTrue: [^self primitiveAtPut].
+	primitiveIndex = 62 ifTrue: [^self primitiveSize].
+	primitiveIndex = 63 ifTrue: [^self primitiveStringAt].
+	primitiveIndex = 64 ifTrue: [^self primitiveStringAtPut].
+	primitiveIndex = 65 ifTrue: [^self primitiveNext].
+	primitiveIndex = 66 ifTrue: [^self primitiveNextPut].
+	primitiveIndex = 67 ifTrue: [^self primitiveAtEnd]
 ]
 
 { #category : #'send bytecodes' }
@@ -480,6 +637,15 @@ Interpreter >> extractBits: firstBitIndex to: lastBitIndex of: anInteger [
 ]
 
 { #category : #'primitive methods' }
+Interpreter >> extractFloat: objectPointer [
+   "This routine is not implemented in the BB. It rebuilds a 32 bit
+   Float from 2 words"
+
+   (memory fetchWord: 1 ofObject: objectPointer) << 16 | 
+   (memory fetchWord: 0 ofObject: objectPointer)
+]
+
+{ #category : #'primitive methods' }
 Interpreter >> failPrimitive [
    "set the state of the success flag when a primitive routine cannot complete successfully (BB 616)"
 
@@ -572,6 +738,16 @@ Interpreter >> findNewMethodInClass: class [
 
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> firstContext [
+   "When Smalltalk is started up, the initial active context is found through
+   the scheduler's active Process. (BB 644)"
+
+   newProcessWaiting := false.
+   ^memory fetchPointer: SuspendedContextIndex
+           ofObject: self activeProcess
+]
+
 { #category : #instances }
 Interpreter >> fixedFieldsOf: classPointer [
    "(BB 591)"
@@ -658,7 +834,9 @@ Interpreter >> initialize [
 		initializeClassIndices;
 		initializeAssociationIndex;
 		initializeMethodCache;
-		initializePointIndices 
+		initializePointIndices;
+		initializeCharacterIndex ;
+		initializeStreamIndices 
 ]
 
 { #category : #initialization }
@@ -669,6 +847,13 @@ Interpreter >> initializeAssociationIndex [
  the value field of Associations. (BB 599)"
 
 	ValueIndex := 1
+]
+
+{ #category : #initialization }
+Interpreter >> initializeCharacterIndex [
+   "Index where the value of the character field in Character object is placed (BB 630)"
+
+   CharacterValueIndex := 0
 ]
 
 { #category : #initialization }
@@ -782,6 +967,31 @@ Interpreter >> initializePointIndices [
 ]
 
 { #category : #initialization }
+Interpreter >> initializeSchedulerIndices [
+	"The next four primitive routines (for primitive indices 85 through 88) 
+   are used for communication and scheduling of independent processes. The 
+   following routine initializes the indices used to access Processes, 
+   ProcessorSchedulers, and Semaphores. (BB 641)"
+
+	"Class ProcessorScheduler"
+
+	ProcessListsIndex  := 0.
+	ActiveProcessIndex := 1.
+	"Class LinkedList"
+	FirstLinkIndex := 0.
+	LastLinkIndex  := 1.
+	"Class Semaphore"
+	ExcessSignalsIndex := 2.
+	"Class Link"
+	NextLinkIndex := 0.
+	"Class Process"
+	SuspendedContextIndex := 1.
+	PriorityIndex := 2.
+	MyListIndex   := 3
+
+]
+
+{ #category : #initialization }
 Interpreter >> initializeSmallIntegers [
 	"SmallIntegers definition (BB 575)"
 
@@ -789,6 +999,16 @@ Interpreter >> initializeSmallIntegers [
 	ZeroPointer := 1.
 	OnePointer  := 3.
 	TwoPointer  := 5
+]
+
+{ #category : #initialization }
+Interpreter >> initializeStreamIndices [
+	"Indices to the Stream instance variables"
+
+	StreamArrayIndex := 0.
+	StreamIndexIndex := 1.
+	StreamReadLimitIndex  := 2.
+	StreamWriteLimitIndex := 3
 ]
 
 { #category : #instances }
@@ -836,6 +1056,15 @@ subclasses of MethodContext and BlockContext. (BB 584)"
 	| methodOrArguments |
 	methodOrArguments := memory	fetchPointer: MethodIndex ofObject: contextPointer.
 	^ memory isIntegerObject: methodOrArguments
+]
+
+{ #category : #'control primitives' }
+Interpreter >> isEmptyList: aLinkedList [
+   "Routines removeFirstLinkOfList:, addLastLink:toList: and isEmptyList: 
+    are used to manipulate LinkedLists. (BB 645)"
+
+   ^(memory fetchPointer: FirstLinkIndex
+            ofObject: aLinkedList) = NilPointer
 ]
 
 { #category : #instances }
@@ -912,6 +1141,17 @@ Interpreter >> largeContextFlagOf: methodPointer [
 	have room for 32. (BB 578)"
 
 	^ self extractBits: 8 to: 8 of: (self headerOf: methodPointer)
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> lengthOf: array [
+	"Length of the array (number of elements). It determines whether the object 
+	being indexed contains pointers, 16-bit integer values, or 8-bit integer 
+	values, in its indexable fields. (BB 627)"
+
+	(self isWords: (memory fetchClassOf: array))
+		ifTrue: [ ^ memory fetchWordLengthOf: array ]
+		ifFalse: [ ^ memory fetchByteLengthOf: array ]
 ]
 
 { #category : #contexts }
@@ -1093,6 +1333,18 @@ Interpreter >> pop: number [
 ]
 
 { #category : #'primitive methods' }
+Interpreter >> popFloat [
+   "This routine is not implementedin the BB. It is needed to pop a Float
+   object from the stack"
+
+   | objectPointer |
+   objectPointer := self popStack.
+   self success: (memory fetchClassOf: objectPointer) = ClassFloatPointer.
+   self success
+      ifTrue: [^ Float fromIEEE32Bit: (self extractFloat: objectPointer)]
+]
+
+{ #category : #'primitive methods' }
 Interpreter >> popInteger [
    "Many of the primitives manipulate integer quantities, so the interpreter 
    includes several routines that perform common functions. The popInteger 
@@ -1181,6 +1433,135 @@ Interpreter >> primitiveAdd [
 ]
 
 { #category : #'arithmetic primitives' }
+Interpreter >> primitiveAsFloat [
+   "Converts its SmallInteger receiver into a Float (BB 626)
+   This routine first convert the receiver to a Float the size of the
+   native type of the VM (32 or 64 bit) and then turn it into a IEEE 32
+   bit single precision float so that it is 2 word long as expected by
+   the original ST-80 VM"
+
+   	| integerReceiver |
+	integerReceiver := self popInteger.
+	self success
+		ifTrue: [ self pushFloat: integerReceiver asFloat asIEEE32BitWord ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveAsObject [
+	"The primitiveAsObject routine performs the inverse operation of primitiveAsOop.
+   It only works for SmallInteger receivers (it is associated with the asObject 
+   message in SmallInteger). It produces the object pointer that is twice the 
+   receiver's value. The primitive fails if there is no object for that pointer. (BB 635)"
+
+	| thisReceiver newOop |
+	thisReceiver := self popStack.
+	newOop := thisReceiver bitAnd: 16rFFFE.
+	self success: (memory isIntegerObject: thisReceiver).
+	self success
+		ifTrue: [ self push: newOop ]
+		ifFalse: [ self unPop: 1 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveAsOop [
+	"The primitiveAsOop routine produces a SmallInteger whose value is half 
+   of the receiver's object pointer (interpreting object pointers as 16-bit 
+   signed quantities). The primitive only works for non-SmallInteger receivers. 
+   Since non-SmallInteger object pointers are even, no information in the 
+   object pointer is lost. Because of the encoding of SmallIntegers, the 
+   halving operation can be performed by setting the least significant bit
+   of the receiver's object pointer. (BB 636)"
+
+	| thisReceiver |
+	thisReceiver := self popStack.
+	self success: (memory isIntegerObject: thisReceiver) == false.
+	self success
+		ifTrue: [ self push: (thisReceiver bitOr: 1) ]
+		ifFalse: [ self unPop: 1 ]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveAt [
+   "The primitiveAt simply fetch one of the indexable fields of the receiver. 
+   It fails if the index is not a SmallInteger or if it is out of bounds. (BB 628)"
+
+   | index array arrayClass result |
+   index := self positive16BitValueOf: self popStack.
+   array := self popStack.
+   arrayClass := memory fetchClassOf: array.
+   self checkIndexableBoundsOf: index in: array.
+
+   self success
+      ifTrue: [index := index + (self fixedFieldsOf: arrayClass).
+               result := self subscript: array with: index].
+
+   self success
+      ifTrue: [self push: result]
+      ifFalse: [self unPop: 2]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveAtEnd [
+	"The primitiveAtEnd routine is an optional primitive version of the Smalltalk
+   code for the atEnd message to streams. This routine only works if the object 
+   being streamed is an Array or a String. (BB 632)"
+
+	| stream array arrayClass index limit |
+	stream := self popStack.
+	array := memory fetchPointer: StreamArrayIndex ofObject: stream.
+	arrayClass := memory fetchClassOf: array.
+	index := self fetchInteger: StreamIndexIndex ofObject: stream.
+	limit := self fetchInteger: StreamReadLimitIndex ofObject: stream.
+	
+	self success: (arrayClass = ClassArrayPointer) | (arrayClass = ClassStringPointer).
+	self success
+		ifTrue: [index >= limit
+				     ifTrue: [ self push: TruePointer]
+				     ifFalse: [ self push: FalsePointer]]
+		ifFalse: [self unPop: 1]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveAtPut [
+   "This routine simply store one of the indexable fields of the receiver. It fails
+   if the receiver is not a pointer type and the second argument is not an 8-bit 
+   (for byte-indexable objects) or 16-bit (for word-indexable objects) positive integer. 
+   The primitive routine returns the stored value as its value. (BB 629)"
+
+   | array index arrayClass value |
+   value := self popStack.
+   index := self positive16BitValueOf: self popStack.
+   array := self popStack.
+   arrayClass := memory fetchClassOf: array.
+   self checkIndexableBoundsOf: index in: array.
+
+   self success
+      ifTrue: [index := index + (self fixedFieldsOf: arrayClass).
+               self subscript: array with: index storing: value].
+   self success
+      ifTrue: [self push: value]
+      ifFalse: [self unPop: 3]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveBecome [
+	"The primitiveBecome routine swaps the instance pointers of the receiver
+   and argument. This means that all objects that used to point to the receiver
+   now point to the argument and vice versa. (BB 634)"
+
+	| thisReceiver otherPointer |
+	otherPointer := self popStack.
+	thisReceiver := self popStack.
+	self success: (memory isIntegerObject: otherPointer) not.
+	self success: (memory isIntegerObject: thisReceiver) not.
+	self success
+		ifTrue: [memory swapPointersOf: thisReceiver and: otherPointer.
+			      self push: thisReceiver]
+		ifFalse: [self unPop: 2]
+]
+
+{ #category : #'arithmetic primitives' }
 Interpreter >> primitiveBitAnd [
 	"Bit and of receiver and argument (BB 624)"
 
@@ -1243,6 +1624,43 @@ Interpreter >> primitiveBitXor [
 		ifFalse: [ self unPop: 2 ]
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> primitiveBlockCopy [
+	"The primitiveBlockCopy routine is associated with the blockCopy: message in 
+   both BlockContext and MethodContext. This message is only produced by the compiler. 
+   The number of block arguments the new BlockContext takes is passed as the argument. 
+   The primitiveBlockCopy routine creates a new instance of BlockContext. If the 
+   receiver is a MethodContext, it becomes the new BlockContext's home context. 
+   If the receiver is a BlockContext, its home context is used for the new BlockContext's
+   home context. (BB 638)"
+
+	| context methodContext blockArgumentCount newContext initialIP contextSize |
+	blockArgumentCount := self popStack.
+	context := self popStack.
+	(self isBlockContext: context)
+		ifTrue: [ methodContext := memory fetchPointer: HomeIndex ofObject: context ]
+		ifFalse: [ methodContext := context ].
+	contextSize := memory fetchWordLengthOf: methodContext.
+	newContext := memory instantiateClass: ClassBlockContextPointer
+		                  withPointers: contextSize.
+	initialIP := memory integerObjectOf: instructionPointer + 3.
+	memory storePointer: InitialIPIndex
+		    ofObject: newContext
+		    withValue: initialIP.
+	memory storePointer: InstructionPointerIndex
+		    ofObject: newContext
+		    withValue: initialIP.
+	self storeStackPointerValue: 0 
+	     inContext: newContext.
+	memory storePointer: BlockArgumentCountIndex
+		    ofObject: newContext
+		    withValue: blockArgumentCount.
+	memory storePointer: HomeIndex
+		    ofObject: newContext
+		    withValue: methodContext.
+	self push: newContext
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveDiv [
 	"There are two primitive routines for rounding division (associated with 
@@ -1296,6 +1714,172 @@ Interpreter >> primitiveEqual [
 ]
 
 { #category : #'arithmetic primitives' }
+Interpreter >> primitiveExponent [
+   "Returns the exponent of the receiver (optional) (BB 626)"
+
+   ^ self primitiveFail 
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatAdd [
+	"Primitive float add operation (BB 626)"
+
+	| floatReceiver floatArgument floatResult |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatResult := floatReceiver + floatArgument.
+			       self pushFloat: floatResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatDivide [
+	"This routine is not implemented in the BB. it divides the float
+	receiver by the float argument (BB 626)"
+
+	| floatReceiver floatArgument floatResult |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success: floatArgument ~= 0.
+	self success
+		ifTrue: [ floatResult := floatReceiver / floatArgument.
+                self pushFloat: floatResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatEqual [
+	"Primitive float less or equal operation (BB 626)"
+
+	| floatReceiver floatArgument |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatReceiver = floatArgument
+			         ifTrue: [ self push: TruePointer ]
+				      ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatGreaterOrEqual [
+	"Primitive float less or equal operation (BB 626)"
+
+	| floatReceiver floatArgument |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatReceiver >= floatArgument
+			         ifTrue: [ self push: TruePointer ]
+				      ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatGreaterThan [
+	"Primitive float less than operation (BB 626)"
+
+	| floatReceiver floatArgument |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatReceiver > floatArgument
+			         ifTrue: [ self push: TruePointer ]
+				      ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatLessOrEqual [
+	"Primitive float less or equal operation (BB 626)"
+
+	| floatReceiver floatArgument |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatReceiver <= floatArgument
+			         ifTrue: [ self push: TruePointer ]
+				      ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatLessThan [
+	"Primitive float less than operation (BB 626)"
+
+	| floatReceiver floatArgument |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatReceiver < floatArgument
+			         ifTrue: [ self push: TruePointer ]
+				      ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatMultiply [
+	"Primitive float add operation (BB 626)"
+
+	| floatReceiver floatArgument floatResult |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatResult := floatReceiver * floatArgument.
+			       self pushFloat: floatResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatNotEqual [
+	"Primitive float less or equal operation (BB 626)"
+
+	| floatReceiver floatArgument |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatReceiver ~= floatArgument
+			         ifTrue: [ self push: TruePointer ]
+				      ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFloatSubstract [
+	"Primitive float substract operation (BB 626)"
+
+	| floatReceiver floatArgument floatResult |
+	floatArgument := self popFloat.
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatResult := floatReceiver - floatArgument.
+			       self pushFloat: floatResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitiveFlushCache [
+   "The primitiveFlushCache routine removes the contents of the method cache.
+   Implementations that do not use a method cache can treat this as a no-op.
+   (BB 647)"
+
+   self initializeMethodCache
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveFractionalPart [
+	"Primitive float fractional part operation (BB 626)"
+
+	| floatReceiver floatResult |
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ floatResult := floatReceiver - floatReceiver asInteger.
+			       self pushFloat: floatResult ]
+		ifFalse: [ self unPop: 1 ]
+]
+
+{ #category : #'arithmetic primitives' }
 Interpreter >> primitiveGreaterOrEqual [
 	"Test if receiver >= argument (BB 623)"
 
@@ -1336,6 +1920,47 @@ Interpreter >> primitiveIndexOf: methodPointer [
 		ifTrue: [ ^ self extractBits: 7 to: 14
 				           of: (self headerExtensionOf: methodPointer) ]
 		ifFalse: [ ^ 0 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveInstVarAt [
+   "The primitiveInstVarAt routine is associated with the instVarAt: message
+   in Object. They are similar to primitiveAt except that the numbering of 
+   fields starts with the fixed fields (corresponding to named instance variables)
+   instead of with the indexable fields. The indexable fields are numbered
+   starting with one more than the number of fixed fields. (BB 635)"
+
+	| thisReceiver index value |
+	index := self popInteger.
+	thisReceiver := self popStack.
+	self checkInstanceVariableBoundsOf: index in: thisReceiver.
+	self success
+		ifTrue: [ value := self subscript: thisReceiver with: index ].
+	self success
+		ifTrue: [ self push: value ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveInstVarAtPut [
+	"The primitiveInstVarAtPut routine is associated with the instVarAt:put: message
+   in Object. They are similar to primitiveAtPut except that the numbering of 
+   fields starts with the fixed fields (corresponding to named instance variables)
+   instead of with the indexable fields. The indexable fields are numbered
+   starting with one more than the number of fixed fields. (BB 635)"
+
+	| thisReceiver index newValue |
+	newValue := self popStack.
+	index := self popInteger.
+	thisReceiver := self popStack.
+	self checkInstanceVariableBoundsOf: index in: thisReceiver.
+	self success
+		ifTrue: [self subscript: thisReceiver 
+			           with: index
+			           storing: newValue].
+	self success
+		ifTrue: [self push: newValue]
+		ifFalse: [self unPop: 3]
 ]
 
 { #category : #'arithmetic primitives' }
@@ -1390,6 +2015,24 @@ Interpreter >> primitiveMakePoint [
 ]
 
 { #category : #'arithmetic primitives' }
+Interpreter >> primitiveMod [
+	"The primitive routine for the modulo function (associated with the 
+   selector \\) gives the remainder of a division where the quotient is always
+   rounded down (toward negative infinity). (BB 623)"
+
+	| integerReceiver integerArgument integerResult |
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
+	self success: integerArgument ~= 0.
+	self success
+		ifTrue: [ integerResult := integerReceiver \\ integerArgument.
+			self success: (memory isIntegerValue: integerResult) ].
+	self success
+		ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'arithmetic primitives' }
 Interpreter >> primitiveMultiply [
 	"Primitive multiply operation (BB 622)"
 
@@ -1404,6 +2047,152 @@ Interpreter >> primitiveMultiply [
 		ifFalse: [ self unPop: 2 ]
 ]
 
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveNew [
+	"The primitiveNew routine creates a new instance of the receiver (a class)
+   without indexable fields. The primitive fails if the class is indexable. (BB 634)"
+
+	| class size |
+	class := self popStack.
+	size := self fixedFieldsOf: class.
+	self success: (self isIndexable: class) == false.
+	self success
+		ifTrue: [ (self isPointers: class)
+				       ifTrue: [ self push: (memory instantiateClass: class withPointers: size) ]
+				       ifFalse: [ self push: (memory instantiateClass: class withWords: size) ] ]
+		ifFalse: [ self unPop: 1 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveNewMethod [
+	"The primitiveNewMethod routine is associated with the newMethod:header: message
+   in CompiledMethod class. Instances of CompiledMethod are created with a special 
+   message. Since the part of a CompiledMethod that contains pointers instead of 
+   bytes is indicated in the header, all CompiledMethods must have a valid header. 
+   Therefore, CompiledMethods are created with a message (newMethod:header:) that 
+   takes the number of bytes as the first argument and the header as the second 
+   argument. The header, in turn, indicates the number of pointer fields. (BB 637)"
+
+	| header bytecodeCount class size |
+	header := self popStack.
+	bytecodeCount := self popInteger.
+	class := self popStack.
+	size := ((self literalCountOfHeader: header) + 1) * 2 + bytecodeCount.
+	self push: (memory instantiateClass: class withBytes: size)
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveNewWithArg [
+	"The primitiveNewWithArg routine creates a new instance of the receiver 
+   (a class) with the number of indexable fields specified by the integer 
+   argument. The primitive fails if the class is not indexable. (BB 634)"
+
+	| size class |
+	size := self positive16BitValueOf: self popStack.
+	class := self popStack.
+	self success: (self isIndexable: class).
+	self success
+		ifTrue: [size := size + (self fixedFieldsOf: class).
+			      (self isPointers: class)
+				      ifTrue: [self push: (memory instantiateClass: class withPointers: size)]
+				      ifFalse: [(self isWords: class)
+						             ifTrue: [self push: (memory instantiateClass: class withWords: size)]
+						             ifFalse: [self push: (memory instantiateClass: class withBytes: size)]]]
+		ifFalse: [self unPop: 2]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveNext [
+   "The primitiveNext routine is an optional primitive version of the Smalltalk
+   code for the next message to streams. This routine only works if the object 
+   being streamed is an Array or a String. (BB 631)"
+
+   | stream index limit array arrayClass result ascii |
+   stream := self popStack.
+   array := memory fetchPointer: StreamArrayIndex
+                   ofObject: stream.
+   arrayClass := memory fetchClassOf: array.
+   index := self fetchInteger: StreamIndexIndex
+                 ofObject: stream.
+   limit := self fetchInteger: StreamReadLimitIndex
+                 ofObject: stream.
+
+   self success: index < limit.
+   self success: (arrayClass ~= ClassArrayPointer) | (arrayClass = ClassStringPointer).
+   self checkIndexableBoundsOf: index + 1
+        in: array.
+
+   self success
+      ifTrue: [index := index + 1.
+               result := self subscript: array
+                              with: index].
+   self success
+      ifTrue: [self storeInteger: StreamIndexIndex
+                    ofObject: stream
+                    withValue: index].
+   self success
+      ifTrue: [arrayClass = ClassArrayPointer
+                  ifTrue: [self push: result]
+                  ifFalse: [ascii := memory integerValueOf: result.
+                            self push: (memory fetchPointer: ascii
+                                               ofObject: CharacterTablePointer)]]
+     ifFalse: [self unPop: 1]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveNextInstance [
+	"The primitiveSomeInstance and primitiveNextInstance routines allow for
+   the enumeration of the instances of a class. They rely on the ability 
+   of the object memory to define an ordering on object pointers, to find
+   the first instance of a class in that ordering, and, given an object 
+   pointer, to find the next instance of the same class. (BB 637)"
+
+	"Note: the original source code in the BB uses the ObjectMemory >> instancesOf
+   routine but it is not implemented anywahere in the ObjectMemory class
+   so the code is revised here (source: 
+   https://github.com/dbanay/Smalltalk/blob/6a7619cba3d7a3bd3d9807e429bf00d6c6886061/src/interpreter.cpp#L5160"
+
+	| object instance |
+	object := self popStack.
+	instance := memory instanceAfter: object.
+	instance = NilPointer
+		ifTrue: [ self primitiveFail ]
+		ifFalse: [ self push: instance ]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveNextPut [
+	"The primitiveNextPut routine is an optional primitive version of the Smalltalk
+   code for the nextPut: message to streams. This routine only works if the object 
+   being streamed is an Array or a String. (BB 631)"
+
+	| value stream index limit array arrayClass ascii |
+	value  := self popStack.
+	stream := self popStack.
+	array  := memory fetchPointer: StreamArrayIndex ofObject: stream.
+	arrayClass := memory fetchClassOf: array.
+	index := self fetchInteger: StreamIndexIndex ofObject: stream.
+	limit := self fetchInteger: StreamWriteLimitIndex ofObject: stream.
+	self success: index < limit.
+	self success: 
+	   (arrayClass = ClassArrayPointer) | (arrayClass = ClassStringPointer).
+	self checkIndexableBoundsOf: index + 1 in: array.
+	
+	self success
+		ifTrue: [index := index + 1.
+			      arrayClass = ClassArrayPointer
+				      ifTrue: [self subscript: array with: index storing: value]
+				      ifFalse: [ascii := memory fetchPointer: CharacterValueIndex ofObject: value.
+					             self subscript: array with: index storing: ascii]].
+	self success
+		ifTrue: [self storeInteger: StreamIndexIndex
+				        ofObject: stream
+				        withValue: index].
+	self success
+		ifTrue: [self push: value]
+		ifFalse: [self unPop: 2]
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveNotEqual [
 	"Test two objects inequality (~=) (BB 623)"
@@ -1416,6 +2205,116 @@ Interpreter >> primitiveNotEqual [
 			          ifTrue: [ self push: TruePointer ]
 				       ifFalse: [ self push: FalsePointer ] ]
 		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveObjectAt [
+	"The primitiveObjectAt routine is associated with the objectAt: message 
+   in CompiledMethod. It provides access to the object pointer fields of the
+   receiver (the method header and the literals) from Smalltalk. The header
+   is accessed with an index of 1 and the literals are accessed with indices
+   2 through the number of literals plus 1. This message is used primarily
+   by the compiler. (BB 633)"
+
+	| thisReceiver index |
+	index := self popInteger.
+	thisReceiver := self popStack.
+	self success: index > 0.
+	self success: index <= (self objectPointerCountOf: thisReceiver).
+	self success
+		ifTrue: [ self push: (memory fetchPointer: index - 1 
+			                          ofObject: thisReceiver) ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveObjectAtPut [
+	"The primitiveObjectAtPut routine is associated with the objectAt: message 
+   in CompiledMethod. It provides access to the object pointer fields of the
+   receiver (the method header and the literals) from Smalltalk. The header
+   is accessed with an index of 1 and the literals are accessed with indices
+   2 through the number of literals plus 1. This message is used primarily
+   by the compiler. (BB 634)"
+
+	| thisReceiver index newValue |
+	newValue := self popStack.
+	index := self popInteger.
+	thisReceiver := self popStack.
+	self success: index > 0.
+	self success: index <= (self objectPointerCountOf: thisReceiver).
+	self success
+		ifTrue: [ memory storePointer: index - 1
+				           ofObject: thisReceiver
+				           withValue: newValue.
+			      self push: newValue ]
+		ifFalse: [ self unPop: 3 ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitivePerform [
+	"The primitivePerform routine is associated with all 'perform' messages 
+   in Object (perform:, perform:with:, perform:with:with:, and so on). It 
+   is equivalent to sending a message to the receiver whose selector is the 
+   first argument of and whose arguments are the remaining arguments. It is, 
+   therefore, similar to the sendSelector:argumentCount: routine except that 
+   it must get rid of the selector from the stack before calling executeNewMethod 
+   and it must check that the CompiledMethod it finds takes one less argument 
+   than the 'perform' message did. The primitive fails if the number of arguments 
+   does not match. (BB 640)"
+
+	| performSelector newReceiver selectorIndex |
+	performSelector := messageSelector.
+	messageSelector := self stackValue: argumentCount - 1.
+	newReceiver := self stackValue: argumentCount.
+	self lookupMethodInClass: (memory fetchClassOf: newReceiver).
+	self success: (self argumentCountOf: newMethod) = (argumentCount - 1).
+	self success
+		ifTrue: [ selectorIndex := stackPointer - argumentCount + 1.
+			       self transfer: argumentCount - 1
+				         fromIndex: selectorIndex + 1
+				         ofObject: activeContext
+				         toIndex: selectorIndex
+				         ofObject: activeContext.
+			      self pop: 1.
+			      argumentCount := argumentCount - 1.
+			     self executeNewMethod ]
+		ifFalse: [ messageSelector := performSelector ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitivePerformWithArgs [
+	"The primitivePerformWithArgs routine is associated with the performWithArguments:
+   messages in Object. It is basically the same as the primitivePerform routine except
+   that the message arguments come in a single Array argument to the performWithArguments: 
+   message instead of as multiple arguments to the 'perform' message. (BB 641)"
+
+	| thisReceiver performSelector argumentArray arrayClass arraySize index |
+	argumentArray := self popStack.
+	arraySize := memory fetchWordLengthOf: argumentArray.
+	arrayClass := memory fetchClassOf: argumentArray.
+	self
+		success: stackPointer + arraySize < (memory fetchWordLengthOf: activeContext).
+	self success: arrayClass = ClassArrayPointer.
+	self success
+		ifTrue: [ performSelector := messageSelector.
+			messageSelector := self popStack.
+			thisReceiver := self stackTop.
+			argumentCount := arraySize.
+			index := 1.
+			[ index <= argumentCount ]
+				whileTrue: [ self push: (memory fetchPointer: index - 1 
+					                             ofObject: argumentArray).
+					         index := index + 1 ].
+			self lookupMethodInClass: (memory fetchClassOf: thisReceiver).
+			self success: (self argumentCountOf: newMethod) = argumentCount.
+			self success
+				ifTrue: [ self executeNewMethod ]
+				ifFalse: [ self pop: argumentCount.
+					        self push: messageSelector.
+					        self push: argumentArray.
+					        argumentCount := 2.
+					        messageSelector := performSelector ] ]
+		ifFalse: [ self unPop: 1 ]
 ]
 
 { #category : #'arithmetic primitives' }
@@ -1455,6 +2354,119 @@ Interpreter >> primitiveResponse [
              ^ self success]
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> primitiveResume [
+   "The primitiveResume routine is associated with the resume message in 
+    Process. It simply calls the resume: routine with the receiver as 
+    argument. (BB 647)"
+
+   self resume: self stackTop
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitiveSignal [
+   "The primitiveSignal routine is associated with the signal message in 
+   Semaphore. Since it is called in the process of interpreting a bytecode, 
+   it can use the synchronousSignal: routine. Any other signaling of Semaphores
+   by the interpreter (for example, for timeouts and keystrokes) must use the
+   asynchronousSignal: routine. (BB 646)"
+
+   self synchronousSignal: self stackTop
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveSize [
+   "The primitiveSize routine returns the number of indexable fields the receiver 
+   has (i.e., the largest legal subscript). (BB 629)"
+
+   | array class length |
+   array := self popStack.
+   class := memory fetchClassOf: array.
+   length := self positive16BitIntegerFor: (self lengthOf: array) - (self fixedFieldsOf: class).
+
+   self success
+      ifTrue: [self push: length]
+      ifFalse: [self unPop: 1]
+]
+
+{ #category : #'storage management primitives' }
+Interpreter >> primitiveSomeInstance [
+	"The primitiveSomeInstance and primitiveNextInstance routines allow for
+   the enumeration of the instances of a class. They rely on the ability 
+   of the object memory to define an ordering on object pointers, to find
+   the first instance of a class in that ordering, and, given an object 
+   pointer, to find the next instance of the same class. (BB 637)"
+
+	"Note: the original source code in the BB uses the ObjectMemory >> instancesOf
+   routine but it is not implemented anywahere in the ObjectMemory class
+   so the code is revised here (source: 
+   https://github.com/dbanay/Smalltalk/blob/6a7619cba3d7a3bd3d9807e429bf00d6c6886061/src/interpreter.cpp#L5099"
+
+	| class instance |
+	class := self popStack.
+	instance := memory initialInstanceOf: class.
+	instance = NilPointer
+		ifTrue: [ self primitiveFail ]
+		ifFalse: [ self push: instance ]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveStringAt [
+   "The primitiveStringAt routine is a special response to the at: message 
+   by instances of String. A String actually stores 8-bit numbers in byte-indexable
+   fields, but it communicates through the at: message with instances of Character.
+
+   A Character has a single instance variable that holds a SmallInteger. The
+   value of the SmallInteger returned from the at: message is then stored in
+   the indicated field of the String. The primitiveStringAt routine always
+   returns the same instance of Character for any particular value. It gets
+   the Characters from an Array in the object memory that has a guaranteed
+   object pointer called CharacterTablePointer. (BB 630)"
+
+   | index array ascii character |
+   index := self positive16BitValueOf: self popStack.
+   array := self popStack.
+   self checkIndexableBoundsOf: index in: array.
+
+   self success
+      ifTrue: [ascii := memory integerValueOf: (self subscript: array with: index).
+              character := memory fetchPointer: ascii
+                                  ofObject: CharacterTablePointer].
+
+   self success
+      ifTrue:[self push: character]
+      ifFalse: [self unPop: 2]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> primitiveStringAtPut [
+   "The primitiveStringAtPut routine is a special response to the at:put: message 
+   by instances of String. A String actually stores 8-bit numbers in byte-indexable
+   fields, but it communicates through the at: message with instances of Character.
+
+   A Character has a single instance variable that holds a SmallInteger. The
+   value of the SmallInteger returned from the at: message is then stored in
+   the indicated field of the String. It gets the Characters from an Array
+   in the object memory that has a guaranteed object pointer called 
+   CharacterTablePointer. (BB 630)"
+
+   | index array ascii character |
+   character := self popStack.
+   index := self positive16BitValueOf: self popStack.
+   array := self popStack.
+   self checkIndexableBoundsOf: index in: array.
+   self success: (memory fetchClassOf: character) = ClassCharacterPointer.
+
+   self success
+      ifTrue: [ascii := memory fetchPointer: CharacterValueIndex
+                               ofObject: character.
+               self subscript: array with: index storing: ascii].
+
+   self success
+      ifTrue: [self push: character]
+      ifFalse: [self unPop: 3]
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveSubstract [
 	"Primitive substract operation (BB 622)"
@@ -1468,6 +2480,134 @@ Interpreter >> primitiveSubstract [
 	self success
 		ifTrue: [ self pushInteger: integerResult ]
 		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitiveSuspend [
+   "The primitiveSuspend routine is associated with the suspend message in 
+   Process. The primitiveSuspend routine suspends the receiver if it is the 
+   active Process. If the receiver is not the active Process, the primitive 
+   fails. (BB 647)"
+
+   self success: self stackTop = self activeProcess.
+   self success
+      ifTrue: [self popStack.
+               self push: NilPointer.
+               self suspendActive]
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveTimesTwoPower [
+   "Increases the exponent of the receiver by an amount specified by the
+   argument (optional) (BB 626)"
+
+   ^ self primitiveFail 
+]
+
+{ #category : #'arithmetic primitives' }
+Interpreter >> primitiveTruncated [
+	"Primitive float truncate operation (BB 626)"
+
+	| floatReceiver integerResult |
+	floatReceiver := self popFloat.
+	self success
+		ifTrue: [ integerResult := floatReceiver asInteger.
+			       self success: (memory isIntegerValue: integerResult) ].
+	self success 
+	   ifTrue: [ self pushInteger: integerResult ]
+		ifFalse: [ self unPop: 1 ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitiveValue [
+	"The primitiveValue routine is associated with all 'value' messages in
+   BlockContext (value, value:, value:value:, and so on). It checks that 
+   the receiver takes the same number of block arguments that the 'value'
+   message did and then transfers them from the active context's stack to 
+   the receiver's stack. The primitive fails if the number of arguments do 
+   not match. The primitiveValue routine also stores the active context in
+   the receiver's caller field and initializes the receiver's instruction 
+   pointer and stack pointer. After the receiver has been initialized, it 
+   becomes the active context. (BB 639)"
+
+	| blockContext blockArgumentCount initialIP |
+	blockContext := self stackValue: argumentCount.
+	blockArgumentCount := self argumentCountOfBlock: blockContext.
+	self success: argumentCount = blockArgumentCount.
+	self success
+		ifTrue: [ self transfer: argumentCount
+				         fromIndex: stackPointer - argumentCount + 1
+				         ofObject: activeContext
+				         toIndex: TempFrameStart
+				         ofObject: blockContext.
+			      self pop argumentCount + 1.
+			      initialIP := memory fetchPointer: InitialIPIndex
+				                       ofObject: blockContext.
+			      memory storePointer: InstructionPointerIndex
+				          ofObject: blockContext
+				          withValue: initialIP.
+			      self storeStackPointerValue: argumentCount inContext: blockContext.
+			      memory storePointer: CallerIndex
+				          ofObject: blockContext
+				          withValue: activeContext.
+			      self newActiveContext: blockContext ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitiveValueWithArgs [
+	"The primitiveValueWithArgs routine is associated with the valueWithArguments:
+   messages in BlockContext. It is basically the same as the primitiveValue 
+   routine except that the block arguments come in a single Array argument to 
+   the valueWithArguments: message instead of as multiple arguments to the 
+   'value' message. (BB 639)"
+
+	| argumentArray blockContext blockArgumentCount arrayClass arrayArgumentCount initialIP |
+	argumentArray := self popStack.
+	blockContext := self popStack.
+	blockArgumentCount := self argumentCountOfBlock: blockContext.
+	arrayClass := memory fetchClassOf: argumentArray.
+	self success: arrayClass = ClassArrayPointer.
+	self success
+		ifTrue: [ arrayArgumentCount := memory fetchWordLengthOf: argumentArray.
+			       self success: arrayArgumentCount = blockArgumentCount ].
+	self success
+		ifTrue: [ self transfer: arrayArgumentCount
+				         fromIndex: 0
+				         ofObject: argumentArray
+				         toIndex: TempFrameStart
+				         ofObject: blockContext.
+                initialIP := memory fetchPointer: InitialIPIndex
+				                        ofObject: blockContext.
+                memory storePointer: InstructionPointerIndex
+				           ofObject: blockContext
+				           withValue: initialIP.
+			      self storeStackPointerValue: arrayArgumentCount
+				        inContext: blockContext.
+			      memory storePointer: CallerIndex
+				          ofObject: blockContext
+				          withValue: activeContext.
+			      self newActiveContext: blockContext ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'control primitives' }
+Interpreter >> primitiveWait [
+   "The primitiveWait routine is associated with the wait message in Semaphore. 
+   If the receiver has an excess signal count greater than 0, primitiveWait 
+   routine decrements the count. If the excess signal count is 0, the primitiveWait
+   suspends the active Process and adds it to the receiver's list of Processes. 
+  (BB 646)"
+
+   | thisReceiver excessSignals |
+   thisReceiver := self stackTop.
+   excessSignals := self fetchInteger: ExcessSignalsIndex ofObject: thisReceiver.
+   excessSignals > 0
+      ifTrue: [self storeInteger: ExcessSignalsIndex
+                    ofObject: thisReceiver
+                    withValue: excessSignals - 1]
+      ifFalse: [self addLastLink: self activeProcess
+                toList: thisReceiver.
+                self suspendActive]
 ]
 
 { #category : #contexts }
@@ -1501,6 +2641,20 @@ Interpreter >> pushConstantBytecode [
    currentBytecode = 117 ifTrue: [^self push: ZeroPointer].
    currentBytecode = 118 ifTrue: [^self push: OnePointer].
    currentBytecode = 119 ifTrue: [^self push: TwoPointer]
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> pushFloat: integerValue [
+   "This routine is not implemented in the BB. It is needed to push a 32 bit
+    Float on the stack (see primitiveAsFloat)"
+
+   | objectPointer |
+   "Create a Float object (IEEE 32 bits = 2 words long), split it in 2 words and
+   store it in the class instance"
+   objectPointer := memory instantiateClass: ClassFloatPointer withWords: 2.
+   memory storeWord: 0 ofObject: objectPointer  withValue: (integerValue bitAnd: 16rffff).
+   memory storeWord: 1 ofObject: objectPointer  withValue: integerValue << 16.
+	self push: objectPointer 
 ]
 
 { #category : #'primitive methods' }
@@ -1606,6 +2760,62 @@ Interpreter >> quickReturnSelf [
     receiver that it should occupy as the message response. (BB 620)"
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> removeFirstLinkOfList: aLinkedList [
+   "If the object memory automatically deallocates objects on the basis of 
+   reference counting, special consideration must be given to reference counting 
+   in the process scheduling routines. During the execution of some of these 
+   routines, there will be times at which there are no references to some 
+   object from the object memory (e.g., after a Process has been removed from
+   a Semaphore but before it has been placed on one of the ProcessorScheduler's
+   LinkedLists). If the object memory uses garbage collection, it simply must avoid
+   doing a collection in the middle of a primitive routine. The routines listed
+   here ignore the reference-counting problem in the interest of clarity. 
+   Implementations using reference-counting will have to modify these routines
+   in order to prevent premature deallocation of objects.
+
+   Routines removeFirstLinkOfList:, addLastLink:toList: and isEmptyList: are used 
+   to manipulate LinkedLists. (BB 644)"
+
+   | firstLink lastLink nextLink |
+   firstLink := memory fetchPointer: FirstLinkIndex
+                       ofObject: aLinkedList.
+   lastLink := memory fetchPointer: LastLinkIndex
+                      ofObject: aLinkedList.
+   lastLink = firstLink
+      ifTrue: [memory storePointer: FirstLinkIndex
+                      ofObject: aLinkedList
+                      withValue: NilPointer.
+              memory storePointer: LastLinkIndex
+                     ofObject: aLinkedList
+                     withValue: NilPointer]
+      ifFalse: [nextLink := memory fetchPointer: NextLinkIndex
+                                   ofObject: firstLink.
+                memory storePointer: FirstLinkIndex
+                       ofObject: aLinkedList
+                       withValue: nextLink].
+   memory storePointer: NextLinkIndex
+          ofObject: firstLink
+          withValue: NilPointer.
+   ^firstLink
+]
+
+{ #category : #'control primitives' }
+Interpreter >> resume: aProcess [
+   "Resume given process (BB 646)"
+
+   | activeProcess activePriority newPriority |
+   activeProcess := self activeProcess.
+   activePriority := self fetchInteger: PriorityIndex
+                          ofObject: activeProcess.
+   newPriority := self fetchInteger: PriorityIndex
+                       ofObject: aProcess.
+   newPriority > activePriority
+      ifTrue: [self sleep: activeProcess.
+               self transferTo: aProcess]
+      ifFalse: [self sleep: aProcess]
+]
+
 { #category : #'return bytecodes' }
 Interpreter >> returnBytecode [
 	"There are six bytecodes that return control and a value from a context; 
@@ -1687,6 +2897,19 @@ Interpreter >> returnValue: resultPointer to: contextPointer [
 	self returnToActiveContext: contextPointer.
 	self push: resultPointer.
 	memory decreaseReferencesTo: resultPointer
+]
+
+{ #category : #'control primitives' }
+Interpreter >> schedulerPointer [
+   "The instance of ProcessorScheduler responsible for scheduling the actual
+   processor needs to be known globally so that the primitives will know where
+   to resume and suspend Processes. This ProcessorScheduler is bound to the 
+   name Processor in the Smalltalk global dictionary. The association 
+   corresponding to Processor has a guaranteed object pointer, so the 
+   appropriate ProcessorScheduler can be found. (BB 644)"
+
+   ^memory fetchPointer: ValueIndex
+      ofObject: SchedulerAssociationPointer
 ]
 
 { #category : #'send bytecodes' }
@@ -1858,6 +3081,21 @@ Interpreter >> singleExtendedSuperBytecode [
 	self sendSelectorToClass: (self superclassOf: methodClass)
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> sleep: aProcess [
+   "Add links to the ProcessorScheduler's LinkedLists of quiescent Processes. (BB 646)"
+
+   | priority processLists processList |
+   priority := self fetchInteger: PriorityIndex
+                    ofObject: aProcess.
+   processLists := memory fetchPointer: ProcessListsIndex
+                          ofObject: self schedulerPointer.
+   processList := memory fetchPointer: priority - 1
+                         ofObject: processLists.
+   self addLastLink: aProcess
+        toList: processList
+]
+
 { #category : #'primitive methods' }
 Interpreter >> specialSelectorPrimitiveResponse [
 	"The first path to a primitive routine was represented by the call on 
@@ -2011,6 +3249,51 @@ Interpreter >> storeStackPointerValue: value inContext: contextPointer [
 		withValue: value
 ]
 
+{ #category : #'array stream primitives' }
+Interpreter >> subscript: array with: index [
+   "Get value at index in array. Note: this routine assume that the number
+   of fixed fields has been added into the index, so they use it as a 
+   one-relative index into the object as a whole. (BB 628)"
+
+	| class value |
+	class := memory fetchClassOf: array.
+	(self isWords: class)
+		ifTrue: [(self isPointers: class)
+						ifTrue: [^memory fetchPointer: index - 1
+      						 				  ofObject: array]
+						ifFalse: [value := memory fetchWord: index - 1
+       					                       ofObject: array.
+									^self positive16BitIntegerFor: value]]
+		ifFalse: [value := memory fetchByte: index - 1
+       								 ofObject: array.
+					^memory integerObjectOf: value]
+]
+
+{ #category : #'array stream primitives' }
+Interpreter >> subscript: array with: index storing: value [
+   "Set value at index in array. Note: this routine assume that the number
+   of fixed fields has been added into the index, so they use it as a 
+   one-relative index into the object as a whole. (BB 628)"
+
+   | class |
+   class := memory fetchClassOf: array.
+   (self isWords: class)
+      ifTrue: [(self isPointers: class)
+                  ifTrue: [^memory storePointer: index - 1
+                                    ofObject: array
+                                    withValue: value]
+                  ifFalse: [self success: (memory isIntegerObject: value).
+                     self success ifTrue:
+                     [^memory storeWord: index - 1
+                                   ofObject: array
+                                 withValue: (self positive16BitValueOf: value)]]]
+      ifFalse: [self success: (memory isIntegerObject: value).
+                self success ifTrue:
+                   [^memory storeByte: index - 1
+                            ofObject: array
+                            withValue: (self lowByteOf: (memory integerValueOf: value))]]
+]
+
 { #category : #'primitive methods' }
 Interpreter >> success [
    "test the state of the primitive success register (BB 616)"
@@ -2029,6 +3312,33 @@ Interpreter >> superclassOf: classPointer [
 	"get the value of the super class given a class pointer (BB 589)"
 
 	^ memory fetchPointer: SuperclassIndex ofObject: classPointer
+]
+
+{ #category : #'control primitives' }
+Interpreter >> suspendActive [
+   "Suspend active process (BB 646)"
+
+   self transferTo: self wakeHighestPriority
+]
+
+{ #category : #'control primitives' }
+Interpreter >> synchronousSignal: aSemaphore [
+   "The Semaphores will actually be signaled in the checkProcessSwitch 
+   routine which calls the synchronousSignal: routine once for each Semaphore 
+   in the buffer. If a Process is waiting for the Semaphore, the 
+   synchronousSignal: routine resumes it. If no Process is waiting, the 
+   synchronousSignal: routine increments the Semaphore's count of excess 
+   signals. The isEmptyList:, resume:, and removeFirstLinkOfList: routines 
+   are described later in this section. (BB 643)"
+
+   | excessSignals |
+   (self isEmptyList: aSemaphore)
+      ifTrue: [excessSignals := self fetchInteger: ExcessSignalsIndex
+                                     ofObject: aSemaphore.
+               self storeInteger ExcessSignalsIndex
+                    ofObject: aSemaphore
+                    withValue: excessSignals + 1]
+      ifFalse: [self resume: (self removeFirstLinkOfList: aSemaphore)]
 ]
 
 { #category : #contexts }
@@ -2067,9 +3377,32 @@ Interpreter >> transfer: count fromIndex: firstFrom ofObject: fromOop toIndex: f
 		  toIndex := toIndex + 1 ]
 ]
 
+{ #category : #'control primitives' }
+Interpreter >> transferTo: aProcess [
+   "The transferTo: routine is used whenever the need to switch processes is 
+   detected. It sets the newProcessWaiting and newProcess registers. (BB 643)"
+
+   newProcessWaiting := true.
+   newProcess := aProcess
+]
+
 { #category : #contexts }
 Interpreter >> unPop: number [
 	"Increase stack pointer by number (BB 585)"
 
 	stackPointer := stackPointer + number
+]
+
+{ #category : #'control primitives' }
+Interpreter >> wakeHighestPriority [
+   "Remove links from the ProcessorScheduler's LinkedLists of quiescent Processes. (BB 645)"
+
+   | priority processLists processList |
+   processLists := memory fetchPointer: ProcessListsIndex
+                          ofObject: self schedulerPointer.
+   priority := memory fetchWordLengthOf: processLists.
+   [processList := memory fetchPointer: priority - 1
+                   ofObject: processLists.
+    self isEmptyList: processList] whileTrue: [priority := priority - 1].
+   ^self removeFirstLinkOfList: processList
 ]
