@@ -397,6 +397,32 @@ Interpreter >> dispatchFloatPrimitives [
    primitiveIndex = 54 ifTrue: [^self primitiveTimesTwoPower]
 ]
 
+{ #category : #'io primitives' }
+Interpreter >> dispatchInputOutputPrimitives [
+   "The input/output primitive routines provide Smalltalk with access to the
+   state of the hardware devices. Since the implementation of these routines 
+   will be dependent on the structure of the implementing machine, no routines 
+   will be given, just a specification of the behavior of the primitives. 
+   (BB 647)"
+
+   primitiveIndex = 90 ifTrue: [^self primitiveMousePoint].
+   primitiveIndex = 91 ifTrue: [^self primitiveCursorLocPut].
+   primitiveIndex = 92 ifTrue: [^self primitiveCursorLink].
+   primitiveIndex = 93 ifTrue: [^self primitiveInputSemaphore].
+   primitiveIndex = 94 ifTrue: [^self primitiveSampleInterval].
+   primitiveIndex = 95 ifTrue: [^self primitiveInputWord].
+   primitiveIndex = 96 ifTrue: [^self primitiveCopyBits].
+   primitiveIndex = 97 ifTrue: [^self primitiveSnapshot].
+   primitiveIndex = 98 ifTrue: [^self primitiveTimeWordsInto].
+   primitiveIndex = 99 ifTrue: [^self primitiveTickWordsInto].
+   primitiveIndex = 100 ifTrue: [^self primitiveSignalAtTick].
+   primitiveIndex = 101 ifTrue: [^self primitiveBeCursor].
+   primitiveIndex = 102 ifTrue: [^self primitiveBeDisplay].
+   primitiveIndex = 103 ifTrue: [^self primitiveScanCharacters].
+   primitiveIndex = 104 ifTrue: [^self primitiveDrawLoop].
+   primitiveIndex = 105 ifTrue: [^self primitiveStringReplace]
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> dispatchIntegerPrimitives [
    "The first set of arithmetic primitive routines all pop a receiver and 
@@ -1661,6 +1687,34 @@ Interpreter >> primitiveBlockCopy [
 	self push: newContext
 ]
 
+{ #category : #'io primitives' }
+Interpreter >> primitiveCursorLink [
+	"Cause the cursor to track the pointing device location if the argument is true.
+   Decouple the cursor from the pointing device if the argument is false. (BB 651)"	
+			
+	| flag |
+	flag := self popStack.
+	" set cursor link to true here"
+	self vm hal cursorLink: (flag class = TruePointer)
+]
+
+{ #category : #'io primitives' }
+Interpreter >> primitiveCursorLocPut [
+	"Move the cursor to the screen location specified by the argument. Fail if
+   the argument is not a Point. (BB 651)"	
+			
+	| point x y |
+   point := self popStack.
+   self success: (memory fetchClassOf: point == ClassPointPointer).
+   self success
+      ifTrue: [ x := self fetchInteger: XIndex ofObject: point.
+	             y := self fetchInteger: YIndex ofObject: point.
+	             "TODO: adapt to set cursor location of the VM window"
+	             self currentWorld activeHand position: x@y ]
+      ifFalse: [ self unPop: 1 ]
+
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveDiv [
 	"There are two primitive routines for rounding division (associated with 
@@ -1922,6 +1976,41 @@ Interpreter >> primitiveIndexOf: methodPointer [
 		ifFalse: [ ^ 0 ]
 ]
 
+{ #category : #'io primitives' }
+Interpreter >> primitiveInputSemaphore [
+	"Initialize the Semaphore to be signalled whenever an input event occurs.
+   The semaphore will be signaled once for every word placed in the input 
+   buffer by an I/O device. Fail if the argument is neither a Semaphore 
+   nor nil. (BB 648)"	
+			
+	| semaphore  |
+	semaphore := self popStack.
+	self success: (semaphore = NilPointer | memory fetchClassOf: semaphore = ClassSemaphorePointer).
+	
+	self success
+      "TODO: adjust for Semaphore handling in the VM"	   
+	   ifTrue: [ self vm hal inputSemaphore: semaphore ]
+	   ifFalse: [ self unPop: 1 ]
+	
+]
+
+{ #category : #'io primitives' }
+Interpreter >> primitiveInputWord [
+	"Get the next word from the input buffer and remove the word from the
+   buffer. This message should be sent just after the input semaphore
+   finished a wait (was sent a signal by an I/O device). Fail if the input
+   buffer is empty. (BB 648)"	
+			
+	| word |
+	word := self vm hal nextInputWord.
+	self success: (word ~= 0). "A value of 0 should not happen so use it as an error code"
+	
+	self success
+		ifTrue: [ self pop: 1.
+			       self push: (self positive16BitIntegerFor: word) ]
+		ifFalse: [ self primitiveFail ]
+]
+
 { #category : #'storage management primitives' }
 Interpreter >> primitiveInstVarAt [
    "The primitiveInstVarAt routine is associated with the instVarAt: message
@@ -2030,6 +2119,23 @@ Interpreter >> primitiveMod [
 	self success
 		ifTrue: [ self pushInteger: integerResult ]
 		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : #'io primitives' }
+Interpreter >> primitiveMousePoint [
+	"The primitiveMousePoint routine allows the location of the pointing device
+	 to be polled. It allocates a new Point and stores the location of the 
+	 pointing device in its x and y fields. (BB 651)"
+			
+	| currentPoint pointResult |
+	self pop: 1. "remove receiver from stack"
+	"TODO: Adapt to get coordinates relative to the simulated screen"
+   currentPoint := self currentWorld activeHand position.
+   "Create a point object and push it to the VM stack"
+   pointResult := memory instantiateClass: ClassPointPointer withPointers: ClassPointSize.
+   self storeInteger: XIndex ofObject: pointResult withValue: currentPoint x.
+   self storeInteger: YIndex ofObject: pointResult withValue: currentPoint y.
+	self push: pointResult
 ]
 
 { #category : #'arithmetic primitives' }
@@ -2361,6 +2467,22 @@ Interpreter >> primitiveResume [
     argument. (BB 647)"
 
    self resume: self stackTop
+]
+
+{ #category : #'io primitives' }
+Interpreter >> primitiveSampleInterval [
+	"Set the minimum time span between events generated by the ponting
+	device. The argument is a SmallInteger representing the number 
+   of milliseconds. Fail if the argument is not a SmallInteger. (BB 648)"	
+			
+	| interval |
+	interval := self popStack.
+	self success: (memory isIntegerObject: interval).
+	
+	self success
+      "TODO: adjust for call below handling in the VM"	   
+	   ifTrue: [ self vm hal sampleInterval: interval ]
+	   ifFalse: [ self unPop: 1 ]
 ]
 
 { #category : #'control primitives' }
