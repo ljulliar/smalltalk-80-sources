@@ -432,7 +432,7 @@ Interpreter >> dispatchIntegerPrimitives [
    result fail if the value cannot be represented as a SmallInteger. (BB 621)"
 
    primitiveIndex = 1 ifTrue: [^self primitiveAdd].
-   primitiveIndex = 2 ifTrue: [^self primitiveSubstract].
+   primitiveIndex = 2 ifTrue: [^self primitiveSubtract].
    primitiveIndex = 3 ifTrue: [^self primitiveLessThan].
    primitiveIndex = 4 ifTrue: [^self primitiveGreaterThan].
    primitiveIndex = 5 ifTrue: [^self primitiveLessOrEqual].
@@ -2590,7 +2590,7 @@ Interpreter >> primitiveStringAtPut [
 ]
 
 { #category : #'arithmetic primitives' }
-Interpreter >> primitiveSubstract [
+Interpreter >> primitiveSubtract [
 	"Primitive substract operation (BB 622)"
 
 	| integerReceiver integerArgument integerResult |
