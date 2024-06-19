@@ -230,6 +230,36 @@ ObjectMemory >> countBitsOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 0 to: 7 put: value
 ]
 
+{ #category : #'private - ref count gc' }
+ObjectMemory >> countDown: rootObjectPointer [
+	"Simple garbage collector method to increase reference count (BB p. 677)"
+
+	| count |
+	(self isIntegerObject: rootObjectPointer)
+		ifTrue: [ ^ rootObjectPointer ]
+		ifFalse: [ "this is a pointer, so decrement its reference count"
+			^ self
+				  forAllObjectsAccessibleFrom: rootObjectPointer
+				  suchThat: [ :objectPointer | "the predicate decrements the count and tests for zero"
+					  count := (self countBitsOf: objectPointer) - 1.
+					  count < 127 ifTrue: [
+						  self countBitsOf: objectPointer put: count ].
+					  count = 0 ]
+				  do: [ :objectPointer | "the action zeroes the count and deallocates the object"
+					  self countBitsOf: objectPointer put: 0.
+					  self deallocate: objectPointer ] ]
+]
+
+{ #category : #'private - ref count gc' }
+ObjectMemory >> countUp: objectPointer [
+	"Simple garbage collector method to increase reference count (BB p. 677)"
+	| count |
+	(self isIntegerObject: objectPointer)
+		ifFalse: [count := (self countBitsOf: objectPointer) + 1.
+	count < 129 ifTrue: [self countBitsOf: objectPointer put: count]].
+	^objectPointer
+]
+
 { #category : #'private - deallocation' }
 ObjectMemory >> deallocate: objectPointer [
 	"chunk is recycled on a free-chunk list. The following routine expects the count field to have been reset to zero by a higher-level routine. deallocated objects have no provision for an extra word not counted in the size field."
@@ -262,7 +292,7 @@ ObjectMemory >> fetchByteLengthOf: objectPointer [
 ObjectMemory >> fetchClassOf: objectPointer [
 	"Return the object pointer of the class-describing object for the object associated with objectPointer"
 	(self isIntegerObject: objectPointer)
-		ifTrue: [^ ClassSmallInteger] "Constant is defined in ObjectMemory class << initialize"
+		ifTrue: [^ IntegerClass] "Constant is defined in ObjectMemory class << initialize"
 		ifFalse: [^ self classBitsOf: objectPointer]
 ]
 
@@ -285,49 +315,56 @@ ObjectMemory >> fetchWordLengthOf: objectPointer [
 ]
 
 { #category : #'private - ref count gc' }
+ObjectMemory >> forAllObjectsAccessibleFrom: objectPointer suchThat: predicate do: action [
+	"BB p. 578"
+	(predicate value: objectPointer) ifTrue: [
+		^ self
+			  forAllOtherObjectsAccessibleFrom: objectPointer
+			  suchThat: predicate
+			  do: action ]
+]
+
+{ #category : #'private - ref count gc' }
 ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predicate do: action [
 	"Space-efficient traversal algorithm for reference counting garbage collector"
-
+	"BB p. 578"
 	| prior current offset size next |
 	"compute prior, current, offset, and size to begin processing objectPointer"
 	prior := NonPointer.
 	current := objectPointer.
 	offset := size := self lastPointerOf: objectPointer.
-	[ true ]
-		whileTrue: [ "for all pointers in all objects traversed"
-			(offset := offset - 1) > 0
-				ifTrue: [ "the class field hasn't been passed yet"
-					next := self heapChunkOf: current word: offset.	"one of the pointers"
-					((self isIntegerObject: next) == false
-						and: [ predicate value: next ])
-						ifTrue: [ "reverse the pointer chain"
-							"it's a non-immediate object and it should be processed"
-							self heapChunkOf: current word: offset put: prior.
-							"save the offset either in the count field or in the extra word"
-							size < HugeSize
-								ifTrue: [ self countBitsOf: current put: offset ]
-								ifFalse: [ self heapChunkOf: current word: size put: offset ].
-							"compute prior, current, offset, and size to begin processing next"
-							prior := current.
-							current := next.
-							offset := size := self lastPointerOf: current ] ]
-				ifFalse: [ " all pointers have been followed; now perform the action"
-					action value: current.
-					"did we get here from another object?"
-					prior = NonPointer
-						ifTrue: [ "this was the root object, so we are done" ^ objectPointer ].
-					"restore next, current, and size to resume processing prior"
-					next := current.
-					current := prior.
-					size := self lastPointerOf: current.
-					"restore offset either from the count field or from the extra word"
+	[ true ] whileTrue: [ "for all pointers in all objects traversed"
+		(offset := offset - 1) > 0
+			ifTrue: [ "the class field hasn't been passed yet"
+				next := self heapChunkOf: current word: offset. "one of the pointers"
+				((self isIntegerObject: next) == false and: [
+					 predicate value: next ]) ifTrue: [ "reverse the pointer chain""it's a non-immediate object and it should be processed"
+					self heapChunkOf: current word: offset put: prior.
+					"save the offset either in the count field or in the extra word"
 					size < HugeSize
-						ifTrue: [ offset := self countBitsOf: current ]
-						ifFalse: [ offset := self heapChunkOf: current word: size + 1 ].
-					"restore prior from the reversed pointer chain"
-					prior := self heapChunkOf: current word: offset.
-					"restore (unreverse) the pointer chain"
-					self heapChunkOf: current word: offset put: next ]	"decrement the field index" ]
+						ifTrue: [ self countBitsOf: current put: offset ]
+						ifFalse: [ self heapChunkOf: current word: size put: offset ].
+					"compute prior, current, offset, and size to begin processing next"
+					prior := current.
+					current := next.
+					offset := size := self lastPointerOf: current ] ]
+			ifFalse: [ " all pointers have been followed; now perform the action""decrement the field index"
+				action value: current.
+				"did we get here from another object?"
+				prior = NonPointer ifTrue: [ "this was the root object, so we are done"
+					^ objectPointer ].
+				"restore next, current, and size to resume processing prior"
+				next := current.
+				current := prior.
+				size := self lastPointerOf: current.
+				"restore offset either from the count field or from the extra word"
+				size < HugeSize
+					ifTrue: [ offset := self countBitsOf: current ]
+					ifFalse: [ offset := self heapChunkOf: current word: size + 1 ].
+				"restore prior from the reversed pointer chain"
+				prior := self heapChunkOf: current word: offset.
+				"restore (unreverse) the pointer chain"
+				self heapChunkOf: current word: offset put: next ] ]
 ]
 
 { #category : #'private - object table entries' }
