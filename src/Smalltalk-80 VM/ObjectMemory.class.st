@@ -13,7 +13,6 @@ Class {
 	],
 	#classVars : [
 		'BigSize',
-		'ClassSmallInteger',
 		'FirstFreeChunkList',
 		'FirstHeapSegment',
 		'FreePointerList',
@@ -21,6 +20,7 @@ Class {
 		'HeapSegmentCount',
 		'HeapSpaceStop',
 		'HugeSize',
+		'IntegerClass',
 		'LastFreeChunkList',
 		'LastHeapSegment',
 		'MethodClass',
@@ -34,14 +34,38 @@ Class {
 }
 
 { #category : #'class initialization' }
-ObjectMemory class >> initialize [
-	"A good value for NonPointer is 2^16 - 1, a value that is easily detected on most computers and that cannot be confused with an actual object table entry address because it is an odd number."
-	NonPointer := 2**16 - 1.
+ObjectMemory class >> initialize [ 
+	"Initialize memory parameters. Note all idex in Memory
+	management are assumed to start at 0 whether, word, byte
+	or bit indices"
+
+   "Heap Related constants (BB p. 658)"
+	HeapSegmentCount := 16-1.	"All segments minus one used by the Object Table"
+	FirstHeapSegment := 0.      "Start at the first segment"
+	LastHeapSegment := (FirstHeapSegment + HeapSegmentCount - 1). "Last segment occupied by Object Table (see below)"
+	HeapSpaceStop := 65535 - BigSize + 1. "Reserve the last Bigsize words of each segment for Free chunk list heads"
+	HeaderSize := 2. 				"An object header is 2-word size"
 	
-	"These are known objects that are also defined in the Interpreter class"
-	"See Blue Book p 576 and Xerox St-80 Manual p 7 for Erratum"
-	NilPointer := 2.
-	ClassSmallInteger := 12
+	"Object Table Related Constants (BB p.661)"
+	ObjectTableSegment := 15.	"Object Table occupies last memory segment"
+	ObjectTableStart := 0.      "First word reserved for head of free pointer list"
+	ObjectTableSize := 65534.   "64K minus the 2 reserved words at the end (e.g. one for FreePointerList, one spare)"
+	HugeSize := 256.
+	NilPointer := 2.				"BB p. 576, p. 661"
+
+	"Free Space Related Constants (BB p. 664)"
+	FreePointerList := 65535.   "Head of free pointer list stored in last word of Object Table segment"
+	BigSize := 21.              "All free chunks of size 20 and below are kept in a linked list"
+	FirstFreeChunkList := HeapSpaceStop + 1.
+	LastFreeChunkList := FirstFreeChunkList + BigSize - 2.
+	NonPointer := 65535.
+	
+	"Interface to the bytecode interpreter"
+	IntegerClass := 12.          "BB p. 687  and Xerox VM Image Booklet p. 6"
+
+   "object table index of CompiledMethod"
+	MethodClass := 22.				"BB p. 686 and Xerox VM Image Booklet p. 6"
+
 ]
 
 { #category : #'private - compaction' }
@@ -391,6 +415,19 @@ ObjectMemory >> initialInstanceOf: classPointer [
 			ifTrue: [ (self fetchClassOf: pointer) = classPointer
 					ifTrue: [ ^ pointer ] ] ].
 	^ NilPointer
+]
+
+{ #category : #initialization }
+ObjectMemory >> initialize [
+	"Initialize memory space (not BB code)"
+
+	super initialize.
+	"The real real memory implementation"
+	wordMemory := RealWordMemory new.
+	"Initialize current segment to zero for now.
+	It must be set to its proper value once the Object Space 
+	from the VM image is loaded  in theObjectMemory"
+	currentSegment := 0.
 ]
 
 { #category : #'instance enumeration' }
