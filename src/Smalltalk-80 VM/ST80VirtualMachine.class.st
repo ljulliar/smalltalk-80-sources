@@ -33,8 +33,10 @@ ST80VirtualMachine >> init [
 ST80VirtualMachine >> initialize [
 	"Initialize a new ST80 VM"
 
-	displayWidth := 606.
-	displayHeight := 808.
+	"Initial Screen dimensions can be found
+	 in the Xerox ST80 Virtual Image Booklet p. 3"
+	displayWidth := 640.
+	displayHeight := 480.
 	vmImagePath := '/misc/applications/Smalltalk/ST80_Image/'.
 	vmImageFile := vmImagePath, 'Smalltalk-80.image'.
 	vmSourcesFile := vmImagePath, 'Smalltalk-80.sources'.
