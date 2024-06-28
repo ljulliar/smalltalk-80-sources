@@ -40,31 +40,49 @@ ObjectMemory class >> initialize [
 	or bit indices"
 
    "Heap Related constants (BB p. 658)"
-	HeapSegmentCount := 16-1.	"All segments minus one used by the Object Table"
-	FirstHeapSegment := 0.      "Start at the first segment"
-	LastHeapSegment := (FirstHeapSegment + HeapSegmentCount - 1). "Last segment occupied by Object Table (see below)"
-	HeapSpaceStop := 65535 - BigSize + 1. "Reserve the last Bigsize words of each segment for Free chunk list heads"
-	HeaderSize := 2. 				"An object header is 2-word size"
+	"----------------------------------"
+
+	"All segments minus one used by the Object Table"
+	HeapSegmentCount := 16-1.
+	"Start at the first segment"
+	FirstHeapSegment := 0.
+	"Last segment occupied by Object Table (see below)"
+	LastHeapSegment := (FirstHeapSegment + HeapSegmentCount - 1). 
+	"Reserve the last Bigsize words of each segment for Free chunk list heads"
+	HeapSpaceStop := 65535 - (BigSize + 1).
+	"An object header is 2-word size"
+	HeaderSize := 2.
 	
 	"Object Table Related Constants (BB p.661)"
-	ObjectTableSegment := 15.	"Object Table occupies last memory segment"
-	ObjectTableStart := 0.      "First word reserved for head of free pointer list"
-	ObjectTableSize := 65534.   "64K minus the 2 reserved words at the end (e.g. one for FreePointerList, one spare)"
+	"-----------------------------------------"
+	"Object Table occupies last memory segment"
+	ObjectTableSegment := 15.
+	"First word reserved for head of free pointer list"
+	ObjectTableStart := 0.
+	"64K minus the 2 reserved words at the end (e.g. one for FreePointerList, one spare)"
 	HugeSize := 256.
-	NilPointer := 2.				"BB p. 576, p. 661"
+	ObjectTableSize := 65534.
+	"Definition of NilPointer BB p. 576, p. 661" 
+	NilPointer := 2.
 
 	"Free Space Related Constants (BB p. 664)"
-	FreePointerList := 65535.   "Head of free pointer list stored in last word of Object Table segment"
-	BigSize := 21.              "All free chunks of size 20 and below are kept in a linked list"
+	"----------------------------------------"
+   "Head of free pointer list stored in last word of Object Table segment"
+	FreePointerList := 65535.
+	"All free chunks of size 20 and below are kept in a linked list"
+	BigSize := 21.
 	FirstFreeChunkList := HeapSpaceStop + 1.
-	LastFreeChunkList := FirstFreeChunkList + BigSize - 2.
+	LastFreeChunkList := FirstFreeChunkList + BigSize.
 	NonPointer := 65535.
 	
 	"Interface to the bytecode interpreter"
-	IntegerClass := 12.          "BB p. 687  and Xerox VM Image Booklet p. 6"
-
-   "object table index of CompiledMethod"
-	MethodClass := 22.				"BB p. 686 and Xerox VM Image Booklet p. 6"
+	"----------------------------------------"
+	"object pointer of IntegerClass"
+   "BB p. 687  and Xerox VM Image Booklet p. 6"
+	IntegerClass := 12.
+   "object pointer of CompiledMethod"
+	"BB p. 686 and Xerox VM Image Booklet p. 6"
+	MethodClass := 22.
 
 ]
 
