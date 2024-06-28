@@ -46,6 +46,10 @@ RealWordMemory >> segment: s word: w [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
    "Not BB code"
+	"Some preliminary sanity checks"
+	self assert: ( (s >= 0) and: (s < SegmentCount)).
+	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	
 	^ realWordMemory at: (s * WordSegmentCount + w + 1).
 
 ]
@@ -57,6 +61,11 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	
 	"Not BB code. For bit index see BB p. 657"
 	|mask shift word|
+	
+	"Some preliminary sanity checks"
+	self assert: ( (s >= 0) and: (s < SegmentCount)).
+	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	
 	shift := (15 - lastBitIndex).
 	mask  := (2**(lastBitIndex - firstBitIndex + 1) - 1) bitShift: shift.
 	word  := self segment: s word: w.
@@ -70,6 +79,11 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex put: v
 	
 	"Not BB code. For bit index see BB p. 657"
 	|mask shift word|
+	"Some preliminary sanity checks"
+	self assert: ( (s >= 0) and: (s < SegmentCount)).
+	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	self assert: ( (value >= 0) and: (value < 65536)).
+	
 	shift := (15 - lastBitIndex).
 	mask  := (2**(lastBitIndex - firstBitIndex + 1) - 1) bitShift: shift.
 	word  := (self segment: s word: w) bitAnd: ((mask bitInvert) bitOr: (value bitShift: shift)).
@@ -83,6 +97,11 @@ RealWordMemory >> segment: s word: w byte: byteNumber [
 	
 	"Not BB code. For byte index see BB p. 657"
 	|word byte|
+	"Some preliminary sanity checks"
+	self assert: ( (s >= 0) and: (s < SegmentCount)).
+	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
+	
 	word := self segment: s word: w.
 	byte := (byteNumber = 1)
 		ifTrue: [ word bitAnd: 16rFF ] 
@@ -97,6 +116,12 @@ RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 	
 	"Not BB code. For byte indexing see BB p. 657"
 	|word|
+	"Some preliminary sanity checks"
+	self assert: ( (s >= 0) and: (s < SegmentCount)).
+	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
+	self assert: ( (value >= 0) and: (value < 65536)).
+	
 	word := self segment: s word: w.
 	word := (byteNumber = 1)
 		ifTrue: [ word bitAnd: 16rFF00; bitOr: value ] 
@@ -109,7 +134,13 @@ RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 RealWordMemory >> segment: s word: w put: value [
 	"Store value into word w of segment s; return value."
 	"ShouldBeImplemented signalFor: thisContext sender selector"
-	"Not BB code"
-	^realWordMemory at: (s * WordSegmentCount + w) put: value
+
+	"Not BB code"	
+	"Some preliminary sanity checks"
+	self assert: ( (s >= 0) and: (s < SegmentCount)).
+	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	self assert: ( (value >= 0) and: (value < 65536)).
 	
+	^realWordMemory at: (s * WordSegmentCount + w) put: value
+
 ]
