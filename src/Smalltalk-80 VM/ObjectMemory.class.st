@@ -86,6 +86,22 @@ ObjectMemory class >> initialize [
 
 ]
 
+{ #category : #'vm image loading' }
+ObjectMemory class >> readUInt16From: stream [
+	"Read next 4 bytes from stream and return an
+	unsigned 16-bit integer"
+
+	^ (stream next) + (stream next bitShift: 8).
+]
+
+{ #category : #'vm image loading' }
+ObjectMemory class >> readUInt32From: stream [
+	"Read next 4 bytes from stream and return an
+	unsigned 32-bit integer"
+
+	^ (stream next) + (stream next bitShift: 8) + (stream next bitShift: 16) + (stream next bitShift: 24).
+]
+
 { #category : #'private - compaction' }
 ObjectMemory >> abandonFreeChunksInSegment: segment [
 	"Computes lowWaterMark and also finds all deallocated chunks, recycles their object table entries onto the list of free pointers using the subroutine releasePointer:, and changes their class fields to the distinguished value NonPointer. During the subsequent sweep, when the compacter encounters objects so marked it can recognize them as deallocated chunks."
