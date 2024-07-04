@@ -495,10 +495,20 @@ ObjectMemory >> initialize [
 	super initialize.
 	"The real real memory implementation"
 	wordMemory := RealWordMemory new.
+	
+	"Initialize the object table free entry list"
+	self headOfFreePointerListPut: NonPointer.
+	
+	"Initialize all free chunck list heads in all segments"
+	0 to: LastHeapSegment do: [ :s |
+		0 to: BigSize do: [ :sz | self resetFreeChunkList: sz inSegment: s ]
+	].
+
 	"Initialize current segment to zero for now.
 	It must be set to its proper value once the Object Space 
 	from the VM image is loaded  in theObjectMemory"
 	currentSegment := 0.
+	
 ]
 
 { #category : #'instance enumeration' }
