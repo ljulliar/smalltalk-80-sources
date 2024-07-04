@@ -18,7 +18,8 @@ Class {
 		'vmImageFile',
 		'vmSourcesFile',
 		'vmChangesFile',
-		'vmImagePath'
+		'vmImagePath',
+		'objectMemory'
 	],
 	#category : #'Smalltalk-80 VM'
 }
@@ -42,6 +43,7 @@ ST80VirtualMachine >> initialize [
 	vmSourcesFile := vmImagePath, 'Smalltalk-80.sources'.
 	vmChangesFile := vmImagePath, 'Smalltalk-80.changes'.
 	
+	objectMemory := ObjectMemory new.
    self load; run
 
 ]
