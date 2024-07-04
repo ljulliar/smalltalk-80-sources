@@ -575,6 +575,101 @@ ObjectMemory >> lastPointerOf: objectPointer [
 		ifFalse: [ ^ self sizeBitsOf: objectPointer ]
 ]
 
+{ #category : #'vm image loading' }
+ObjectMemory >> loadVMImageFrom: stream [
+	"Not BB code"
+
+	"Load ST80 image from stream
+	 **IMPORTANT NOTE** : the loaded image file are assumed to follow 
+	 the LSB format. The original image file from the Xerox Parc ST80 tape
+	 follows the MSB format and must reformated before it can be used here"
+
+   | objectSpaceLength objectTableLength vmImageFormat osFileOffset 
+     otFileOffset pageLength  w size segment offset spaceLeft freeChuncks
+	  addressRelocation address |
+
+	"Page length in bytes. See Xerox Virtual Image Booklet p. 2"
+	pageLength := 512.
+	
+	"Mkae sure to be at the beginning of the image stream"
+	stream reset.
+	
+	"See Xerox Virtual Image Booklet p. 2 for details on VM image file format"
+	"First 4 bytes is the Object Space length  and the next 4 bytes
+	are the Object Table Length (both length are in 16-bit word)"
+	objectSpaceLength := self class readUInt32From: stream.
+	objectTableLength := self class readUInt32From: stream.
+	
+	"Read the next 2 byte word and make sure it is 0 (VM Interchange format)"
+	vmImageFormat := self class readUInt16From: stream.
+	(vmImageFormat = 0) ifFalse: [ Exception signal: 'VM Image is not Interchange format' ].
+	
+	"----------------------------------------------------------"
+	"Skip to position 512. Object space starts right after that"
+	osFileOffset := pageLength.
+	stream position: osFileOffset.
+	
+	freeChuncks := Array new: HeapSegmentCount withAll: 0.
+	addressRelocation := Dictionary new.
+	segment := 0.
+	offset  := 0. "offset in segment"
+	address := 0. "absolute address in memory"
+	[size := (self class readUInt16From: stream) > 0] whileTrue: [ 
+		
+		"check if there is enough speace left in the segment 
+		to place this object"
+		(spaceLeft := (HeapSpaceStop - offset + 1)) >= size
+	  		ifTrue: [
+	   			wordMemory segment: segment word: offset put: size.
+				addressRelocation at: address put: (segment bitShift: 16) + offset.
+	   			offset := offset + 1.
+				[size - 1] timesRepeat: [
+					wordMemory segment: segment word: offset  put: (self class readUInt16From: stream).
+		  	 		offset := offset + 1.
+	   				].
+				address := address + size.
+				]
+			ifFalse: [ 
+				freeChuncks at: segment put: spaceLeft.
+				segment := segment + 1.
+				offset := 0.
+				]
+		].
+		
+	"----------------------------------------------------------"
+	"Skip to the object table offset, rounding to the nearest
+	 upper multiple of page length (= 512 bytes)"
+	otFileOffset := ((osFileOffset + (objectSpaceLength * 2) + pageLength - 1) / pageLength) * pageLength.
+	stream position: otFileOffset.
+		
+	"Load all object table entries and rebuild both
+	free chunck list and free entry list"
+	0 to: (objectTableLength / 2) do: [ :op |
+		"read and store both 16-bit words of the object table entry"
+		w := (stream next) + (stream next bitShift: 8).
+		wordMemory ot: op put: w.
+		w := (stream next) + (stream next bitShift: 8).
+		wordMemory locationBitsOf: op put: (addressRelocation at: w).
+
+		"Add this entry to the free object table entry list if needed"
+		((wordMemory freeBitOf: op) = 1) ifTrue: [ 
+			wordMemory toFreePointerListAdd: op
+			].
+		
+	   "Add this entry to the free chunck list if needed"
+		((wordMemory countBitsOf: op) = 0 and: (wordMemory freeBitOf: op) = 0) ifTrue: [
+			wordMemory toFreeChunkList: (wordMemory sizeBitsOf: op) add: op 
+			].
+		]
+
+	"TODO: add a new free chunk entry in the table 
+	for each end of segment free space"
+	
+
+	
+		
+]
+
 { #category : #'private - object table entries' }
 ObjectMemory >> locationBitsOf: objectPointer [
 	self cantBeIntegerObject: objectPointer.

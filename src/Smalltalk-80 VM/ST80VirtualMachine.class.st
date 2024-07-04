@@ -54,27 +54,11 @@ ST80VirtualMachine >> load [
 	 IMPORTANT NOTE : the loaded image file are assumed to follow 
 	 the LSB format. The original image file from the Xerox Parc ST80 tape
 	 follows the MSB format and must reformated before it can be used here"
+	
+	"Load the image file in memory "
+	objectMemory loadVMImageFrom: (vmImageFile asFileReference binaryReadStream).
 
-   | objectSpaceLength objectTableLength vmImageFormat|
-	"Load the image file and extract "
-	vmImageFile asFileReference binaryReadStreamDo: [ :stream |
-		
-		"See Xerox Virtual Image Booklet p. 2 for details on VM image file format"
-		"First 4 bytes is the Object Space length - 32 bit integer
-		 and the next 4 bytes are the Object Table Length"
-		 objectSpaceLength := (stream next) + (stream next bitShift: 8) + (stream next bitShift: 16) + (stream next bitShift: 24).
-	    objectTableLength := (stream next) + (stream next bitShift: 8) + (stream next bitShift: 16) + (stream next bitShift: 24).
-	
-		"Read the next 2 byte word and make sure it is 0 (VM Interchange format)"
-		vmImageFormat := (stream next) + (stream next bitShift: 8).
-		(vmImageFormat = 0) ifFalse: [ Exception signal: 'VM Image is not Interchange format' ].
-	
-		"Now skip to position 513 where Object space starts"
-		stream position: 512.
-		
-		 ]
-	
-	"Populate the VM memory"
+
 ]
 
 { #category : #running }
