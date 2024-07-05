@@ -586,7 +586,7 @@ ObjectMemory >> loadVMImageFrom: stream [
 
    | objectSpaceLength objectTableLength vmImageFormat osFileOffset 
      otFileOffset pageLength  w size segment offset spaceLeft freeChuncks
-	  addressRelocation address |
+	  addressRelocation location otVMEntryCount otMaxEntryCount op |
 
 	"Page length in bytes. See Xerox Virtual Image Booklet p. 2"
 	pageLength := 512.
@@ -613,23 +613,25 @@ ObjectMemory >> loadVMImageFrom: stream [
 	addressRelocation := Dictionary new.
 	segment := 0.
 	offset  := 0. "offset in segment"
-	address := 0. "absolute address in memory"
+	location := 0. "absolute address in memory"
 	[size := (self class readUInt16From: stream) > 0] whileTrue: [ 
 		
 		"check if there is enough speace left in the segment 
-		to place this object"
+		to place this object..."
 		(spaceLeft := (HeapSpaceStop - offset + 1)) >= size
 	  		ifTrue: [
+				"If so, copy the whole object block"
 	   			wordMemory segment: segment word: offset put: size.
-				addressRelocation at: address put: (segment bitShift: 16) + offset.
+				addressRelocation at: location put: (segment bitShift: 16) + offset.
 	   			offset := offset + 1.
 				[size - 1] timesRepeat: [
-					wordMemory segment: segment word: offset  put: (self class readUInt16From: stream).
+					wordMemory segment: segment word: offset put: (self class readUInt16From: stream).
 		  	 		offset := offset + 1.
 	   				].
-				address := address + size.
+				location := location + size.
 				]
 			ifFalse: [ 
+				"if not, ear mark the remaining memory chunk as free space"
 				freeChuncks at: segment put: spaceLeft.
 				segment := segment + 1.
 				offset := 0.
@@ -644,30 +646,44 @@ ObjectMemory >> loadVMImageFrom: stream [
 		
 	"Load all object table entries and rebuild both
 	free chunck list and free entry list"
-	0 to: (objectTableLength / 2) do: [ :op |
-		"read and store both 16-bit words of the object table entry"
+	otVMEntryCount  := objectTableLength / 2.
+	otMaxEntryCount := ObjectTableSize / 2.
+	0 to: (otVMEntryCount - 1) do: [ :i |
+		"read and store the 2 16-bit words of the object table entry"
 		w := (stream next) + (stream next bitShift: 8).
-		wordMemory ot: op put: w.
+		self ot: i put: w.
 		w := (stream next) + (stream next bitShift: 8).
-		wordMemory locationBitsOf: op put: (addressRelocation at: w).
+		self locationBitsOf: i put: (addressRelocation at: w).		
+				
+		"See if this entry must be added either to the 
+		free object table entry list or to the free chunk list"				
+		((self freeBitOf: i) = 1) 
+			ifTrue: [ self toFreePointerListAdd: i ]
+			ifFalse: [ 
+				((self countBitsOf: i) = 0) 
+				ifTrue: [ self toFreeChunkList: (self sizeBitsOf: i) add: i ]
+			]
+		].
 
-		"Add this entry to the free object table entry list if needed"
-		((wordMemory freeBitOf: op) = 1) ifTrue: [ 
-			wordMemory toFreePointerListAdd: op
-			].
-		
-	   "Add this entry to the free chunck list if needed"
-		((wordMemory countBitsOf: op) = 0 and: (wordMemory freeBitOf: op) = 0) ifTrue: [
-			wordMemory toFreeChunkList: (wordMemory sizeBitsOf: op) add: op 
-			].
-		]
-
-	"TODO: add a new free chunk entry in the table 
-	for each end of segment free space"
+	"Add a new free chunk entry in the table for each end of
+	segment free space"
+	op := otVMEntryCount.
+	freeChuncks do: [ :sz |
+		(sz >= HeaderSize) ifTrue: [ 
+		   self segmentBitsOf: op put: sz.
+			self countBitsOf: op put: 0.
+			self freeBitOf: op put: 0.
+			self toFreeChunkList: sz add: op.
+			 ].
+		op := op + 1.
+		].
 	
-
+	"Mark all the remaining object table entries as free entries"
+	op to: otMaxEntryCount do: [  :i|
+		self freeBitOf: i put: 1.
+		self toFreePointerListAdd: i.
+		 ]
 	
-		
 ]
 
 { #category : #'private - object table entries' }
