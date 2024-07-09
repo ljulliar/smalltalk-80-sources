@@ -62,16 +62,15 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
 	"Not BB code. For bit index see BB p. 657"
-	|mask shift word|
+	|mask word|
 	
 	"Some preliminary sanity checks"
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
 	
-	shift := (15 - lastBitIndex).
-	mask  := (2**(lastBitIndex - firstBitIndex + 1) - 1) bitShift: shift.
+	mask  := (1 << (lastBitIndex - firstBitIndex + 1) - 1) bitShift: firstBitIndex.
 	word  := self segment: s word: w.
-	^ word bitAnd: mask;  bitShift: shift.
+	^ (word bitAnd: mask) bitShift: firstBitIndex negated.
 ]
 
 { #category : #access }
@@ -80,16 +79,18 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex put: v
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
 	"Not BB code. For bit index see BB p. 657"
-	|mask shift word|
+	|mask word|
+	mask  := (1 << (lastBitIndex - firstBitIndex + 1) - 1).
+	
 	"Some preliminary sanity checks"
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
-	self assert: ( (value >= 0) and: (value < 65536)).
+	self assert: ( (value >= 0) and: (value <= mask)).
 	
-	shift := (15 - lastBitIndex).
-	mask  := (2**(lastBitIndex - firstBitIndex + 1) - 1) bitShift: shift.
-	word  := (self segment: s word: w) bitAnd: ((mask bitInvert) bitOr: (value bitShift: shift)).
-	^self segment: s word: s put: word 
+	mask := mask bitShift: firstBitIndex.
+	word := self segment: s word: w.
+	word := (word bitAnd: (mask bitInvert)) bitOr: (value bitShift: firstBitIndex).
+	^ self segment: s word: w put: word 
 ]
 
 { #category : #access }
@@ -128,7 +129,7 @@ RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 	word := (byteNumber = 1)
 		ifTrue: [ word bitAnd: 16rFF00; bitOr: value ] 
 		ifFalse: [ word bitAnd: 16r00FF; bitOr: (value bitShift: -8) ].
-	^ self segment: w word: w put: word.
+	^ self segment: s word: w put: word.
 	
 ]
 
@@ -143,6 +144,6 @@ RealWordMemory >> segment: s word: w put: value [
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
 	self assert: ( (value >= 0) and: (value < 65536)).
 	
-	^realWordMemory at: (s * WordSegmentCount + w) put: value
+	^realWordMemory at: (s * WordSegmentCount + w + 1) put: value
 
 ]
