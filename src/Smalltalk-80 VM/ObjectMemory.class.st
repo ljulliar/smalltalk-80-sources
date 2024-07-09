@@ -38,6 +38,11 @@ ObjectMemory class >> initialize [
 	"Initialize memory parameters. Note all idex in Memory
 	management are assumed to start at 0 whether, word, byte
 	or bit indices"
+	
+	"Free Space Related Constants part #1 (BB p. 664)"
+	"------------------------------------------------"
+	"All free chunks of size 20 and below are kept in a linked list"
+	BigSize := 21.
 
    "Heap Related constants (BB p. 658)"
 	"----------------------------------"
@@ -65,12 +70,11 @@ ObjectMemory class >> initialize [
 	"Definition of NilPointer BB p. 576, p. 661" 
 	NilPointer := 2.
 
-	"Free Space Related Constants (BB p. 664)"
+	"Free Space Related Constants part 2 (BB p. 664)"
 	"----------------------------------------"
-   "Head of free pointer list stored in last word of Object Table segment"
+   "Head of free chunk pointer list stored in last word of Object Table segment"
 	FreePointerList := 65535.
-	"All free chunks of size 20 and below are kept in a linked list"
-	BigSize := 21.
+	"Free chunks pointer by size are stored at the end of each segment"
 	FirstFreeChunkList := HeapSpaceStop + 1.
 	LastFreeChunkList := FirstFreeChunkList + BigSize.
 	NonPointer := 65535.
