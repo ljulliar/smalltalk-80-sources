@@ -28,16 +28,18 @@ RealWordMemory class >> initialize [
 RealWordMemory >> initialize [
 	"Initialize the real world memory (not BB code)"
 
-	"Since we do not add required parameters here simply calloutAPIClass super.
+	"Since we do not add required parameters here simply super.
 	(Follows the Seaside initialization convention"
-
 	super initialize.
+	
+	"Also make sure this class variables are initialized"
+	self class initialize.
 
 	"The Array below will ba made of SmallIntegers which are 32 bits log 
 	on most modern architecture. This is twice the size that ST-80 needs 
 	as it uses 16 bit words but we don't care compacting 2 ST-80 words
 	in one SmallInteger for now."
-	realWordMemory := Array new: (WordSegmentCount * SegmentCount)  withAll: 0
+	realWordMemory := Array new: (WordSegmentCount * SegmentCount)  withAll: 0.
 ]
 
 { #category : #access }

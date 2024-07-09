@@ -501,6 +501,10 @@ ObjectMemory >> initialize [
 	"Initialize memory space (not BB code)"
 
 	super initialize.
+	
+	"Also make sure this class variables are initialized"
+	self class initialize.
+	
 	"The real real memory implementation"
 	wordMemory := RealWordMemory new.
 	
