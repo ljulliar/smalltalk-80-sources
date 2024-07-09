@@ -256,12 +256,16 @@ ObjectMemory >> compactCurrentSegment [
 
 { #category : #'private - object table entries' }
 ObjectMemory >> countBitsOf: objectPointer [
-	^ self ot: objectPointer bits: 0 to: 7
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 0 to: 7"
+	^ self ot: objectPointer bits: 8 to: 15
 ]
 
 { #category : #'private - object table entries' }
 ObjectMemory >> countBitsOf: objectPointer put: value [
-	^ self ot: objectPointer bits: 0 to: 7 put: value
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 0 to: 7 put: value"
+	^ self ot: objectPointer bits: 8 to: 15 put: value
 ]
 
 { #category : #'private - ref count gc' }
@@ -403,12 +407,16 @@ ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predic
 
 { #category : #'private - object table entries' }
 ObjectMemory >> freeBitOf: objectPointer [
-	^ self ot: objectPointer bits: 10 to: 10
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 10 to: 10"
+	^ self ot: objectPointer bits: 5 to: 5
 ]
 
 { #category : #'private - object table entries' }
 ObjectMemory >> freeBitOf: objectPointer put: value [
-	^ self ot: objectPointer bits: 10 to: 10 put: value
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 10 to: 10 put value"
+	^ self ot: objectPointer bits: 5 to: 5 put: value
 ]
 
 { #category : #'private - object table entries' }
@@ -746,12 +754,16 @@ ObjectMemory >> obtainPointer: size location: location [
 
 { #category : #'private - object table entries' }
 ObjectMemory >> oddBitOf: objectPointer [
-	^ self ot: objectPointer bits: 8 to: 8
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 8 to: 8"
+	^ self ot: objectPointer bits: 7 to: 7
 ]
 
 { #category : #'private - object table entries' }
 ObjectMemory >> oddBitOf: objectPointer put: value [
-	^ self ot: objectPointer bits: 8 to: 8 put: value
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 8 to: 8 put: value"
+	^ self ot: objectPointer bits: 7 to: 7 put: value
 ]
 
 { #category : #'private - object table entries' }
@@ -801,12 +813,16 @@ ObjectMemory >> ot: objectPointer put: value [
 
 { #category : #'private - object table entries' }
 ObjectMemory >> pointerBitOf: objectPointer [
-	^ self ot: objectPointer bits: 9 to: 9
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 9 to: 9"
+	^ self ot: objectPointer bits: 6 to: 6
 ]
 
 { #category : #'private - object table entries' }
 ObjectMemory >> pointerBitOf: objectPointer put: value [
-	^ self ot: objectPointer bits: 9 to: 9 put: value
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 9 to: 9 put: value"
+	^ self ot: objectPointer bits: 6 to: 6 put: value
 ]
 
 { #category : #'private - marking gc' }
@@ -908,12 +924,16 @@ ObjectMemory >> reverseHeapPointersAbove: lowWaterMark [
 
 { #category : #'private - object table entries' }
 ObjectMemory >> segmentBitsOf: objectPointer [
-	^ self ot: objectPointer bits: 12 to: 15
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 12 to: 15"
+	^ self ot: objectPointer bits: 0 to: 3
 ]
 
 { #category : #'private - object table entries' }
 ObjectMemory >> segmentBitsOf: objectPointer put: value [
-	^ self ot: objectPointer bits: 12 to: 15 put: value
+	"Original BB code for MSB architecture:"
+	"^ self ot: objectPointer bits: 12 to: 15 put: value"
+	^ self ot: objectPointer bits: 0 to: 3 put: value
 ]
 
 { #category : #'private - object table entries' }
