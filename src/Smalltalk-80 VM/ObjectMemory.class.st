@@ -602,100 +602,144 @@ ObjectMemory >> loadVMImageFrom: stream [
 
    | objectSpaceLength objectTableLength vmImageFormat osFileOffset 
      otFileOffset pageLength  w size segment offset spaceLeft freeChuncks
-	  addressRelocation location otVMEntryCount otMaxEntryCount op |
+	  addressRelocation otVMEntryCount otMaxEntryCount op objectCount
+	  address |
+	
+	Transcript clear.
 
 	"Page length in bytes. See Xerox Virtual Image Booklet p. 2"
 	pageLength := 512.
 	
-	"Mkae sure to be at the beginning of the image stream"
-	stream reset.
-	
+	Transcript show: '================= Reading VM Image preamble =================='; cr.
 	"See Xerox Virtual Image Booklet p. 2 for details on VM image file format"
 	"First 4 bytes is the Object Space length  and the next 4 bytes
 	are the Object Table Length (both length are in 16-bit word)"
 	objectSpaceLength := self class readUInt32From: stream.
 	objectTableLength := self class readUInt32From: stream.
+	Transcript show: ' - Object Space length (in words): '; nextPutAll: objectSpaceLength printString; cr.
+	Transcript show: ' - Object Table length (in words): '; nextPutAll: objectTableLength printString; cr.
 	
 	"Read the next 2 byte word and make sure it is 0 (VM Interchange format)"
 	vmImageFormat := self class readUInt16From: stream.
 	(vmImageFormat = 0) ifFalse: [ Exception signal: 'VM Image is not Interchange format' ].
+	Transcript show: ' - Vm Image format: '; nextPutAll: vmImageFormat printString; cr.
 	
+	"Calculate Object space and object table offsets in file"
+	osFileOffset := pageLength.
+	otFileOffset := osFileOffset + (((objectSpaceLength * 2 + pageLength - 1) // pageLength) * pageLength).
+	Transcript show: ' - Object space offset: '; nextPutAll: osFileOffset printString; cr.
+	Transcript show: ' - Object table offset: '; nextPutAll: otFileOffset printString; cr.
+		
 	"----------------------------------------------------------"
 	"Skip to position 512. Object space starts right after that"
-	osFileOffset := pageLength.
 	stream position: osFileOffset.
 	
-	freeChuncks := Array new: HeapSegmentCount withAll: 0.
+	
+	Transcript show: '================= Loading objects in memory =================='; cr; cr.
+	freeChuncks := Array new: HeapSegmentCount withAll: HeapSpaceStop.
 	addressRelocation := Dictionary new.
 	segment := 0.
 	offset  := 0. "offset in segment"
-	location := 0. "absolute address in memory"
-	[size := (self class readUInt16From: stream) > 0] whileTrue: [ 
+	address := 0. "absolute address in memory"
+	objectCount := 0.
+	[(size := (self class readUInt16From: stream)) > 0] whileTrue: [ 
+		Transcript show: '------------- Loading object ----------------'; cr.
+		Transcript show: 'size: '; nextPutAll: size printString; nextPutAll: ' file offset: '; nextPutAll: address printString; cr.
 		
 		"check if there is enough speace left in the segment 
 		to place this object..."
-		(spaceLeft := (HeapSpaceStop - offset + 1)) >= size
-	  		ifTrue: [
-				"If so, copy the whole object block"
-	   			wordMemory segment: segment word: offset put: size.
-				addressRelocation at: location put: (segment bitShift: 16) + offset.
-	   			offset := offset + 1.
-				[size - 1] timesRepeat: [
-					wordMemory segment: segment word: offset put: (self class readUInt16From: stream).
-		  	 		offset := offset + 1.
-	   				].
-				location := location + size.
-				]
-			ifFalse: [ 
-				"if not, ear mark the remaining memory chunk as free space"
-				freeChuncks at: segment put: spaceLeft.
+		((spaceLeft := HeapSpaceStop - offset + 1) < size)
+			ifTrue: [ 
+				"if not, ear mark the remaining memory chunk as free space
+				 and store this object in the next segment"
+				freeChuncks at: segment+1 put: spaceLeft.
 				segment := segment + 1.
 				offset := 0.
-				]
+				].
+			
+			Transcript show: 'relocated at segment: '; nextPutAll: segment printString; nextPutAll: ', offset: '; nextPutAll: offset printString; cr.
+			
+			"Keep track of object relocation"
+			addressRelocation at: address put: (Array with: segment with: offset).
+			
+			"Copy all object fields in memory"
+   			wordMemory segment: segment word: offset put: size.
+   			offset := offset + 1.
+			(size - 1) timesRepeat: [
+				wordMemory segment: segment word: offset put: (self class readUInt16From: stream).
+	  	 		offset := offset + 1.
+   				].
+			address := address + size.
+			objectCount := objectCount + 1.
 		].
-		
+
+		Transcript show: ' - Total objects loaded: '; nextPutAll: objectCount printString; cr.
+		Transcript show: '------------- Loading objects done ----------------'; cr; cr.
+
 	"----------------------------------------------------------"
 	"Skip to the object table offset, rounding to the nearest
 	 upper multiple of page length (= 512 bytes)"
-	otFileOffset := ((osFileOffset + (objectSpaceLength * 2) + pageLength - 1) / pageLength) * pageLength.
 	stream position: otFileOffset.
 		
 	"Load all object table entries and rebuild both
 	free chunck list and free entry list"
 	otVMEntryCount  := objectTableLength / 2.
 	otMaxEntryCount := ObjectTableSize / 2.
-	0 to: (otVMEntryCount - 1) do: [ :i |
-		"read and store the 2 16-bit words of the object table entry"
-		w := (stream next) + (stream next bitShift: 8).
+
+	
+	Transcript show: '================= Loading object table entries =================='; cr.
+	Transcript show: '>>>>> Object table entries to load: '; nextPutAll: otVMEntryCount printString; cr; cr.
+	0 to: (objectTableLength - 2) by: 2 do: [ :i |
+		"read first 16-bit words of the object table entry"
+		w := self class readUInt16From: stream.
 		self ot: i put: w.
-		w := (stream next) + (stream next bitShift: 8).
-		self locationBitsOf: i put: (addressRelocation at: w).		
-				
+		Transcript show: '----------------------------'; cr; 
+		   nextPutAll: 'oop: '; nextPutAll: i printString;
+			nextPutAll: ' count: '; nextPutAll: (self countBitsOf: i) printString;
+			nextPutAll: ' o: '; nextPutAll: (self oddBitOf: i)  printString;
+			nextPutAll: ' p: '; nextPutAll: (self pointerBitOf: i) printString;
+			nextPutAll: ' f: '; nextPutAll: (self freeBitOf: i) printString;
+			nextPutAll: ' segment: '; nextPutAll: (self segmentBitsOf: i) printString;
+			nextPutAll: ' (value: '; nextPutAll: w printString; nextPutAll: ')';
+		   cr.
+
+		"read second 16 bit word - location bits"
+		"then adjust both segment and location based on relocation info"
+		w := self class readUInt16From: stream.
+		address := ((self segmentBitsOf: i) bitShift: 16) + w.
+		Transcript show: 'location: '; nextPutAll: w printString; cr.
+		Transcript show: 'address '; nextPutAll: address printString.
+		self segmentBitsOf:  i put: ((addressRelocation at: address) at: 1).
+		self locationBitsOf: i put: ((addressRelocation at: address) at: 2).
+		Transcript show: '  -> new segment:'; nextPutAll: (self segmentBitsOf: i) printString;
+		   nextPutAll: ', location: '; nextPutAll: (self locationBitsOf: i) printString;cr.
+		
 		"See if this entry must be added either to the 
 		free object table entry list or to the free chunk list"				
 		((self freeBitOf: i) = 1) 
 			ifTrue: [ self toFreePointerListAdd: i ]
 			ifFalse: [ 
 				((self countBitsOf: i) = 0) 
-				ifTrue: [ self toFreeChunkList: (self sizeBitsOf: i) add: i ]
+				ifTrue: [ self toFreeChunkList: ((self sizeBitsOf: i) min: BigSize) add: i ]
 			]
 		].
 
 	"Add a new free chunk entry in the table for each end of
 	segment free space"
-	op := otVMEntryCount.
-	freeChuncks do: [ :sz |
+	op := otVMEntryCount * 2.
+	freeChuncks doWithIndex:  [ :sz :s |
 		(sz >= HeaderSize) ifTrue: [ 
-		   self segmentBitsOf: op put: sz.
+		   self segmentBitsOf: op put: s.
 			self countBitsOf: op put: 0.
 			self freeBitOf: op put: 0.
-			self toFreeChunkList: sz add: op.
+			self toFreeChunkList: (sz min: BigSize) add: op.
 			 ].
-		op := op + 1.
+		op := op + 2.
 		].
 	
-	"Mark all the remaining object table entries as free entries"
-	op to: otMaxEntryCount do: [  :i|
+	"Mark all remaining object table entries as free entries
+	and add them to the object table free entry list"
+	op to: otMaxEntryCount*2 by: 2 do: [ :i|
 		self freeBitOf: i put: 1.
 		self toFreePointerListAdd: i.
 		 ]
