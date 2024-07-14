@@ -521,6 +521,9 @@ ObjectMemory >> initialize [
 		0 to: BigSize do: [ :sz | self resetFreeChunkList: sz inSegment: s ]
 	].
 
+	"Set debug to False by default"
+	debug := false.
+
 	"Initialize current segment to zero for now.
 	It must be set to its proper value once the Object Space 
 	from the VM image is loaded  in theObjectMemory"
