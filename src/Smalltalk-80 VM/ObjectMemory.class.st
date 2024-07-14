@@ -571,7 +571,9 @@ ObjectMemory >> integerObjectOf: value [
 
 { #category : #'integer access' }
 ObjectMemory >> integerValueOf: objectPointer [
-   ^ objectPointer / 2
+	"BB code modified"
+   "^ objectPointer / 2"
+	^ objectPointer bitShift: -1.
 ]
 
 { #category : #'integer access' }
