@@ -593,25 +593,224 @@ ObjectMemory >> lastPointerOf: objectPointer [
 ]
 
 { #category : #'vm image loading' }
-ObjectMemory >> loadVMImageFrom: stream [
+ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLength [
+	"Not BB code"
+	"Load object space from VM snapshot. The length is given in 16-bit words"
+	
+	| word heapSpaceRemaining segment offset address objectCount 
+	objectSize space objectPointer remainingSpaceInSegment |
+
+	debug ifTrue: [
+		Transcript show: '>>>>>> Loading Object Space ...'; cr.
+		Transcript show: ' - Object space length (in words): '; nextPutAll: osLength printString;
+			nextPutAll: '   starting at file offset: '; nextPutAll: fileOffset printString; cr; cr.
+		].
+	
+	"Keep track of remaining free space remining in each segment"
+	"At the beginning the memory is empty so all segment spaces are free"
+	heapSpaceRemaining := Array new: HeapSegmentCount withAll: (HeapSpaceStop + 1).
+	
+	"addressRelocation := Dictionary new."
+	segment := FirstHeapSegment. "start loading in first memory segment"
+	offset  := 0. "offset in memory segment"
+	address := 0. "absolute address of object in snapshot"
+	objectCount := 0.
+	
+	2 to: ObjectTableSize-2 by: 2 do: [ :oop |	
+		(self freeBitOf: oop) = 0
+			ifTrue: [ 
+				"Sanity check : a none free entry must have a non zero reference count
+				as the VM snapshot should not contain free chunk entries. (see Xerox
+				Virtual image Booklet p. 3)"
+				self assert: ((self countBitsOf: oop) ~= 0).
+				
+				"All objects in snapshot are stored one after the other as if it
+				was a contiguous 20 bit address space"
+				address := ((self segmentBitsOf: oop) bitShift: 16) + (self locationBitsOf: oop).
+				stream position: (fileOffset + (address * 2)).
+				
+				"read object size"
+				objectSize := self class readUInt16From: stream.
+				debug ifTrue: [
+					Transcript show: '----- Loading object...'; cr;
+						nextPutAll: 'oop: '; nextPutAll: oop printString;
+					  	nextPutAll: ' size: '; nextPutAll: objectSize printString; 
+						nextPutAll: ' address: '; nextPutAll: address printString;
+						nextPutAll: ' snapshot position '; nextPutAll: address printString; cr.
+					].
+		
+				"Oes this object requires an extra word ? (see 
+				HugeSize objects (BB p. 679 and 685)"
+				space := 	((objectSize < HugeSize) or: [(self pointerBitOf: oop) = 0])
+					ifTrue: [ objectSize ]
+					ifFalse: [ objectSize + 1 ].
+				
+				"If there isn't enough space in the current segment to store
+				this object then move to next segment"
+				(space > heapSpaceRemaining at: (segment - FirstHeapSegment + 1))
+				   ifTrue: [ 
+						segment := segment + 1.
+						"Not enough memory space to load the snapshot"
+						(segment > LastHeapSegment) ifTrue: [ ^false ].
+						offset := 0.
+					 	].
+				debug ifTrue: [
+					Transcript show: 'relocated at segment: '; nextPutAll: segment printString; 
+					nextPutAll: ', offset: '; nextPutAll: offset printString; cr.
+					].
+	
+				"Update the Object table entry to reflect the object location in memory"
+				self segmentBitsOf: oop put: segment.
+				self locationBitsOf: oop put: offset.
+			
+			   "Transfer the object from snapshot to memory"
+				"Start with the object size"
+				self sizeBitsOf: oop put: objectSize.
+				
+				"Then the class word"
+			   self classBitsOf: oop put: (self class readUInt16From: stream).
+			
+				"Finally load all remaining object fields"
+				0 to: objectSize - HeaderSize do: [ :i |
+					word := self class readUInt16From: stream.
+					self storeWord: i ofObject: oop withValue: word.
+					].
+				
+				"move to next destination word and update the remaining space"
+				offset := offset + space.
+				remainingSpaceInSegment := heapSpaceRemaining at: (segment - FirstHeapSegment + 1).
+				heapSpaceRemaining at: (segment - FirstHeapSegment + 1) put: (remainingSpaceInSegment - space).
+				].
+		 ].
+	
+	"Build the free chunk lists for each segment"
+	"First initialize the free chunk list entries"
+	FirstHeapSegment to: LastHeapSegment do: [ :s |
+		"Reset all segment entries as if the list was empty"
+		0 to: BigSize do: [ :sz |
+			self resetFreeChunkList: sz inSegment: s
+			]
+		].
+	
+	"Add any free space remaining in segments to the list of free chunks"
+	"Note: there is no need to scan the object table for free chunks entry
+	as the Xerox Virtuel Image Booklet p. 3 says that no free chunks are stored
+	in the VM snapshot"
+	FirstHeapSegment to: LastHeapSegment do: [ :s |
+		remainingSpaceInSegment := heapSpaceRemaining at: (s - FirstHeapSegment + 1).
+		remainingSpaceInSegment >= HeaderSize ifTrue: [ 
+			"offset in segment where free chunk starts"
+			offset := HeapSpaceStop - remainingSpaceInSegment + 1. 
+			debug ifTrue: [
+				Transcript show: 'Creating free chunk of size: '; nextPutAll: remainingSpaceInSegment printString; 
+					nextPutAll: ' in segment: '; nextPutAll: s printString;
+					nextPutAll: ' at offset: '; nextPutAll: offset printString; cr.
+				].
+
+			"BB p. 664, 665 each free chunk uses an object table entry
+			so claim e free entry and link it to the free chunk list"
+			currentSegment := s.
+			objectPointer := self obtainPointer: remainingSpaceInSegment location: offset.
+			self toFreeChunkList: (space min: BigSize) add: objectPointer.
+			 ]
+		 ].
+	
+   "Reset currentSegement to first segment before starting the VM"
+   currentSegment := FirstHeapSegment.
+
+	debug ifTrue: [
+		Transcript show: '>>>>>> Finished loading Object Space ...'; cr; cr.
+		].
+	
+	^ true
+
+]
+
+{ #category : #'vm image loading' }
+ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLength [
+	"Not BB code"
+	"Load object table from VM snapshot. The length is given in 16-bit words"
+	
+	| word |
+
+	"----------------------------------------------------------"
+	"Skip to the object table offset, rounding to the nearest
+	 upper multiple of page length (= 512 bytes)"
+	stream position: fileOffset.
+	debug ifTrue: [ 
+		Transcript show: '>>>>>> Loading Object Table ...'; cr.
+		Transcript show: ' - Object table entries to load: '; nextPutAll: (otLength / 2) printString; cr; cr.
+		].
+
+	0 to: (otLength - 2) by: 2 do: [ :i |
+		"read first 16-bit words of the object table entry"
+		word := self class readUInt16From: stream.
+		self ot: i put: word.
+		
+		debug ifTrue: [ 
+			Transcript show: '----------------------------'; cr; 
+		   		nextPutAll: 'oop: '; nextPutAll: i printString;
+				nextPutAll: ' count: '; nextPutAll: (self countBitsOf: i) printString;
+				nextPutAll: ' o: '; nextPutAll: (self oddBitOf: i)  printString;
+				nextPutAll: ' p: '; nextPutAll: (self pointerBitOf: i) printString;
+				nextPutAll: ' f: '; nextPutAll: (self freeBitOf: i) printString;
+				nextPutAll: ' segment: '; nextPutAll: (self segmentBitsOf: i) printString;
+				nextPutAll: ' (value: '; nextPutAll: word printString; nextPutAll: ')';
+		 	 	cr.
+				].
+
+		"read second 16 bit word - location bits"
+		"Note: the location word will be adjusted when object space is loaded"
+		word := self class readUInt16From: stream.
+		self locationBitsOf: i put: word.
+		debug ifTrue: [ 
+			Transcript show: 'location: '; nextPutAll: word printString; cr.
+			].
+		].
+
+	"Mark all remaining entries as free"
+	otLength to: ObjectTableSize-2 by: 2 do: [ :i |
+		self ot: i put: 0.
+		self freeBitOf: i put: 1.
+		self locationBitsOf: i put: 0.
+		].
+	
+	"Build the object table free entry list"
+	"Skip the oop 0 entry as it is documented as an invalid 
+	entry any way"
+	self headOfFreePointerListPut: NonPointer.		
+	2 to: ObjectTableSize-2 by: 2 do: [ :i |
+		((self freeBitOf: i) = 1) 
+			ifTrue: [ self toFreePointerListAdd: i ]
+		].
+	
+	debug ifTrue: [ 
+		Transcript show: '<<<<<<< Finshed loading Object Table.'; cr; cr.
+		].
+
+	^ true
+	
+
+]
+
+{ #category : #'vm image loading' }
+ObjectMemory >> loadWithSnapshot: stream debug: onOff [
 	"Not BB code"
 
 	"Load ST80 image from stream
-	 **IMPORTANT NOTE** : the loaded image file are assumed to follow 
+	 **IMPORTANT NOTE** : the loaded image file is assumed to follow 
 	 the LSB format. The original image file from the Xerox Parc ST80 tape
-	 follows the MSB format and must reformated before it can be used here"
+	 follows the MSB format and must be reformated before it can be used here"
 
    | objectSpaceLength objectTableLength vmImageFormat osFileOffset 
-     otFileOffset pageLength  w size segment offset spaceLeft freeChuncks
-	  addressRelocation otVMEntryCount otMaxEntryCount op objectCount
-	  address |
-	
-	Transcript clear.
+     otFileOffset pageLength  |
+
+	debug := onOff.
 
 	"Page length in bytes. See Xerox Virtual Image Booklet p. 2"
 	pageLength := 512.
 	
-	Transcript show: '================= Reading VM Image preamble =================='; cr.
+	Transcript show: '>>>>>>>> Reading VM Snapshot preamble...'; cr.
 	"See Xerox Virtual Image Booklet p. 2 for details on VM image file format"
 	"First 4 bytes is the Object Space length  and the next 4 bytes
 	are the Object Table Length (both length are in 16-bit word)"
@@ -630,121 +829,14 @@ ObjectMemory >> loadVMImageFrom: stream [
 	otFileOffset := osFileOffset + (((objectSpaceLength * 2 + pageLength - 1) // pageLength) * pageLength).
 	Transcript show: ' - Object space offset: '; nextPutAll: osFileOffset printString; cr.
 	Transcript show: ' - Object table offset: '; nextPutAll: otFileOffset printString; cr.
+
+	(self loadObjectTableWithSnapshot: stream at: otFileOffset length: objectTableLength )
+		ifFalse: [ Exception signal: 'Error loading object table' ].
+	
+	(self loadObjectSpaceWithSnapshot: stream at: osFileOffset length: objectSpaceLength )
+		ifFalse: [ Exception signal: 'Error loading object space' ].
 		
-	"----------------------------------------------------------"
-	"Skip to position 512. Object space starts right after that"
-	stream position: osFileOffset.
-	
-	
-	Transcript show: '================= Loading objects in memory =================='; cr; cr.
-	freeChuncks := Array new: HeapSegmentCount withAll: HeapSpaceStop.
-	addressRelocation := Dictionary new.
-	segment := 0.
-	offset  := 0. "offset in segment"
-	address := 0. "absolute address in memory"
-	objectCount := 0.
-	[(size := (self class readUInt16From: stream)) > 0] whileTrue: [ 
-		Transcript show: '------------- Loading object ----------------'; cr.
-		Transcript show: 'size: '; nextPutAll: size printString; nextPutAll: ' file offset: '; nextPutAll: address printString; cr.
-		
-		"check if there is enough speace left in the segment 
-		to place this object..."
-		((spaceLeft := HeapSpaceStop - offset + 1) < size)
-			ifTrue: [ 
-				"if not, ear mark the remaining memory chunk as free space
-				 and store this object in the next segment"
-				freeChuncks at: segment+1 put: spaceLeft.
-				segment := segment + 1.
-				offset := 0.
-				].
-			
-			Transcript show: 'relocated at segment: '; nextPutAll: segment printString; nextPutAll: ', offset: '; nextPutAll: offset printString; cr.
-			
-			"Keep track of object relocation"
-			addressRelocation at: address put: (Array with: segment with: offset).
-			
-			"Copy all object fields in memory"
-   			wordMemory segment: segment word: offset put: size.
-   			offset := offset + 1.
-			(size - 1) timesRepeat: [
-				wordMemory segment: segment word: offset put: (self class readUInt16From: stream).
-	  	 		offset := offset + 1.
-   				].
-			address := address + size.
-			objectCount := objectCount + 1.
-		].
-
-		Transcript show: ' - Total objects loaded: '; nextPutAll: objectCount printString; cr.
-		Transcript show: '------------- Loading objects done ----------------'; cr; cr.
-
-	"----------------------------------------------------------"
-	"Skip to the object table offset, rounding to the nearest
-	 upper multiple of page length (= 512 bytes)"
-	stream position: otFileOffset.
-		
-	"Load all object table entries and rebuild both
-	free chunck list and free entry list"
-	otVMEntryCount  := objectTableLength / 2.
-	otMaxEntryCount := ObjectTableSize / 2.
-
-	
-	Transcript show: '================= Loading object table entries =================='; cr.
-	Transcript show: '>>>>> Object table entries to load: '; nextPutAll: otVMEntryCount printString; cr; cr.
-	0 to: (objectTableLength - 2) by: 2 do: [ :i |
-		"read first 16-bit words of the object table entry"
-		w := self class readUInt16From: stream.
-		self ot: i put: w.
-		Transcript show: '----------------------------'; cr; 
-		   nextPutAll: 'oop: '; nextPutAll: i printString;
-			nextPutAll: ' count: '; nextPutAll: (self countBitsOf: i) printString;
-			nextPutAll: ' o: '; nextPutAll: (self oddBitOf: i)  printString;
-			nextPutAll: ' p: '; nextPutAll: (self pointerBitOf: i) printString;
-			nextPutAll: ' f: '; nextPutAll: (self freeBitOf: i) printString;
-			nextPutAll: ' segment: '; nextPutAll: (self segmentBitsOf: i) printString;
-			nextPutAll: ' (value: '; nextPutAll: w printString; nextPutAll: ')';
-		   cr.
-
-		"read second 16 bit word - location bits"
-		"then adjust both segment and location based on relocation info"
-		w := self class readUInt16From: stream.
-		address := ((self segmentBitsOf: i) bitShift: 16) + w.
-		Transcript show: 'location: '; nextPutAll: w printString; cr.
-		Transcript show: 'address '; nextPutAll: address printString.
-		self segmentBitsOf:  i put: ((addressRelocation at: address) at: 1).
-		self locationBitsOf: i put: ((addressRelocation at: address) at: 2).
-		Transcript show: '  -> new segment:'; nextPutAll: (self segmentBitsOf: i) printString;
-		   nextPutAll: ', location: '; nextPutAll: (self locationBitsOf: i) printString;cr.
-		
-		"See if this entry must be added either to the 
-		free object table entry list or to the free chunk list"				
-		((self freeBitOf: i) = 1) 
-			ifTrue: [ self toFreePointerListAdd: i ]
-			ifFalse: [ 
-				((self countBitsOf: i) = 0) 
-				ifTrue: [ self toFreeChunkList: ((self sizeBitsOf: i) min: BigSize) add: i ]
-			]
-		].
-
-	"Add a new free chunk entry in the table for each end of
-	segment free space"
-	op := otVMEntryCount * 2.
-	freeChuncks doWithIndex:  [ :sz :s |
-		(sz >= HeaderSize) ifTrue: [ 
-		   self segmentBitsOf: op put: s.
-			self countBitsOf: op put: 0.
-			self freeBitOf: op put: 0.
-			self toFreeChunkList: (sz min: BigSize) add: op.
-			 ].
-		op := op + 2.
-		].
-	
-	"Mark all remaining object table entries as free entries
-	and add them to the object table free entry list"
-	op to: otMaxEntryCount*2 by: 2 do: [ :i|
-		self freeBitOf: i put: 1.
-		self toFreePointerListAdd: i.
-		 ]
-	
+	^ true
 ]
 
 { #category : #'private - object table entries' }

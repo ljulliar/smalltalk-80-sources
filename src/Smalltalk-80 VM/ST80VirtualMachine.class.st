@@ -19,21 +19,17 @@ Class {
 		'vmSourcesFile',
 		'vmChangesFile',
 		'vmImagePath',
-		'objectMemory'
+		'interpreter'
 	],
 	#category : #'Smalltalk-80 VM'
 }
 
-{ #category : #actions }
-ST80VirtualMachine >> init [
-	"load the VirtualMachine image file in memory"
-
-]
-
 { #category : #initialization }
 ST80VirtualMachine >> initialize [
+   "Not BB code"
 	"Initialize a new ST80 VM"
-
+	
+	| snapshot |
 	"Initial Screen dimensions can be found
 	 in the Xerox ST80 Virtual Image Booklet p. 3"
 	displayWidth := 640.
@@ -43,27 +39,12 @@ ST80VirtualMachine >> initialize [
 	vmSourcesFile := vmImagePath, 'Smalltalk-80.sources'.
 	vmChangesFile := vmImagePath, 'Smalltalk-80.changes'.
 	
-	objectMemory := ObjectMemory new.
-   self load; run
-
-]
-
-{ #category : #actions }
-ST80VirtualMachine >> load [
-	"load the VM files
-	 IMPORTANT NOTE : the loaded image file are assumed to follow 
-	 the LSB format. The original image file from the Xerox Parc ST80 tape
-	 follows the MSB format and must reformated before it can be used here"
+	"Open snapshot stream"
+	snapshot := vmImageFile asFileReference binaryReadStream.
+	interpreter := Interpreter withSnapshot: snapshot debug: true.
 	
-	"Load the image file in memory "
-	objectMemory loadVMImageFrom: (vmImageFile asFileReference binaryReadStream).
+	"run the Smalltalk-80 VM loaded in memory"
+	interpreter interpret.
 
 
-]
-
-{ #category : #running }
-ST80VirtualMachine >> run [
-	"run a Smalltalk-80 VM"
-
-	
 ]
