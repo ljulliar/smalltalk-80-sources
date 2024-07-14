@@ -905,19 +905,19 @@ message dictionary is shown in Figure 27.7 p 587 (BB 587)"
 { #category : #initialization }
 Interpreter >> initializeContextIndices [
 	"A BlockContext represents a block encountered in a CompiledMethod. 
-A BlockContext refers to the MethodContext whose CompiledMethod contained the block 
-it represents. This is called the BlockContext's home. 
-Figure 27.6 p 582 of the Blue Book shows a BlockContext and its home. The indices 
-used to access the fields of contexts are initialized here. (BB 581)"
+	A BlockContext refers to the MethodContext whose CompiledMethod contained the block 
+	it represents. This is called the BlockContext's home. 
+	Figure 27.6 p 582 of the Blue Book shows a BlockContext and its home. The indices 
+	used to access the fields of contexts are initialized here. (BB 581)"
 
 	"Class MethodContext"
-
 	SenderIndex := 0.
 	InstructionPointerIndex := 1.
 	StackPointerIndex := 2.
 	MethodIndex       := 3.
 	ReceiverIndex     := 5.
 	TempFrameStart    := 6.
+
 	"Class BlockContext"
 	CallerIndex := 0.
 	BlockArgumentCountIndex := 3.
