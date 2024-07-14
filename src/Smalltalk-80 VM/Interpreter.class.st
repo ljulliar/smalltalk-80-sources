@@ -1357,6 +1357,14 @@ Interpreter >> lowByteOf: anInteger [
 	^ self extractBits: 8 to: 15 of: anInteger
 ]
 
+{ #category : #accessing }
+Interpreter >> memory [
+	"Not BB code"
+	"Accessor used by the VM image loader"
+
+	^ memory
+]
+
 { #category : #'compiled method header access' }
 Interpreter >> methodClassOf: methodPointer [
    "Any CompiledMethod that sends a superclass message (i.e., a message to super) or 
