@@ -151,16 +151,21 @@ ObjectMemory >> allocate: size odd: oddBit pointer: pointerBit extra: extraWord 
 { #category : #'private - allocation' }
 ObjectMemory >> allocateChunk: size [
 	"Allocate a chunk of memory and Attempts a marking collection if compaction of all segments has failed to yield enough space to satisfy an allocation request."
-
+	"BB code adapted for debug code"
 	| objectPointer |
 	objectPointer := self attemptToAllocateChunk: size.
 	objectPointer isNil
-		ifFalse: [ ^ objectPointer ].
-	self reclaimInaccessibleObjects.	"garbage collect and try again"
-	objectPointer := self attemptToAllocateChunk: size.
-	objectPointer isNil
-		ifFalse: [ ^ objectPointer ].
-	self outOfMemoryError	"give up"
+		ifTrue: [
+			self reclaimInaccessibleObjects.	"garbage collect and try again"
+			objectPointer := self attemptToAllocateChunk: size.
+			objectPointer isNil
+			ifTrue: [ self outOfMemoryError ].	"give up" 
+			].
+	debug ifTrue: [ 
+		Transcript show: 'allocating oop: '; nextPutAll: objectPointer printString; cr.
+		 ].
+	^ objectPointer.
+
 ]
 
 { #category : #'private - allocation' }
@@ -322,8 +327,14 @@ ObjectMemory >> decreaseReferencesTo: objectPointer [
 { #category : #'byte access' }
 ObjectMemory >> fetchByte: byteIndex ofObject: objectPointer [
 	"Return the 8 bit numerical value found in the byte numbered byteIndex of the object associated with ObjectPointer"
-
-	^ self heapChunkOf: objectPointer byte: HeaderSize * 2 + byteIndex
+	|value|
+	value := self heapChunkOf: objectPointer byte: (HeaderSize * 2 + byteIndex).
+	debug ifTrue: [ 
+		Transcript show: objectPointer printString; nextPutAll: ' byte '; 
+			nextPutAll: byteIndex printString; nextPutAll: ' = ';
+			nextPutAll: value printString; cr.
+		 ].
+	^ value
 ]
 
 { #category : #'length access' }
@@ -341,15 +352,30 @@ ObjectMemory >> fetchClassOf: objectPointer [
 
 { #category : #'object pointer access' }
 ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
-	"Return the object pointer found in the field numbered fieldIndex of the object associated with ObjectPointer"
-	^self heapChunkOf: objectPointer word: HeaderSize + fieldIndex
+	"Return the object pointer found in the field numbered 
+	fieldIndex of the object associated with ObjectPointer"
+	|value|
+	self assert: (fieldIndex >= 0).
+	value := self heapChunkOf: objectPointer word: (HeaderSize + fieldIndex).
+	debug ifTrue: [ 
+		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
+			nextPutAll: fieldIndex printString; nextPutAll: ' = ';
+			nextPutAll: value printString; cr.
+		 ].
+	^ value
 ]
 
 { #category : #'word access' }
 ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	"Return the 16 bit numerical value found in the word numbered fieldIndex of the object associated with ObjectPointer"
-
-	^ self heapChunkOf: objectPointer word: HeaderSize + wordIndex
+	|value|
+	value := self heapChunkOf: objectPointer word: HeaderSize + wordIndex.
+	debug ifTrue: [ 
+		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
+			nextPutAll: wordIndex printString; nextPutAll: ' = ';
+			nextPutAll: value printString; cr.
+		 ].
+	^ value
 ]
 
 { #category : #'length access' }
@@ -458,8 +484,8 @@ ObjectMemory >> headOfFreePointerListPut: objectPointer [
 ObjectMemory >> heapChunkOf: objectPointer byte: offset [
 	^ wordMemory
 		segment: (self segmentBitsOf: objectPointer)
-		word: (self locationBitsOf: objectPointer) + (offset // 2)
-		byte: offset \\ 2
+		word: ((self locationBitsOf: objectPointer) + (offset // 2))
+		byte: (offset \\ 2)
 ]
 
 { #category : #'private - object table entries' }
@@ -1119,11 +1145,18 @@ ObjectMemory >> storeByte: byteIndex ofObject: objectPointer withValue: valueByt
 { #category : #'object pointer access' }
 ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valuePointer [
 	"Store the object pointer valuePointer in the field numbered fieldIndex of the object associated with ObjectPointer"
-	| chunkIndex |
+	| chunkIndex value |
 	chunkIndex := HeaderSize + fieldIndex.
 	self countUp: valuePointer.
 	self countDown: (self heapChunkOf: objectPointer word: chunkIndex).
-	^self heapChunkOf: objectPointer word: chunkIndex put: valuePointer
+	value := self heapChunkOf: objectPointer word: chunkIndex put: valuePointer.
+
+	debug ifTrue: [ 
+		Transcript show: objectPointer printString; nextPutAll: ' pointer '; 
+			nextPutAll: chunkIndex printString; nextPutAll: ' <- ';
+			nextPutAll: value printString; cr.
+		 ].
+	^ value
 ]
 
 { #category : #'word access' }

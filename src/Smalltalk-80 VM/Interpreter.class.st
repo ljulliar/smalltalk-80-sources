@@ -492,6 +492,12 @@ Interpreter >> dispatchOnThisBytecode [
    "Not all of the bytecodes of one type are contiguous, so the main dispatch has
     seven branches each of which calls one of four routines (stackBytecode, jumpBytecode,
     sendBytecode, or returnBytecode) (BB 595)"
+
+	debug ifTrue: [ 
+		Transcript show: 'Bytecode '; nextPutAll: '<'; 
+			nextPutAll: currentBytecode printString; nextPutAll: '> '.
+		].
+	
    (currentBytecode between: 0 and: 119)   ifTrue: [^self stackBytecode].
    (currentBytecode between: 120 and: 127) ifTrue: [^self returnBytecode].
    (currentBytecode between: 128 and: 130) ifTrue: [^self stackBytecode].
@@ -564,9 +570,18 @@ Interpreter >> doubleExtendedSendBytecode [
     first is the number of arguments and the second is the index of the selector 
     in the literal frame. (BB 607)"
 
-   | count selector |
+   | count selector selBits |
    count := self fetchByte.
-   selector := self literal: self fetchByte.
+   selBits := self fetchByte.
+   selector := self literal: selBits.
+	debug ifTrue: [ 
+		Transcript show: 'Send Literal Selector #'; 
+			nextPutAll: selBits printString; 
+			nextPutAll: ' With '; 
+			nextPutAll: count printString;
+			nextPutAll: ' Arguments';		 
+			cr.
+		].
    self sendSelector: selector
         argumentCount: count
 ]
@@ -583,9 +598,19 @@ Interpreter >> doubleExtendedSuperBytecode [
     start the message lookup in the superclass of the class in which the 
     current CompiledMethod was found. (BB 607)"
 
-	| methodClass |
+	| methodClass selBits |
 	argumentCount := self fetchByte.
-	messageSelector := self literal: self fetchByte.
+	selBits := self fetchByte.
+	messageSelector := self literal: selBits.
+	debug ifTrue: [ 
+		Transcript show: 'Send Literal Selector #'; 
+			nextPutAll: selBits printString; 
+			nextPutAll: ' To Super Class With '; 
+			nextPutAll: argumentCount printString;
+			nextPutAll: 'Arguments';		 
+			cr.
+		].
+
 	methodClass := self methodClassOf: method.
 	self sendSelectorToClass: (self superclassOf: methodClass)
 ]
@@ -594,7 +619,9 @@ Interpreter >> doubleExtendedSuperBytecode [
 Interpreter >> duplicateTopBytecode [
 	"The duplicateTopBytecode routine pushes another copy of the object pointer
     on the top of the stack. (BB 599)"
-
+	debug ifTrue: [ 
+		Transcript show: 'Duplicate Stack Top ' ; cr.
+	   ].
 	^ self push: self stackTop
 ]
 
@@ -621,6 +648,12 @@ Interpreter >> extendedPushBytecode [
 	descriptor := self fetchByte.
 	variableType := self extractBits: 8 to: 9 of: descriptor.
 	variableIndex := self extractBits: 10 to: 15 of: descriptor.
+	debug ifTrue: [ 
+		Transcript show:'(Extended) Push '; 
+		nextPutAll: (ExtendedPushVariableTypes at: (variableType + 1)) printString;
+		nextPutAll: '#'; nextPutAll: variableIndex printString; cr.
+	   ].
+	
 	variableType = 0 ifTrue: [ ^ self pushReceiverVariable: variableIndex ].
 	variableType = 1 ifTrue: [ ^ self pushTemporaryVariable: variableIndex ].
 	variableType = 2 ifTrue: [ ^ self pushLiteralConstant: variableIndex ].
@@ -659,6 +692,13 @@ Interpreter >> extendedStoreBytecode [
 	descriptor := self fetchByte.
 	variableType := self extractBits: 8 to: 9 of: descriptor.
 	variableIndex := self extractBits: 10 to: 15 of: descriptor.
+	debug ifTrue: [ 
+		Transcript show: ((currentBytecode = 129) ifTrue: [ '(Extended) Store ' ]);
+		nextPutAll: ((currentBytecode = 130) ifTrue: [ '(Extended) Pop and Store ' ]); 
+		nextPutAll: (ExtendedStoreVariableTypes at: (variableType + 1)) printString;
+		nextPutAll: '#'; nextPutAll: variableIndex printString; cr.
+	   ].
+	
 	variableType = 0 ifTrue: 
 	   [ ^ memory storePointer: variableIndex
 			        ofObject: receiver
@@ -714,32 +754,31 @@ Interpreter >> fetchByte [
 
 { #category : #contexts }
 Interpreter >> fetchContextRegisters [
-"The context that represents the CompiledMethod or block currently being executed is called the active context. 
-The interpreter caches in its registers the contents of the parts of the active context it uses most often. 
-These Context-related Registers of the Interpreter are:
+	"The context that represents the CompiledMethod or block currently being executed is called the active context. 
+	The interpreter caches in its registers the contents of the parts of the active context it uses most often. 
+	These Context-related Registers of the Interpreter are:
  
-- activeContext	       This is the active context itself. It is either a MethodContext or a BlockContext. 
-- homeContext	       If the active context is a MethodContext, the home context is the same context. If 
-	                   the active context is a BlockContext, the home context is the contents of the home
-	                   field of the active context. This will always be a MethodContext. 
-- methodThis          is the CompiledMethod that contains the bytecodes the interpreter is executing. 
-- receiver	          This is the object that received the message that invoked the home context's method. 
-- instructionPointer  This is the byte index of the next bytecode of the method to be executed. 
-- stackPointer        This is the index of the field of the active context containing the top of the stack.
+	- activeContext	       This is the active context itself. It is either a MethodContext or a BlockContext. 
+	- homeContext	       If the active context is a MethodContext, the home context is the same context. If 
+		                   the active context is a BlockContext, the home context is the contents of the home
+	 	                  field of the active context. This will always be a MethodContext. 
+	- methodThis          is the CompiledMethod that contains the bytecodes the interpreter is executing. 
+	- receiver	          This is the object that received the message that invoked the home context's method. 
+	- instructionPointer  This is the byte index of the next bytecode of the method to be executed. 
+	- stackPointer        This is the index of the field of the active context containing the top of the stack.
     
-Whenever the active context changes (when a new CompiledMethod is invoked, when a CompiledMethod returns
-or when a process switch occurs), all of these registers must be updated using this routine.
-(BB 583)"
+	Whenever the active context changes (when a new CompiledMethod is invoked, when a CompiledMethod returns
+	or when a process switch occurs), all of these registers must be updated using this routine.
+	(BB 583)"
 
-(self isBlockContext: activeContext)
-ifTrue: [homeContext := memory fetchPointer: HomeIndex
-       ofObject: activeContext]
-ifFalse: [homeContext := activeContext].
-receiver := memory fetchPointer: ReceiverIndex ofObject: homeContext.
-method := memory fetchPointer: MethodIndex
-         ofObject: homeContext.
-instructionPointer := (self instructionPointerOfContext: activeContext) - 1.
-stackPointer := (self stackPointerOfContext: activeContext) + TempFrameStart - 1
+	(self isBlockContext: activeContext)
+		ifTrue: [homeContext := memory fetchPointer: HomeIndex ofObject: activeContext]
+		ifFalse: [homeContext := activeContext ].
+		
+	receiver := memory fetchPointer: ReceiverIndex ofObject: homeContext.
+	method := memory fetchPointer: MethodIndex ofObject: homeContext.
+	instructionPointer := (self instructionPointerOfContext: activeContext) - 1.
+	stackPointer := (self stackPointerOfContext: activeContext) + TempFrameStart - 1
 ]
 
 { #category : #'field access' }
@@ -1274,11 +1313,29 @@ Interpreter >> longConditionalJump [
 	offset := self extractBits: 14 to: 15 
 	               of: currentBytecode.
 	offset := offset * 256 + self fetchByte.
+
+	debug ifTrue: [ 
+		Transcript show: 'Pop and Jump On  '; 
+			nextPutAll: offset printString; 	 
+			cr.
+		].			
 	(currentBytecode between: 168 and: 171)
-		ifTrue: [ ^ self jumpIf: TruePointer 
+		ifTrue: [ 
+			debug ifTrue: [ 
+				Transcript show: 'True  '; 
+				nextPutAll: offset printString; 	 
+				cr.
+				].	
+			^ self jumpIf: TruePointer 
 			              by: offset ].
 	(currentBytecode between: 172 and: 176)
-		ifTrue: [ ^ self jumpIf: FalsePointer 
+		ifTrue: [ 
+			debug ifTrue: [ 
+				Transcript show: 'False  '; 
+				nextPutAll: offset printString; 	 
+				cr.
+				].
+			^ self jumpIf: FalsePointer 
 			              by: offset ]
 ]
 
@@ -1290,10 +1347,16 @@ Interpreter >> longUnconditionalJump [
    provides the low order eight bits of the displacement. So long unconditional jumps 
    can jump up to 1023 forward and 1024 back. (BB 602)"
 
-| offset |
-offset := self extractBits: 13 to: 15
-of: currentBytecode.
-self jump: offset - 4 * 256 + self fetchByte
+	| offset |
+	offset := self extractBits: 13 to: 15
+ 						of: currentBytecode.
+	offset := (offset - 4) * 256 + self fetchByte.
+	debug ifTrue: [ 
+		Transcript show: 'Jump  '; 
+			nextPutAll: offset printString; 	 
+			cr.
+		].						
+	self jump: offset
 ]
 
 { #category : #classes }
@@ -1459,6 +1522,9 @@ Interpreter >> popStack [
 { #category : #'stack bytecodes' }
 Interpreter >> popStackBytecode [
    "Removes the top object pointer from the stack without doing anything else with it (BB 601)"
+	debug ifTrue: [ 
+		Transcript show: 'Pop Stack Top ' ; cr.
+	   ].
    self popStack
 ]
 
@@ -2808,7 +2874,9 @@ Interpreter >> push: object [
 Interpreter >> pushActiveContextBytecode [
 	"Push a pointer to the active context itself. This corresponds to the use 
    of thisContext in a Smalltalk method. (BB 600)"
-
+	debug ifTrue: [ 
+		Transcript show: 'Push Active Context' ; cr.
+	   ].
 	^ self push: activeContext
 ]
 
@@ -2817,6 +2885,10 @@ Interpreter >> pushConstantBytecode [
    "The pushConstantBytecode routine pushes one of seven constant object 
    pointers (true, false, nil, -1, 0, 1, or 2). (BB 600)"
 
+	debug ifTrue: [ 
+		Transcript show: 'Push Receiver '; 
+		nextPutAll: (PushBytecodeReceivers at: (currentBytecode - 112)) printString; cr.
+	   ].
    currentBytecode = 113 ifTrue: [^self push: TruePointer].
    currentBytecode = 114 ifTrue: [^self push: FalsePointer].
    currentBytecode = 115 ifTrue: [^self push: NilPointer].
@@ -2863,6 +2935,10 @@ Interpreter >> pushLiteralConstantBytecode [
 
 	| fieldIndex |
 	fieldIndex := self extractBits: 11 to: 15 of: currentBytecode.
+	debug ifTrue: [ 
+	Transcript show: 'Push Literal Constant #'; 
+		nextPutAll: fieldIndex printString; cr.
+	   ].
 	self pushLiteralConstant: fieldIndex
 ]
 
@@ -2881,6 +2957,10 @@ Interpreter >> pushLiteralVariableBytecode [
 
 	| fieldIndex |
 	fieldIndex := self extractBits: 11 to: 15 of: currentBytecode.
+	debug ifTrue: [ 
+	Transcript show: 'Push Literal Variable #'; 
+		nextPutAll: fieldIndex printString; cr.
+	   ].
 	self pushLiteralVariable: fieldIndex
 ]
 
@@ -2888,7 +2968,10 @@ Interpreter >> pushLiteralVariableBytecode [
 Interpreter >> pushReceiverBytecode [
 	"This routine pushes a pointer to the active context's receiver. 
    This corresponds to the use of self or super in a Smalltalk method. (BB 599)"
-
+	debug ifTrue: [ 
+		Transcript show: 'Push Receiver '; 
+		  nextPutAll: receiver printString; cr.
+	   ].
 	^ self push: receiver
 ]
 
@@ -2907,7 +2990,11 @@ Interpreter >> pushReceiverVariableBytecode [
    | fieldIndex |
    fieldIndex := self extractBits: 12 to: 15
                       of: currentBytecode.
-   self pushReceiverVariable: fieldIndex
+	debug ifTrue: [ 
+		Transcript show: 'Push Receiver Variable #'; 
+			nextPutAll: fieldIndex printString; cr.
+		 ].
+	self pushReceiverVariable: fieldIndex
 ]
 
 { #category : #'stack bytecodes' }
@@ -2923,6 +3010,10 @@ Interpreter >> pushTemporaryVariableBytecode [
 
 	| fieldIndex |
 	fieldIndex := self extractBits: 12 to: 15 of: currentBytecode.
+	debug ifTrue: [ 
+	Transcript show: 'Push Temporary Variable #'; 
+		nextPutAll: fieldIndex printString; cr.
+	   ].
 	self pushTemporaryVariable: fieldIndex
 ]
 
@@ -3010,6 +3101,26 @@ Interpreter >> returnBytecode [
    values returned from the five return bytecodes are: the receiver (self), 
    true, false, nil, or the top of the stack. The last return bytecode returns
    the top of the stack as the value of a block. (BB 608)"
+
+	debug ifTrue: [ 
+		(currentBytecode = 120) 
+			ifTrue: [ 
+				Transcript nextPutAll: 'Return '; 
+					nextPutAll: receiver printString; cr.
+		 		]
+			ifFalse: [ 
+				(currentBytecode between: 121 and: 123) 
+					ifTrue: [ 
+						Transcript nextPutAll: 'Return '; 
+							nextPutAll: (ReturnBytecodeTypes at: (currentBytecode - 120)) printString; cr.
+		 				]
+					ifFalse: [ "Bytecode 124, 125"
+						Transcript nextPutAll: 'Return Top Stack from '; 
+							nextPutAll: (ReturnTopStackTypes at: (currentBytecode - 123)) printString; cr.
+		 				]
+					]
+			].			
+				 
 
 	currentBytecode = 120
 		ifTrue: [ ^ self returnValue: receiver to: self sender ].
@@ -3118,12 +3229,23 @@ Interpreter >> sendLiteralSelectorBytecode [
     the literal frame. Both the selector index and the argument count are 
     encoded in the bits of the bytecode. (BB 604)"
 
-	| selector |
-	selector := self literal: (self extractBits: 12 to: 15 
-	                                of: currentBytecode).
+	| selector literalIndex argCount|
+	literalIndex := self extractBits: 12 to: 15 
+	                     of: currentBytecode.
+	argCount := (self extractBits: 10 to: 11 
+		              of: currentBytecode) - 1.
+	debug ifTrue: [ 
+		Transcript show: 'Send Literal Selector #'; 
+			nextPutAll: literalIndex  printString; 
+			nextPutAll: ' With ';
+			nextPutAll: argCount printString;
+			nextPutAll: ' Arguments'; 			 
+			cr.
+		].
+	
+	selector := self literal: literalIndex.
 	self sendSelector: selector
-		  argumentCount: (self extractBits: 10 to: 11 
-		                       of: currentBytecode) - 1
+		  argumentCount: argCount
 ]
 
 { #category : #'stack bytecodes' }
@@ -3171,6 +3293,21 @@ Interpreter >> sendSpecialSelectorBytecode [
    routine will be described in the next chapter. (BB 608)"
 
 	| selectorIndex selector count |
+	debug ifTrue: [ 
+
+		(currentBytecode between: 176 and: 191 )
+			ifTrue: [
+				Transcript show: 'Send Arithmetic Message #'; 
+					nextPutAll: (currentBytecode - 176) printString; 
+					cr.
+					]
+			ifFalse: [ "Bytecode 192-207"
+				Transcript show: 'Send Special Message #'; 
+					nextPutAll: (currentBytecode - 192) printString; 
+					cr.
+					]
+			].
+
 	self specialSelectorPrimitiveResponse
 		ifFalse: [ selectorIndex := (currentBytecode - 176) * 2.
 			selector := memory
@@ -3205,6 +3342,11 @@ Interpreter >> shortConditionalJump [
 
 	| offset |
 	offset := self extractBits: 13 to: 15 of: currentBytecode.
+	debug ifTrue: [ 
+		Transcript show: 'Pop and Jump On False '; 
+			nextPutAll: (offset+1) printString; 	 
+			cr.
+		].
 	self jumpIf: FalsePointer by: offset + 1
 ]
 
@@ -3214,6 +3356,11 @@ Interpreter >> shortUnconditionalJump [
 
 	| offset |
 	offset := self extractBits: 13 to: 15 of: currentBytecode.
+	debug ifTrue: [ 
+		Transcript show: 'Jump '; 
+			nextPutAll: (offset+1) printString; 	 
+			cr.
+		].
 	self jump: offset + 1
 ]
 
@@ -3232,13 +3379,23 @@ Interpreter >> singleExtendedSendBytecode [
   the number of arguments in its high order three bits and selector index 
   in the low order five bits. (BB 606)"
 
-   | descriptor selectorIndex |
+   | descriptor selectorIndex argCount |
    descriptor := self fetchByte.
    selectorIndex := self extractBits: 11 to: 15
                          of: descriptor.
+	argCount := self extractBits: 8 to: 10
+                         of: descriptor.
+	debug ifTrue: [ 
+		Transcript show: 'Send Literal Selector #'; 
+			nextPutAll: selectorIndex printString; 
+			nextPutAll: ' With '; 
+			nextPutAll: argumentCount printString;
+			nextPutAll: ' Arguments'; 			 
+			cr.
+		].
+
   self sendSelector: (self literal: selectorIndex)
-       argumentCount: (self extractBits: 8 to: 10
-                            of: descriptor)
+      argumentCount: argCount
 ]
 
 { #category : #'send bytecodes' }
@@ -3259,6 +3416,15 @@ Interpreter >> singleExtendedSuperBytecode [
 	                      of: descriptor.
 	selectorIndex := self extractBits: 11 to: 15 
 	                      of: descriptor.
+	debug ifTrue: [ 
+		Transcript show: 'Send Literal Selector #'; 
+			nextPutAll: selectorIndex printString; 
+			nextPutAll: ' To Super Class With '; 
+			nextPutAll: argumentCount printString;
+			nextPutAll: ' Arguments';		 
+			cr.
+		].
+
 	messageSelector := self literal: selectorIndex.
 	methodClass := self methodClassOf: method.
 	self sendSelectorToClass: (self superclassOf: methodClass)
@@ -3364,6 +3530,10 @@ Interpreter >> storeAndPopReceiverVariableBytecode [
    | variableIndex |
    variableIndex := self extractBits: 13 to: 15
                          of: currentBytecode.
+	debug ifTrue: [ 
+		Transcript show: 'Pop and Store Receiver Variable #'; 
+			nextPutAll: variableIndex printString; cr.
+	   ].
    memory storePointer: variableIndex
           ofObject: receiver
           withValue: self popStack
@@ -3379,6 +3549,10 @@ Interpreter >> storeAndPopTemporaryVariableBytecode [
 	| variableIndex |
 	variableIndex := self extractBits: 13 to: 15 
 	                      of: currentBytecode.
+	debug ifTrue: [ 
+		Transcript show: 'Pop and Store Temporary Variable #'; 
+			nextPutAll: variableIndex printString; cr.
+	   	].	
 	memory storePointer: variableIndex + TempFrameStart
 		    ofObject: homeContext
           withValue: self popStack
