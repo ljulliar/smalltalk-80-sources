@@ -62,9 +62,7 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
 	"Not BB code. For bit index see BB p. 657"
-	|mask word|
-	
-	"Some preliminary sanity checks"
+	| mask word |
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
 	
