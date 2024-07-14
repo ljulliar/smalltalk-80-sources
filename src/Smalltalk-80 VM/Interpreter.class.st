@@ -105,6 +105,17 @@ Class {
 	#category : #'Smalltalk-80 VM'
 }
 
+{ #category : #'class initialization' }
+Interpreter class >> initialize [
+	"Not BB code"
+	
+	PushBytecodeReceivers := #('true', 'false', 'nil', '-1', '0', '1', '2').
+	ExtendedPushVariableTypes := #('Receiver Variable', 'Temporary Location', 'Literal Constant', 'Literal Variable').
+   ExtendedStoreVariableTypes := ExtendedPushVariableTypes.
+	ReturnBytecodeTypes := #('true', 'false', 'nil').
+	ReturnTopStackTypes := #('Message', 'Block').
+]
+
 { #category : #'instance creation' }
 Interpreter class >> withSnapshot: stream debug: debug [
    "the code below ollows the Seaside Object initialization conventions"
