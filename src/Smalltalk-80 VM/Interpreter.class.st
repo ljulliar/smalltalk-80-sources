@@ -870,25 +870,6 @@ Interpreter >> initialInstructionPointerOfMethod: methodPointer [
 ]
 
 { #category : #initialization }
-Interpreter >> initialize [
-   "Initialize the Interpreter data structures and variables"
-   super initialize.
-	memory := ObjectMemory new.
-	self
-		initializeSmallIntegers;
-		initializeGuaranteedPointers;
-		initializeMethodIndices;
-		initializeContextIndices;
-		initializeMessageIndices;
-		initializeClassIndices;
-		initializeAssociationIndex;
-		initializeMethodCache;
-		initializePointIndices;
-		initializeCharacterIndex ;
-		initializeStreamIndices 
-]
-
-{ #category : #initialization }
 Interpreter >> initializeAssociationIndex [
 	"Associations are objects with two fields, one for a name and one for a value. 
  They are used to implement shared variables (global variables, class variables, 
