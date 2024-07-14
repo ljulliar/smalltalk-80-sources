@@ -888,15 +888,16 @@ ObjectMemory >> markObjectsAccessibleFrom: rootObjectPointer [
 
 { #category : #'private - allocation' }
 ObjectMemory >> obtainPointer: size location: location [
-	"Obtain a free object table entry, zeroes its free entry bit as well as the rest of the first word of the entry, points the entry at the specified location, and sets the size field of the header to the specified size"
+	"Obtain a free object table entry, zeroes its free entry bit as well as the rest 
+	of the first word of the entry, points the entry at the specified location, and 
+	sets the size field of the header to the specified size"
 
 	| objectPointer |
 	objectPointer := self removeFromFreePointerList.
 	objectPointer isNil
 		ifTrue: [ ^ nil ].
 	self ot: objectPointer put: 0.
-	self segmentBitsOf: objectPointer put.
-	currentSegment.
+	self segmentBitsOf: objectPointer put: currentSegment.
 	self locationBitsOf: objectPointer put: location.
 	self sizeBitsOf: objectPointer put: size.
 	^ objectPointer
