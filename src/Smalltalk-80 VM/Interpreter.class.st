@@ -25,7 +25,9 @@ Class {
 		'semaphoreIndex',
 		'semaphoreList',
 		'newProcessWaiting',
-		'newProcess'
+		'newProcess',
+		'debug',
+		'cycle'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -52,6 +54,8 @@ Class {
 		'ClassUndefinedObject',
 		'DoesNotUnderstandSelector',
 		'ExcessSignalsIndex',
+		'ExtendedPushVariableTypes',
+		'ExtendedStoreVariableTypes',
 		'FalsePointer',
 		'FirstLinkIndex',
 		'HeaderIndex',
@@ -75,7 +79,10 @@ Class {
 		'OnePointer',
 		'PriorityIndex',
 		'ProcessListsIndex',
+		'PushBytecodeReceivers',
 		'ReceiverIndex',
+		'ReturnBytecodeTypes',
+		'ReturnTopStackTypes',
 		'SchedulerAssociationPointer',
 		'SelectorStart',
 		'SenderIndex',
@@ -95,11 +102,16 @@ Class {
 		'YIndex',
 		'ZeroPointer'
 	],
-	#classInstVars : [
-		'memory'
-	],
 	#category : #'Smalltalk-80 VM'
 }
+
+{ #category : #'instance creation' }
+Interpreter class >> withSnapshot: stream debug: debug [
+   "the code below ollows the Seaside Object initialization conventions"
+	^ self basicNew
+		initializeWithSnapshot: stream debug: debug;
+		yourself
+]
 
 { #category : #'send bytecodes' }
 Interpreter >> activateNewMethod [

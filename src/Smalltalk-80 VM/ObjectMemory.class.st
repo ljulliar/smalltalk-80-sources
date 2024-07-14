@@ -9,7 +9,8 @@ Class {
 	#instVars : [
 		'currentSegment',
 		'wordMemory',
-		'rootObjectPointers'
+		'rootObjectPointers',
+		'debug'
 	],
 	#classVars : [
 		'BigSize',
