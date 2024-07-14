@@ -1041,6 +1041,56 @@ Interpreter >> initializeStreamIndices [
 	StreamWriteLimitIndex := 3
 ]
 
+{ #category : #initialization }
+Interpreter >> initializeWithSnapshot: stream debug: onOff [
+   "Not BB code"
+   "Initialize the Interpreter"
+ 
+	debug := onOff.
+	
+	"Initialize all constants known to the interpreter"
+	self
+		initializeSmallIntegers;
+		initializeGuaranteedPointers;
+		initializeMethodIndices;
+		initializeContextIndices;
+		initializeMessageIndices;
+		initializeClassIndices;
+		initializeAssociationIndex;
+		initializeMethodCache;
+		initializePointIndices;
+		initializeCharacterIndex;
+		initializeSchedulerIndices;
+		initializeStreamIndices.
+
+	"Create the object memory and load it with VM Snapshot"
+	memory := ObjectMemory new.
+	memory loadWithSnapshot: stream debug: onOff.
+	
+	"BB doesn't say how large the semaphore list must be..."
+	"TODO: turn it into an #initializeSemaphore method when code is stable"
+	semaphoreList := Array new: 255 withAll: 0.
+	semaphoreIndex := 0.
+	
+	debug ifTrue: [ 
+		Transcript show: '>>>>>> Initializing interpreter...'; cr
+	].
+
+	"When Smalltalk is started up, the initial active context is found
+	through the scheduler's active Process (BB p. 644)"
+	activeContext := self firstContext.
+	memory increaseReferencesTo: activeContext.
+	
+	"Fetch all the registers of the context that represents the 
+	CompiledMethod or block currently being executed (aka activeContext)"
+	self fetchContextRegisters.
+	
+	"Cycle counter"
+	cycle := 1.
+	
+	
+]
+
 { #category : #instances }
 Interpreter >> instanceSpecificationOf: classPointer [
 	"The instance specification field of a class contains a SmallInteger pointer that
