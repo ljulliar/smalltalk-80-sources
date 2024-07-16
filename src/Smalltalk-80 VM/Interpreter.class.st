@@ -3627,6 +3627,10 @@ Interpreter >> storeContextRegisters [
 Interpreter >> storeInstructionPointerValue: value inContext: contextPointer [
    "Set the instruction pointer field of the home of a Block Context (see Fig.27.6 p 582 of the Blue Book)
     (BB 582)"
+	debug ifTrue: [ 
+		Transcript show: 'storeInstructionPointerValue value: '; nextPutAll: value printString;
+		   nextPutAll: 'contextPointer: '; nextPutAll: contextPointer printString; cr.
+		].
 	self
 		storeInteger: InstructionPointerIndex
 		ofObject: contextPointer
@@ -3638,6 +3642,13 @@ Interpreter >> storeInteger: fieldIndex ofObject: objectPointer withValue: integ
 	"stores the pointer of the SmallInteger with specified value in the specified field (BB 574)"
 
 	| integerPointer |
+	
+	debug ifTrue: [ 
+		Transcript show: 'storeInteger: '; nextPutAll: fieldIndex printString;
+	   nextPutAll: ' ofObject: '; nextPutAll: objectPointer printString;
+	   nextPutAll: ' WithValue: '; nextPutAll: integerValue printString; cr.
+		].
+	
 	(memory isIntegerValue: integerValue)
 		ifTrue: [ integerPointer := memory integerObjectOf: integerValue.
 			memory
