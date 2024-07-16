@@ -1094,6 +1094,9 @@ Interpreter >> initializeWithSnapshot: stream debug: onOff [
  
 	debug := onOff.
 	
+	"Make sure class variables are initialized"
+	self class initialize.
+	
 	"Initialize all constants known to the interpreter"
 	self
 		initializeSmallIntegers;
@@ -1132,7 +1135,7 @@ Interpreter >> initializeWithSnapshot: stream debug: onOff [
 	self fetchContextRegisters.
 	
 	"Cycle counter"
-	cycle := 1.
+	cycleCounter := 0.
 	
 	
 ]
