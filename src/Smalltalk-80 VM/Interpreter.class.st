@@ -2253,10 +2253,17 @@ Interpreter >> primitiveMakePoint [
 	self success
 		ifTrue: [ pointResult := memory instantiateClass: ClassPointPointer
 				                          withPointers: ClassPointSize.
-			       memory storePointer: XIndex
+					"BB code ERROR modified from dbanay implementation"
+					"memory storePointer: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			       memory storePointer: YIndex
+				           ofObject: pointResult
+				           withValue: integerArgument."
+			       self storeInteger: XIndex
+				           ofObject: pointResult
+				          withValue: integerReceiver.
+			       self storeInteger: YIndex
 				           ofObject: pointResult
 				           withValue: integerArgument.
 			       self push: pointResult ]
@@ -2663,6 +2670,8 @@ Interpreter >> primitiveSize [
 
    | array class length |
    array := self popStack.
+	"Line below not in BB code. See dbanay implementation"
+	self success: ((memory isIntegerObject: array ) not).
    class := memory fetchClassOf: array.
    length := self positive16BitIntegerFor: (self lengthOf: array) - (self fixedFieldsOf: class).
 
