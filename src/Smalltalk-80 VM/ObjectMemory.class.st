@@ -609,7 +609,9 @@ ObjectMemory >> isIntegerObject: objectPointer [
 
 { #category : #'integer access' }
 ObjectMemory >> isIntegerValue: valueWord [
-   ^ valueWord <= -16384 and: [valueWord > 16834]
+   "BB code modified - Error in both 1983 and 1985 editions of BB !!"
+   "^ valueWord <= -16384 and: [valueWord > 16834]"
+   ^ valueWord >= -16384 and: [valueWord < 16384]
 ]
 
 { #category : #'private - object table entries' }
