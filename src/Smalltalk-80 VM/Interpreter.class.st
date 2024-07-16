@@ -1821,6 +1821,13 @@ Interpreter >> primitiveBlockCopy [
 	self push: newContext
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> primitiveClass [
+	| instance |
+	instance := self popStack.
+	self push: (memory fetchClassOf: instance)
+]
+
 { #category : #'io primitives' }
 Interpreter >> primitiveCursorLink [
 	"Cause the cursor to track the pointing device location if the argument is true.
@@ -1901,11 +1908,30 @@ Interpreter >> primitiveEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> primitiveEquivalent [
+	"The primitiveEquivalent routine is associated with the = message 
+	in Object. It returns true if the receiver and argument are the 
+	same object (have the same object pointer) and false otherwise. (BB 653)"
+	| thisObject otherObject |
+	otherObject := self popStack.
+	thisObject := self popStack.
+	thisObject = otherObject
+		ifTrue: [self push: TruePointer]
+		ifFalse: [self push: FalsePointer]
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveExponent [
    "Returns the exponent of the receiver (optional) (BB 626)"
 
    ^ self primitiveFail 
+]
+
+{ #category : #'primitive failure' }
+Interpreter >> primitiveFail [
+	"BB code p. 616"
+	success := false
 ]
 
 { #category : #'arithmetic primitives' }
