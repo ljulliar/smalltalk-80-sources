@@ -97,6 +97,9 @@ RealWordMemory >> segment: s word: w byte: byteNumber [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
 	"Not BB code. For byte index see BB p. 657"
+	"Assuming LSB architecture here. if MSB reverse
+	the test on byteNumber below"
+	
 	|word byte|
 	"Some preliminary sanity checks"
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
@@ -104,9 +107,11 @@ RealWordMemory >> segment: s word: w byte: byteNumber [
 	self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
 	
 	word := self segment: s word: w.
-	byte := (byteNumber = 1)
+	"byte := (byteNumber = 1)
 		ifTrue: [ word bitAnd: 16rFF ] 
-		ifFalse: [ word bitShift: 8 ].
+		ifFalse: [ word bitShift: -8 ]."
+	byte := (word bitShift: (-8 * byteNumber)) bitAnd: 16rFF.
+	self assert: (byte < 256).
 	^ byte 
 ]
 
@@ -116,17 +121,22 @@ RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
 	"Not BB code. For byte indexing see BB p. 657"
+	"Assuming LSB architecture here. if MSB reverse
+	the test on byteNumber below"
+	
 	|word|
 	"Some preliminary sanity checks"
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
 	self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
-	self assert: ( (value >= 0) and: (value < 65536)).
+	self assert: ( (value >= 0) and: (value < 256)).
 	
 	word := self segment: s word: w.
 	word := (byteNumber = 1)
-		ifTrue: [ word bitAnd: 16rFF00; bitOr: value ] 
-		ifFalse: [ word bitAnd: 16r00FF; bitOr: (value bitShift: -8) ].
+		ifTrue:  [ (word bitAnd: 16r00FF) bitOr: (value bitShift: 8) ]
+		ifFalse: [ (word bitAnd: 16rFF00) bitOr: value ].
+	self assert: ( (word >= 0) and: (word < 65536)).
+		
 	^ self segment: s word: w put: word.
 	
 ]
