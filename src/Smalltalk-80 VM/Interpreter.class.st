@@ -3389,7 +3389,7 @@ Interpreter >> singleExtendedSendBytecode [
 		Transcript show: 'Send Literal Selector #'; 
 			nextPutAll: selectorIndex printString; 
 			nextPutAll: ' With '; 
-			nextPutAll: argumentCount printString;
+			nextPutAll: argCount printString;
 			nextPutAll: ' Arguments'; 			 
 			cr.
 		].
