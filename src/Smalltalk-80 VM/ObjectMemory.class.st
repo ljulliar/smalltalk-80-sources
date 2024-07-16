@@ -648,8 +648,8 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	objectCount := 0.
 	
 	2 to: ObjectTableSize-2 by: 2 do: [ :oop |	
-		(self freeBitOf: oop) = 0
-			ifTrue: [ 
+		(self freeBitOf: oop) = 1
+			ifFalse: [ 
 				"Sanity check : a none free entry must have a non zero reference count
 				as the VM snapshot should not contain free chunk entries. (see Xerox
 				Virtual image Booklet p. 3)"
@@ -742,7 +742,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 			so claim e free entry and link it to the free chunk list"
 			currentSegment := s.
 			objectPointer := self obtainPointer: remainingSpaceInSegment location: offset.
-			self toFreeChunkList: (space min: BigSize) add: objectPointer.
+			self toFreeChunkList: (remainingSpaceInSegment min: BigSize) add: objectPointer.
 			 ]
 		 ].
 	
@@ -799,6 +799,9 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 			].
 		].
 
+	"Initialize Free pointer list pointer"
+	self headOfFreePointerListPut: NonPointer.
+	
 	"Mark all remaining entries as free"
 	otLength to: ObjectTableSize-2 by: 2 do: [ :i |
 		self ot: i put: 0.
@@ -809,7 +812,6 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	"Build the object table free entry list"
 	"Skip the oop 0 entry as it is documented as an invalid 
 	entry any way"
-	self headOfFreePointerListPut: NonPointer.		
 	2 to: ObjectTableSize-2 by: 2 do: [ :i |
 		((self freeBitOf: i) = 1) 
 			ifTrue: [ self toFreePointerListAdd: i ]

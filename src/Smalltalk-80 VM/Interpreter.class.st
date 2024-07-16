@@ -27,7 +27,7 @@ Class {
 		'newProcessWaiting',
 		'newProcess',
 		'debug',
-		'cycle'
+		'cycleCounter'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
