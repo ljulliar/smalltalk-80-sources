@@ -3319,6 +3319,11 @@ Interpreter >> sendSelector: selector argumentCount: count [
    messageSelector := selector.
    argumentCount := count.
    newReceiver := self stackValue: argumentCount.
+	debug ifTrue: [ 
+		Transcript show: 'sendSelector selector: '; nextPutAll: selector printString; 
+		nextPutAll: ' argumentCount: ';nextPutAll: count printString; 
+		nextPutAll: ' newReceiver: '; nextPutAll: newReceiver printString; cr.
+		].
    self sendSelectorToClass: (memory fetchClassOf: newReceiver)
 
 ]
@@ -3737,11 +3742,12 @@ Interpreter >> synchronousSignal: aSemaphore [
 
    | excessSignals |
    (self isEmptyList: aSemaphore)
-      ifTrue: [excessSignals := self fetchInteger: ExcessSignalsIndex
-                                     ofObject: aSemaphore.
-               self storeInteger ExcessSignalsIndex
-                    ofObject: aSemaphore
-                    withValue: excessSignals + 1]
+      ifTrue: [
+			excessSignals := self fetchInteger: ExcessSignalsIndex
+                               ofObject: aSemaphore.
+         self storeInteger: ExcessSignalsIndex
+              ofObject: aSemaphore
+              withValue: excessSignals + 1]
       ifFalse: [self resume: (self removeFirstLinkOfList: aSemaphore)]
 ]
 
