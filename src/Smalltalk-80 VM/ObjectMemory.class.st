@@ -412,6 +412,7 @@ ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predic
 					"save the offset either in the count field or in the extra word"
 					size < HugeSize
 						ifTrue: [ self countBitsOf: current put: offset ]
+						"ERROR in BB mentioned Xerox VM booklet: size+1 should be size"
 						ifFalse: [ self heapChunkOf: current word: size put: offset ].
 					"compute prior, current, offset, and size to begin processing next"
 					prior := current.
@@ -429,7 +430,8 @@ ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predic
 				"restore offset either from the count field or from the extra word"
 				size < HugeSize
 					ifTrue: [ offset := self countBitsOf: current ]
-					ifFalse: [ offset := self heapChunkOf: current word: size + 1 ].
+					"ERROR in BB mentioned Xerox VM booklet: size+1 should be size"
+					ifFalse: [ offset := self heapChunkOf: current word: size ].
 				"restore prior from the reversed pointer chain"
 				prior := self heapChunkOf: current word: offset.
 				"restore (unreverse) the pointer chain"
