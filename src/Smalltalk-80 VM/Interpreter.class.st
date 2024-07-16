@@ -360,9 +360,16 @@ Interpreter >> cycle [
    routines in the next chapter. After checking for a process switch, a bytecode is fetched
    (perhaps from a new process), and a dispatch is made to the appropriate routine. (BB 594)"
 
+   cycleCounter := cycleCounter + 1.
 	self checkProcessSwitch.
 	currentBytecode := self fetchByte.
-	self dispatchOnThisBytecode
+	debug ifTrue: [
+		Transcript show: 'cycle '; nextPutAll: cycleCounter printString;
+	   		nextPutAll: ' - Bytecode: '; nextPutAll: currentBytecode printString; cr.
+		].
+	self dispatchOnThisBytecode.
+
+
 ]
 
 { #category : #'arithmetic primitives' }
@@ -1158,7 +1165,7 @@ Interpreter >> instructionPointerOfContext: contextPointer [
 { #category : #'main loop' }
 Interpreter >> interpret [
 	"Never ending interpreter loop (BB 594)"
-	[ true ] whileTrue: [ self cycle. cycle := cycle + 1. ]
+	[ true ] whileTrue: [ self cycle ]
 ]
 
 { #category : #contexts }
