@@ -1826,6 +1826,8 @@ Interpreter >> primitiveBlockCopy [
 
 { #category : #'primitive methods' }
 Interpreter >> primitiveClass [
+	"The primitiveClass routine is associated with the class message
+	in Object. It returns the object pointer of the receiver's class. (BB 653)"
 	| instance |
 	instance := self popStack.
 	self push: (memory fetchClassOf: instance)
