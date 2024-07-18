@@ -27,7 +27,9 @@ Class {
 		'newProcessWaiting',
 		'newProcess',
 		'debug',
-		'cycleCounter'
+		'cycleCounter',
+		'classOops',
+		'methodOops'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -59,6 +61,7 @@ Class {
 		'FalsePointer',
 		'FirstLinkIndex',
 		'HeaderIndex',
+		'HeightInForm',
 		'HomeIndex',
 		'InitialIPIndex',
 		'InstanceSpecificationIndex',
@@ -98,6 +101,7 @@ Class {
 		'TruePointer',
 		'TwoPointer',
 		'ValueIndex',
+		'WidthInForm',
 		'XIndex',
 		'YIndex',
 		'ZeroPointer'
@@ -949,6 +953,30 @@ message dictionary is shown in Figure 27.7 p 587 (BB 587)"
 ]
 
 { #category : #initialization }
+Interpreter >> initializeClassOopsWith: stream [
+	"Not BB code"
+   "Load method symbol table from stream"
+
+	| cols oop |
+	classOops := Dictionary new.
+	
+	"symbol table file format is one symbol per line with
+	3 columns each and TAB as a separator
+	oop in octal\toop in hexa\tclass name"
+	[ stream atEnd ] whileFalse: [
+		cols := stream nextLine splitOn: Character tab.
+		"Transcript show: 'Class cols: '; nextPutAll: cols printString; cr."
+		cols size = 3 ifTrue: [ 
+				oop := (cols at: 2).	
+				oop := Integer readFrom: (oop copyFrom: 4 to: oop size) base: 16.
+				classOops at: oop put: (cols at: 3) 
+			]
+		]
+
+
+]
+
+{ #category : #initialization }
 Interpreter >> initializeContextIndices [
 	"A BlockContext represents a block encountered in a CompiledMethod. 
 	A BlockContext refers to the MethodContext whose CompiledMethod contained the block 
@@ -1032,6 +1060,31 @@ Interpreter >> initializeMethodIndices [
 
 	HeaderIndex := 0.
 	LiteralStart := 1
+]
+
+{ #category : #initialization }
+Interpreter >> initializeMethodOopsWith: stream [
+	"Not BB code"
+   "Load method symbol table from stream"
+
+	| cols oop |
+	methodOops := Dictionary new.
+	
+	"symbol table file format is one symbol per line with
+	3 columns each and TAB as a separator: 
+	oop in octal\toop in hexa\tmethod name"
+	[ stream atEnd ] whileFalse: [
+		cols := stream nextLine splitOn: Character tab.
+		"Transcript show: 'Method cols: '; nextPutAll: cols printString; cr."
+		cols size = 3 ifTrue: [ 
+				oop := (cols at: 2).	
+				oop := Integer readFrom: (oop copyFrom: 4 to: oop size) base: 16.
+				methodOops at: oop put: (cols at: 3) 
+			]
+		]
+
+
+
 ]
 
 { #category : #initialization }

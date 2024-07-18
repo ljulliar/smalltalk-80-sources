@@ -19,7 +19,11 @@ Class {
 		'vmSourcesFile',
 		'vmChangesFile',
 		'vmImagePath',
-		'interpreter'
+		'interpreter',
+		'vmClassOopsFile',
+		'vmMethodOopsFile',
+		'directory',
+		'debug'
 	],
 	#category : #'Smalltalk-80 VM'
 }
@@ -30,6 +34,9 @@ ST80VirtualMachine >> initialize [
 	"Initialize a new ST80 VM"
 	
 	| snapshot |
+	
+	debug := true.
+	
 	"Initial Screen dimensions can be found
 	 in the Xerox ST80 Virtual Image Booklet p. 3"
 	displayWidth := 640.
@@ -38,10 +45,18 @@ ST80VirtualMachine >> initialize [
 	vmImageFile := vmImagePath, 'Smalltalk-80.image'.
 	vmSourcesFile := vmImagePath, 'Smalltalk-80.sources'.
 	vmChangesFile := vmImagePath, 'Smalltalk-80.changes'.
+	vmClassOopsFile := vmImagePath, 'class.oops'.
+	vmMethodOopsFile := vmImagePath, 'method.oops'.
 	
 	"Open snapshot stream"
 	snapshot := vmImageFile asFileReference binaryReadStream.
-	interpreter := Interpreter withSnapshot: snapshot debug: true.
+	interpreter := Interpreter withSnapshot: snapshot debug: debug.
+	
+	"Load symbol tables if debug activated"
+	debug ifTrue: [ 
+		interpreter initializeMethodOopsWith: vmMethodOopsFile asFileReference readStream.
+		interpreter initializeClassOopsWith: vmClassOopsFile asFileReference readStream.
+		].
 	
 	"run the Smalltalk-80 VM loaded in memory"
 	interpreter interpret.
