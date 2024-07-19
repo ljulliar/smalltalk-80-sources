@@ -2368,8 +2368,11 @@ Interpreter >> primitiveMakePoint [
 	whose x value is the receiver and whose y value is the argument. (BB 625)"
 
 	| integerReceiver integerArgument pointResult |
-	integerArgument := self popStack.
-	integerReceiver := self popStack.
+	"BB code ERROR modified from dbanay implementation"
+	"integerArgument := self popStack.
+	integerReceiver := self popStack."
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
 	self success: (memory isIntegerValue: integerReceiver).
 	self success: (memory isIntegerValue: integerArgument).
 	self success

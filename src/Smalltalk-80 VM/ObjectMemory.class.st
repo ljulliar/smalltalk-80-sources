@@ -571,8 +571,13 @@ ObjectMemory >> initialize [
 ObjectMemory >> instanceAfter: objectPointer [
 	| classPointer |
 	classPointer := self fetchClassOf: objectPointer.
-	objectPointer to: ObjectTableSize - 2 by: 2 do: [ :pointer | 
-		(self freeBitOf: pointer) = 0
+	
+	"ERROR from dbanay implementation
+	  - was 'objectPointer to: ObjectTableSize-2 by: 2 do: should start at objectPointer+2
+     - should also check count bits to skip free Chunk entries"
+	objectPointer+2 to: ObjectTableSize - 2 by: 2 do: [ :pointer | 
+		"(self freeBitOf: pointer) = 0"
+		(self hasObject: pointer)
 			ifTrue: [ (self fetchClassOf: pointer) = classPointer
 					ifTrue: [ ^ pointer ] ] ].
 	^ NilPointer
