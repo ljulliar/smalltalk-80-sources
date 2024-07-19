@@ -823,8 +823,8 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	
 	"Build the object table free entry list"
 	"Skip the oop 0 entry as it is documented as an invalid 
-	entry any way"
-	2 to: ObjectTableSize-2 by: 2 do: [ :i |
+	entry any way (Xerox Virtual Image booklet p. 2"
+	ObjectTableSize-2 to: 2 by: -2 do: [ :i |
 		((self freeBitOf: i) = 1) 
 			ifTrue: [ self toFreePointerListAdd: i ]
 		].
