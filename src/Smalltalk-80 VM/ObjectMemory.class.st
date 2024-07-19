@@ -355,7 +355,7 @@ ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 	"Return the object pointer found in the field numbered 
 	fieldIndex of the object associated with ObjectPointer"
 	|value|
-	self assert: (fieldIndex >= 0).
+	self assert: (fieldIndex >= 0 & (fieldIndex < (self fetchWordLengthOf: objectPointer))).
 	value := self heapChunkOf: objectPointer word: (HeaderSize + fieldIndex).
 	debug ifTrue: [ 
 		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
