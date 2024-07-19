@@ -2493,7 +2493,8 @@ Interpreter >> primitiveNewMethod [
 	header := self popStack.
 	bytecodeCount := self popInteger.
 	class := self popStack.
-	"ERROR from dbanay : need to initialize literal frame"
+	"ERROR from dbanay : need to initialize literal frame.
+	See also Part 4 Errata of Xerox VM Booklet bullet 4"
 	literalCount := self literalCountOfHeader: header.
 	size := (literalCount + 1) * 2 + bytecodeCount.
 	newMethod := memory instantiateClass: class withBytes: size.
