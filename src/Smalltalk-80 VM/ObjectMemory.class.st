@@ -620,8 +620,28 @@ ObjectMemory >> integerObjectOf: value [
 { #category : #'integer access' }
 ObjectMemory >> integerValueOf: objectPointer [
 	"BB code modified"
+	"Return the value of the instance of
+	Smalllnteger whose pointer is objectPointer (BB p. 573)"
+	
+	| integerValue |
    "^ objectPointer / 2"
-	^ objectPointer bitShift: -1.
+	"^ (objectPointer bitAnd: 16rFFFE) // 2."
+	
+	integerValue := objectPointer // 2.
+	"Native Intergers on Pharo are 31 bit long so we must 
+	 transform ST80 15 bit negative integers into its 
+	 31-bit equivalent.
+	 Positive values greater than the max 15-bit positive value
+	 are actually ST80 negative values. 16384 represents -16384,
+	 16385 is -16383,... and -1 is 32767"
+	integerValue > 16383 ifTrue: [ 
+		Transcript show: 'Converting negative value from '; nextPutAll: integerValue.
+		integerValue := integerValue - 32768.
+		Transcript show: ' to '; nextPutAll: integerValue; cr.
+		self halt.
+		].
+   ^ integerValue 
+
 ]
 
 { #category : #'integer access' }
@@ -633,9 +653,11 @@ ObjectMemory >> isIntegerObject: objectPointer [
 
 { #category : #'integer access' }
 ObjectMemory >> isIntegerValue: valueWord [
+	"Return true if value can be represented as an
+    instance of Smalllnteger, false if not. (BB p. 573)"
    "BB code modified - Error in both 1983 and 1985 editions of BB !!"
    "^ valueWord <= -16384 and: [valueWord > 16834]"
-   ^ valueWord >= -16384 and: [valueWord < 16384]
+   ^ valueWord >= -16384 and: [valueWord <= 16383]
 ]
 
 { #category : #'private - object table entries' }
@@ -889,13 +911,13 @@ ObjectMemory >> loadWithSnapshot: stream debug: onOff [
 	otFileOffset := osFileOffset + (((objectSpaceLength * 2 + pageLength - 1) // pageLength) * pageLength).
 	Transcript show: ' - Object space offset: '; nextPutAll: osFileOffset printString; cr.
 	Transcript show: ' - Object table offset: '; nextPutAll: otFileOffset printString; cr.
-
+	debug := false.
 	(self loadObjectTableWithSnapshot: stream at: otFileOffset length: objectTableLength )
 		ifFalse: [ Exception signal: 'Error loading object table' ].
 	
 	(self loadObjectSpaceWithSnapshot: stream at: osFileOffset length: objectSpaceLength )
 		ifFalse: [ Exception signal: 'Error loading object space' ].
-		
+	debug := onOff.
 	^ true
 ]
 

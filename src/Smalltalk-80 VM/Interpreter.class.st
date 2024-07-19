@@ -380,7 +380,7 @@ Interpreter >> cycle [
 
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchArithmeticPrimitives [
   "There are three sets of arithmetic primitive routines, one for SmallIntegers,
   one for large integers (LargePositiveIntegers and LargeNegativeIntegers), and
@@ -394,7 +394,7 @@ Interpreter >> dispatchArithmeticPrimitives [
 
 ]
 
-{ #category : #'control primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchControlPrimitives [
    "The control primitives provide the control structures not provided by the
    bytecodes. They include support for the behavior of BlockContexts, Processes,
@@ -413,7 +413,7 @@ Interpreter >> dispatchControlPrimitives [
    primitiveIndex = 89 ifTrue: [^self primitiveFlushCache]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchFloatPrimitives [
    "Instances of Float are represented in IEEE single-precision (32-bit) format.
    This format represents a floating point quantity as a number between one and two, 
@@ -435,7 +435,7 @@ Interpreter >> dispatchFloatPrimitives [
    primitiveIndex = 54 ifTrue: [^self primitiveTimesTwoPower]
 ]
 
-{ #category : #'io primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchInputOutputPrimitives [
    "The input/output primitive routines provide Smalltalk with access to the
    state of the hardware devices. Since the implementation of these routines 
@@ -461,7 +461,7 @@ Interpreter >> dispatchInputOutputPrimitives [
    primitiveIndex = 105 ifTrue: [^self primitiveStringReplace]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchIntegerPrimitives [
    "The first set of arithmetic primitive routines all pop a receiver and 
    argument off the stack and fail if they are not both SmallIntegers. The
@@ -489,7 +489,7 @@ Interpreter >> dispatchIntegerPrimitives [
    primitiveIndex = 18 ifTrue: [^self primitiveMakePoint]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchLargeIntegerPrimitives [
 	"The primitive indices 21 to 37 are the same as primitives 1 to 17 except
 	that they perform their operations on large integers (instances of 
@@ -522,7 +522,7 @@ Interpreter >> dispatchOnThisBytecode [
    (currentBytecode between: 176 and: 255) ifTrue: [^self sendBytecode]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchPrimitives [
    "The six types of primitives in the formal specification deal with 
    arithmetic, subscripting and streaming, storage management, control structures, 
@@ -532,6 +532,10 @@ Interpreter >> dispatchPrimitives [
    but cannot be depended upon from interpreter to interpreter. Since these are
    not part of the specification, they cannot be described here. (BB 621)"
 
+	debug ifTrue: [ 
+		Transcript show: 'Primitive #'; nextPutAll: primitiveIndex printString;cr.
+		 ].
+	
    primitiveIndex < 60 ifTrue: [^self dispatchArithmeticPrimitives].
    primitiveIndex < 68 ifTrue: [^self dispatchSubscriptAndStreamPrimitives].
    primitiveIndex < 80 ifTrue: [^self dispatchStorageManagementPrimitives].
@@ -552,7 +556,7 @@ Interpreter >> dispatchPrivatePrimitives [
 
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchStorageManagementPrimitives [
    "The storage management primitive routines manipulate the representation
    of objects. They include primitives for manipulating object pointers, 
@@ -573,7 +577,7 @@ Interpreter >> dispatchStorageManagementPrimitives [
    primitiveIndex = 79 ifTrue: [^self primitiveNewMethod]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : #'bytecode dispatch' }
 Interpreter >> dispatchSubscriptAndStreamPrimitives [
    "Primitive routines for manipulating the indexable fields of objects both 
    directly, by subscripting, and indirectly, by streaming. These routines 
@@ -1117,6 +1121,19 @@ Interpreter >> initializeMethodOopsWith: stream [
 ]
 
 { #category : #initialization }
+Interpreter >> initializeOtherConstants [
+	"Not BB code"
+	"Constants that are needed by the implementation specific code"
+	
+	"Index of Form attributes in ST80 objects to access
+	display size"
+	WidthInForm := 1.
+	HeightInForm := 2.
+	
+
+]
+
+{ #category : #initialization }
 Interpreter >> initializePointIndices [
    "initialize indices of the Point Class"
     XIndex := 0.
@@ -1192,7 +1209,8 @@ Interpreter >> initializeWithSnapshot: stream debug: onOff [
 		initializePointIndices;
 		initializeCharacterIndex;
 		initializeSchedulerIndices;
-		initializeStreamIndices.
+		initializeStreamIndices;
+		initializeOtherConstants.
 
 	"Create the object memory and load it with VM Snapshot"
 	memory := ObjectMemory new.
@@ -3794,7 +3812,7 @@ Interpreter >> storeInstructionPointerValue: value inContext: contextPointer [
     (BB 582)"
 	debug ifTrue: [ 
 		Transcript show: 'storeInstructionPointerValue value: '; nextPutAll: value printString;
-		   nextPutAll: 'contextPointer: '; nextPutAll: contextPointer printString; cr.
+		   nextPutAll: ' contextPointer: '; nextPutAll: contextPointer printString; cr.
 		].
 	self
 		storeInteger: InstructionPointerIndex
