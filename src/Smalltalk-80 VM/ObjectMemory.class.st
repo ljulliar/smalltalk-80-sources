@@ -452,6 +452,14 @@ ObjectMemory >> freeBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 5 to: 5 put: value
 ]
 
+{ #category : #testing }
+ObjectMemory >> hasObject: objectPointer [
+	"BB doesn't give the code for this method.
+	Got it from dbanay implementation"
+	self cantBeIntegerObject: objectPointer.
+	^ (self freeBitOf: objectPointer = 0) & (self countBitsOf: objectPointer ~= 0)
+]
+
 { #category : #'private - object table entries' }
 ObjectMemory >> headOfFreeChunkList: size inSegment: segment [
 	"Get the head of free chunk list in segment"
