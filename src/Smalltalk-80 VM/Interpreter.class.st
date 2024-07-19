@@ -541,6 +541,17 @@ Interpreter >> dispatchPrimitives [
    primitiveIndex < 256 ifTrue: [^self dispatchPrivatePrimitives]
 ]
 
+{ #category : #'bytecode dispatch' }
+Interpreter >> dispatchPrivatePrimitives [
+	"BB p. 621"
+	"A range of primitive indices has been reserved for implementation-private primitive routines. 
+	They may be Arithmetic Primitives assigned any meaning, but cannot be depended upon from
+	interpreter to interpreter. Since these are not part of the specification, they cannot
+	be described here."
+	"NO PRIAVTE PRIMITIVE IMPLEMENTED FOR NOW"
+
+]
+
 { #category : #'storage management primitives' }
 Interpreter >> dispatchStorageManagementPrimitives [
    "The storage management primitive routines manipulate the representation
@@ -577,6 +588,18 @@ Interpreter >> dispatchSubscriptAndStreamPrimitives [
 	primitiveIndex = 65 ifTrue: [^self primitiveNext].
 	primitiveIndex = 66 ifTrue: [^self primitiveNextPut].
 	primitiveIndex = 67 ifTrue: [^self primitiveAtEnd]
+]
+
+{ #category : #'bytecode dispatch' }
+Interpreter >> dispatchSystemPrimitives [
+	"BB p. 652"
+	primitiveIndex = 110 ifTrue: [^self primitiveEquivalent].
+	primitiveIndex = 111 ifTrue: [^self primitiveClass].
+	primitiveIndex = 112 ifTrue: [^self primitiveCoreLeft].
+	primitiveIndex = 113 ifTrue: [^self primitiveQuit].
+	primitiveIndex = 114 ifTrue: [^self primitiveExitToDebugger].
+	primitiveIndex = 115 ifTrue: [^self primitiveOopsLeft].
+	primitiveIndex = 116 ifTrue: [^self primitiveSignalAtOopsLeftWordsLeft]
 ]
 
 { #category : #'send bytecodes' }
@@ -1766,6 +1789,29 @@ Interpreter >> primitiveAtPut [
       ifFalse: [self unPop: 3]
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> primitiveBeDisplay [
+	"Not BB code - This primitive is implementation dependent
+	From BB p. 651
+	beDisplay invokes the primitiveBeDisplay primitive routine. 
+	The screen will be updated from the last recipient of 
+	beDisplay approximately 60 times a second."
+	
+	| newDisplay width height |
+	
+	"Fetch the dimensions of the current display"
+	newDisplay := self stackTop.
+	width := self fetchInteger: WidthInForm ofObject: newDisplay.
+	height := self fetchInteger: HeightInForm ofObject: newDisplay.
+	
+   debug ifTrue: [ 
+		Transcript show: 'Display width: '; nextPutAll: width printString;
+			nextPutAll: ' height: '; nextPutAll: height printString; cr.
+		].
+	
+	self halt.
+]
+
 { #category : #'storage management primitives' }
 Interpreter >> primitiveBecome [
 	"The primitiveBecome routine swaps the instance pointers of the receiver
@@ -1892,6 +1938,12 @@ Interpreter >> primitiveClass [
 	self push: (memory fetchClassOf: instance)
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> primitiveCoreLeft [
+	"BB p. 653"
+	Exception signal: 'NOT IMPLEMENTED YET !!'
+]
+
 { #category : #'io primitives' }
 Interpreter >> primitiveCursorLink [
 	"Cause the cursor to track the pointing device location if the argument is true.
@@ -1983,6 +2035,12 @@ Interpreter >> primitiveEquivalent [
 	thisObject = otherObject
 		ifTrue: [self push: TruePointer]
 		ifFalse: [self push: FalsePointer]
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> primitiveExitToDebugger [
+	"BB p. 653"
+	Exception signal: 'NOT IMPLEMENTED YET !!'
 ]
 
 { #category : #'arithmetic primitives' }
@@ -2599,6 +2657,12 @@ Interpreter >> primitiveObjectAtPut [
 		ifFalse: [ self unPop: 3 ]
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> primitiveOopsLeft [
+	"BB p. 653"
+	Exception signal: 'NOT IMPLEMENTED YET !!'
+]
+
 { #category : #'control primitives' }
 Interpreter >> primitivePerform [
 	"The primitivePerform routine is associated with all 'perform' messages 
@@ -2664,6 +2728,12 @@ Interpreter >> primitivePerformWithArgs [
 					        argumentCount := 2.
 					        messageSelector := performSelector ] ]
 		ifFalse: [ self unPop: 1 ]
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> primitiveQuit [
+	"BB p. 653"
+	Exception signal: 'NOT IMPLEMENTED YET !!'
 ]
 
 { #category : #'arithmetic primitives' }
@@ -2737,6 +2807,12 @@ Interpreter >> primitiveSignal [
    asynchronousSignal: routine. (BB 646)"
 
    self synchronousSignal: self stackTop
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> primitiveSignalAtOopsLeftWordsLeft [
+	"BB p. 653"
+	Exception signal: 'NOT IMPLEMENTED YET !!'
 ]
 
 { #category : #'array stream primitives' }
