@@ -607,6 +607,13 @@ ObjectMemory >> instantiateClass: classPointer withWords: length [
 
 { #category : #'integer access' }
 ObjectMemory >> integerObjectOf: value [
+	"Return the value of the instance of
+   Smalllnteger whose pointer is objectPointer (BB p. 573)"
+
+	"NOTE: the value argument here is a Pharo native 31-bit Integer
+	value. If value is positive the code below works. If 
+	value is negative it works too because all bits from 
+	bit 15 to 31 are all ones."
    ^ (value bitShift: 1) + 1
 ]
 
@@ -619,6 +626,8 @@ ObjectMemory >> integerValueOf: objectPointer [
 
 { #category : #'integer access' }
 ObjectMemory >> isIntegerObject: objectPointer [
+	"Return true if objectPointer is an instance of
+    Smalltnteger, false if not. (BB p. 573) "
    ^ (objectPointer bitAnd: 1) = 1
 ]
 
@@ -632,6 +641,7 @@ ObjectMemory >> isIntegerValue: valueWord [
 { #category : #'private - object table entries' }
 ObjectMemory >> lastPointerOf: objectPointer [
 	| methodHeader |
+	"ERROR on the line below in BB 1983 Edition. Fixed in 1985 Edition"
 	(self pointerBitOf: objectPointer) = 0
 		ifTrue: [ (self classBitsOf: objectPointer) = MethodClass
 				ifTrue: [ methodHeader := self heapChunkOf: objectPointer word: HeaderSize.
@@ -1187,6 +1197,9 @@ ObjectMemory >> storeWord: wordIndex ofObject: objectPointer withValue: valueWor
 
 { #category : #'pointer swapping' }
 ObjectMemory >> swapPointersOf: firstPointer and: secondPointer [
+	"Make firstPointer refer to the object whose object pointer 
+	was secondPointer and make secondPointer refer to the object
+	whose object pointer was firstPointer. (BB p. 573)"
    | firstSegmentBits firstLocationBits firstPointerBit firstOddBit |
    firstSegmentBits := self segmentBitsOf: firstPointer.
    firstLocationBits := self locationBitsOf: firstPointer.
