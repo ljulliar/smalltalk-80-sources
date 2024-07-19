@@ -455,7 +455,8 @@ ObjectMemory >> freeBitOf: objectPointer put: value [
 { #category : #testing }
 ObjectMemory >> hasObject: objectPointer [
 	"BB doesn't give the code for this method.
-	Got it from dbanay implementation"
+	I implemented from the first page of the Part 4
+	Errata in the Xerox VM Booklet - bullet 3"
 	self cantBeIntegerObject: objectPointer.
 	^ (self freeBitOf: objectPointer = 0) & (self countBitsOf: objectPointer ~= 0)
 ]
