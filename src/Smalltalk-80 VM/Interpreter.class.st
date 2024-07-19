@@ -289,17 +289,21 @@ Interpreter >> checkProcessSwitch [
    [semaphoreIndex > 0]
       whileTrue: [self synchronousSignal: (semaphoreList at: semaphoreIndex).
                   semaphoreIndex := semaphoreIndex - 1].
-      newProcessWaiting
-         ifTrue: [newProcessWaiting := false.
-                  activeProcess := self activeProcess.
-                  memory storePointer: SuspendedContextIndex
-                         ofObject: activeProcess
-                         withValue: activeContext.
-                  memory storePointer: ActiveProcessIndex
-                         ofObject: self schedulerPointer
-                         withValue: newProcess.
-                  self newActiveContext: (memory fetchPointer: SuspendedContextIndex
-                                                 ofObject: newProcess)]
+   newProcessWaiting
+      ifTrue: [newProcessWaiting := false.
+               activeProcess := self activeProcess.
+               memory storePointer: SuspendedContextIndex
+                      ofObject: activeProcess
+                      withValue: activeContext.
+               memory storePointer: ActiveProcessIndex
+                      ofObject: self schedulerPointer
+                      withValue: newProcess.
+               self newActiveContext: (memory fetchPointer: SuspendedContextIndex
+                                              ofObject: newProcess).
+               "From dbanay: Need to remove reference"
+               memory decreaseReferencesTo: newProcess.
+               newProcess := nil]
+
 ]
 
 { #category : #'primitive methods' }
@@ -843,6 +847,8 @@ Interpreter >> firstContext [
    the scheduler's active Process. (BB 644)"
 
    newProcessWaiting := false.
+   "ERROR From dbanay need to initialize new Process"
+	newProcess := nil.
    ^memory fetchPointer: SuspendedContextIndex
            ofObject: self activeProcess
 ]
@@ -2404,12 +2410,21 @@ Interpreter >> primitiveNewMethod [
    takes the number of bytes as the first argument and the header as the second 
    argument. The header, in turn, indicates the number of pointer fields. (BB 637)"
 
-	| header bytecodeCount class size |
+	| header bytecodeCount class size literalCount |
 	header := self popStack.
 	bytecodeCount := self popInteger.
 	class := self popStack.
-	size := ((self literalCountOfHeader: header) + 1) * 2 + bytecodeCount.
-	self push: (memory instantiateClass: class withBytes: size)
+	"ERROR from dbanay : need to initialize literal frame"
+	literalCount := self literalCountOfHeader: header.
+	size := (literalCount + 1) * 2 + bytecodeCount.
+	newMethod := memory instantiateClass: class withBytes: size.
+	0 to: literalCount - 1 do: [ :i | 
+		memory storeWord: LiteralStart + i ofObject: newMethod  withValue: NilPointer.
+		].
+	"Note from dbanay : using storeWord vs storePointer because it
+   initialized memory with zeros and this break ref counting"
+   memory storeWord: HeaderIndex ofObject: newMethod  withValue: header.
+	self push: newMethod 
 ]
 
 { #category : #'storage management primitives' }
@@ -2420,6 +2435,9 @@ Interpreter >> primitiveNewWithArg [
 
 	| size class |
 	size := self positive16BitValueOf: self popStack.
+	"ERROR from dbanay check maw size"
+	self success: size <= 65533.
+	
 	class := self popStack.
 	self success: (self isIndexable: class).
 	self success
@@ -3151,9 +3169,24 @@ Interpreter >> removeFirstLinkOfList: aLinkedList [
    Routines removeFirstLinkOfList:, addLastLink:toList: and isEmptyList: are used 
    to manipulate LinkedLists. (BB 644)"
 
+	"From dbanay: The routines listed here ignore the reference-counting 
+	problem in the interest of clarity. (BB pg. 644).
+   Found and fixed. -dbanay"
+
    | firstLink lastLink nextLink |
    firstLink := memory fetchPointer: FirstLinkIndex
                        ofObject: aLinkedList.
+
+    "Also from dbanayWhen the link list is updated the references to fistLink
+    will drop to zero. So, we need to return an increased pointer that
+    must be decreased by the caller.
+    Calls sequence:
+         suspendActive ->  wakeHighestPriority -> removeFirstLinkOfList ->
+         synchronousSignal -> removeFirstLinkOfList."
+
+	"dbanay: protect it in case lastLink = firstLink"
+	memory increaseReferencesTo: firstLink.
+
    lastLink := memory fetchPointer: LastLinkIndex
                       ofObject: aLinkedList.
    lastLink = firstLink
@@ -3791,7 +3824,14 @@ Interpreter >> superclassOf: classPointer [
 Interpreter >> suspendActive [
    "Suspend active process (BB 646)"
 
-   self transferTo: self wakeHighestPriority
+	| aProcess |
+	"Original code :
+	self transferTo: self wakeHighestPriority"
+	"Modified code from dbanay"
+	"Note: wakeHighestPriority returns a pointer that must be decreased by caller"	
+	aProcess := self wakeHighestPriority.
+	self transferTo: aProcess.
+	memory decreaseReferencesTo: aProcess.
 ]
 
 { #category : #'control primitives' }
@@ -3804,7 +3844,7 @@ Interpreter >> synchronousSignal: aSemaphore [
    signals. The isEmptyList:, resume:, and removeFirstLinkOfList: routines 
    are described later in this section. (BB 643)"
 
-   | excessSignals |
+   | excessSignals aProcess |
    (self isEmptyList: aSemaphore)
       ifTrue: [
 			excessSignals := self fetchInteger: ExcessSignalsIndex
@@ -3812,7 +3852,13 @@ Interpreter >> synchronousSignal: aSemaphore [
          self storeInteger: ExcessSignalsIndex
               ofObject: aSemaphore
               withValue: excessSignals + 1]
-      ifFalse: [self resume: (self removeFirstLinkOfList: aSemaphore)]
+		" Error correction on original code from dbanay"
+      "ifFalse: [self resume: (self removeFirstLinkOfList: aSemaphore)]"
+      ifFalse: [
+			aProcess := self removeFirstLinkOfList: aSemaphore.
+			self resume: aProcess.
+			memory decreaseReferencesTo: aProcess.
+			]
 ]
 
 { #category : #contexts }
@@ -3857,7 +3903,11 @@ Interpreter >> transferTo: aProcess [
    detected. It sets the newProcessWaiting and newProcess registers. (BB 643)"
 
    newProcessWaiting := true.
-   newProcess := aProcess
+   "dbanay needs ref count newProcess line below addedd"
+   newProcess ~~ NilPointer ifTrue: [ memory decreaseReferencesTo: newProcess ].
+   newProcess := aProcess.
+   "dbanay needs ref count newProcess line below addedd"
+	memory increaseReferencesTo: newProcess
 ]
 
 { #category : #contexts }
