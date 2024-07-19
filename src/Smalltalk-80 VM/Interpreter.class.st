@@ -113,11 +113,11 @@ Class {
 Interpreter class >> initialize [
 	"Not BB code"
 	
-	PushBytecodeReceivers := #('true', 'false', 'nil', '-1', '0', '1', '2').
-	ExtendedPushVariableTypes := #('Receiver Variable', 'Temporary Location', 'Literal Constant', 'Literal Variable').
+	PushBytecodeReceivers := #('true' 'false' 'nil' '-1' '0' '1' '2').
+	ExtendedPushVariableTypes := #('Receiver Variable' 'Temporary Location' 'Literal Constant' 'Literal Variable').
    ExtendedStoreVariableTypes := ExtendedPushVariableTypes.
-	ReturnBytecodeTypes := #('true', 'false', 'nil').
-	ReturnTopStackTypes := #('Message', 'Block').
+	ReturnBytecodeTypes := #('true' 'false' 'nil').
+	ReturnTopStackTypes := #('Message' 'Block').
 ]
 
 { #category : #'instance creation' }
