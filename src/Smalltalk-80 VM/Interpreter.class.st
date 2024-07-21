@@ -29,7 +29,11 @@ Class {
 		'debug',
 		'cycleCounter',
 		'classOops',
-		'methodOops'
+		'methodOops',
+		'currentDisplay',
+		'currentDisplayWidth',
+		'currentDisplayHeight',
+		'hal'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -1001,7 +1005,7 @@ Interpreter >> initializeClassOopsWith: stream [
 		"Transcript show: 'Class cols: '; nextPutAll: cols printString; cr."
 		cols size = 3 ifTrue: [ 
 				oop := (cols at: 2).	
-				oop := Integer readFrom: (oop copyFrom: 4 to: oop size) base: 16.
+				oop := Integer readFrom: (oop allButFirst: 3) base: 16.
 				classOops at: oop put: (cols at: 3) 
 			]
 		]
@@ -1111,7 +1115,7 @@ Interpreter >> initializeMethodOopsWith: stream [
 		"Transcript show: 'Method cols: '; nextPutAll: cols printString; cr."
 		cols size = 3 ifTrue: [ 
 				oop := (cols at: 2).	
-				oop := Integer readFrom: (oop copyFrom: 4 to: oop size) base: 16.
+				oop := Integer readFrom: (oop allButFirst: 3) base: 16.
 				methodOops at: oop put: (cols at: 3) 
 			]
 		]
