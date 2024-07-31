@@ -690,8 +690,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	"Keep track of remaining free space remining in each segment"
 	"At the beginning the memory is empty so all segment spaces are free"
 	heapSpaceRemaining := Array new: HeapSegmentCount withAll: (HeapSpaceStop + 1).
-	
-	"addressRelocation := Dictionary new."
+
 	segment := FirstHeapSegment. "start loading in first memory segment"
 	offset  := 0. "offset in memory segment"
 	address := 0. "absolute address of object in snapshot"
@@ -720,14 +719,15 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 						nextPutAll: ' snapshot position '; nextPutAll: address printString; cr.
 					].
 		
-				"Oes this object requires an extra word ? (see 
+				"Ooes this object requires an extra word ? (see 
 				HugeSize objects (BB p. 679 and 685)"
 				space := 	((objectSize < HugeSize) or: [(self pointerBitOf: oop) = 0])
 					ifTrue: [ objectSize ]
 					ifFalse: [ objectSize + 1 ].
 				
 				"If there isn't enough space in the current segment to store
-				this object then move to next segment"
+				this object then move to next segment. Reminder: adding + 1
+				on the array index here because index numbering starts at 1 in Smalltalk"
 				(space > heapSpaceRemaining at: (segment - FirstHeapSegment + 1))
 				   ifTrue: [ 
 						segment := segment + 1.
@@ -748,11 +748,11 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 				"Start with the object size"
 				self sizeBitsOf: oop put: objectSize.
 				
-				"Then the class word"
+				"Then set the class word"
 			   self classBitsOf: oop put: (self class readUInt16From: stream).
 			
 				"Finally load all remaining object fields"
-				0 to: objectSize - HeaderSize do: [ :i |
+				0 to: objectSize - HeaderSize - 1 do: [ :i |
 					word := self class readUInt16From: stream.
 					self storeWord: i ofObject: oop withValue: word.
 					].
