@@ -33,7 +33,8 @@ Class {
 		'currentDisplay',
 		'currentDisplayWidth',
 		'currentDisplayHeight',
-		'hal'
+		'hal',
+		'fileSystem'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -125,10 +126,10 @@ Interpreter class >> initialize [
 ]
 
 { #category : #'instance creation' }
-Interpreter class >> withSnapshot: stream debug: debug [
+Interpreter class >> withSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug [
    "the code below ollows the Seaside Object initialization conventions"
 	^ self basicNew
-		initializeWithSnapshot: stream debug: debug;
+		initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug;
 		yourself
 ]
 
@@ -1191,10 +1192,12 @@ Interpreter >> initializeStreamIndices [
 ]
 
 { #category : #initialization }
-Interpreter >> initializeWithSnapshot: stream debug: onOff [
+Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: onOff [
    "Not BB code"
    "Initialize the Interpreter"
  
+	hal := hwAbstractionLayer.
+	fileSystem := hostFS.
 	debug := onOff.
 	
 	"Make sure class variables are initialized"
