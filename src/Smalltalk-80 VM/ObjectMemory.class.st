@@ -812,7 +812,9 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	"Not BB code"
 	"Load object table from VM snapshot. The length is given in 16-bit words"
 	
-	| word |
+	| word1 word2 |
+	
+   "Transcript show: 'ot offset: '; nextPutAll: fileOffset printString; cr."
 
 	"----------------------------------------------------------"
 	"Skip to the object table offset, rounding to the nearest
@@ -825,8 +827,8 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 
 	0 to: (otLength - 2) by: 2 do: [ :i |
 		"read first 16-bit words of the object table entry"
-		word := self class readUInt16From: stream.
-		self ot: i put: word.
+		word1 := self class readUInt16From: stream.
+		self ot: i put: word1.
 		
 		debug ifTrue: [ 
 			Transcript show: '----------------------------'; cr; 
@@ -836,17 +838,22 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 				nextPutAll: ' p: '; nextPutAll: (self pointerBitOf: i) printString;
 				nextPutAll: ' f: '; nextPutAll: (self freeBitOf: i) printString;
 				nextPutAll: ' segment: '; nextPutAll: (self segmentBitsOf: i) printString;
-				nextPutAll: ' (value: '; nextPutAll: word printString; nextPutAll: ')';
+				nextPutAll: ' (value: '; nextPutAll: word1 printString; nextPutAll: ')';
 		 	 	cr.
 				].
 
 		"read second 16 bit word - location bits"
 		"Note: the location word will be adjusted when object space is loaded"
-		word := self class readUInt16From: stream.
-		self locationBitsOf: i put: word.
+		word2 := self class readUInt16From: stream.
+		self locationBitsOf: i put: word2.
 		debug ifTrue: [ 
-			Transcript show: 'location: '; nextPutAll: word printString; cr.
+			Transcript show: 'location: '; nextPutAll: word2 printString; cr.
 			].
+		
+		"Transcript show: 'oop: '; nextPutAll: i printString;
+			nextPutAll: ' word1: '; nextPutAll: word1 printString;
+			nextPutAll: ' word2: '; nextPutAll: word2 printString; cr."
+		
 		].
 
 	"Initialize Free pointer list pointer"
@@ -857,6 +864,7 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		self ot: i put: 0.
 		self freeBitOf: i put: 1.
 		self locationBitsOf: i put: 0.
+		"Transcript show: 'mark free oop: '; nextPutAll: i printString; cr."
 		].
 	
 	"Build the object table free entry list"
@@ -864,7 +872,9 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	entry any way (Xerox Virtual Image booklet p. 2"
 	ObjectTableSize-2 to: 2 by: -2 do: [ :i |
 		((self freeBitOf: i) = 1) 
-			ifTrue: [ self toFreePointerListAdd: i ]
+			ifTrue: [ self toFreePointerListAdd: i.
+		"Transcript show: 'free oop in list: '; nextPutAll: i printString; cr."
+		].
 		].
 	
 	debug ifTrue: [ 
