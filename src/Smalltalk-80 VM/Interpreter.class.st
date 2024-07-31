@@ -1818,7 +1818,9 @@ Interpreter >> primitiveAtPut [
 Interpreter >> primitiveBeDisplay [
 	"Not BB code - This primitive is implementation dependent
 	From BB p. 651
-	beDisplay invokes the primitiveBeDisplay primitive routine. 
+	The instance of DisplayScreen that should be used to
+   update the screen is designated by sending it the message beDisplay.
+   This message invokes the primitiveBeDisplay primitive routine.  
 	The screen will be updated from the last recipient of 
 	beDisplay approximately 60 times a second."
 	
@@ -1826,15 +1828,28 @@ Interpreter >> primitiveBeDisplay [
 	
 	"Fetch the dimensions of the current display"
 	newDisplay := self stackTop.
+	
+	currentDisplay = newDisplay ifTrue: [ ^ self ].
+	
 	width := self fetchInteger: WidthInForm ofObject: newDisplay.
 	height := self fetchInteger: HeightInForm ofObject: newDisplay.
-	
-   debug ifTrue: [ 
-		Transcript show: 'Display width: '; nextPutAll: width printString;
+			
+   	debug ifTrue: [ 
+		Transcript show: 'newDisplay: '; nextPutAll: newDisplay printString;
+		   	nextPutAll: ' width: '; nextPutAll: width printString;
 			nextPutAll: ' height: '; nextPutAll: height printString; cr.
 		].
-	
-	self halt.
+
+	"Interesting fact: In order to save space when writing the object image
+    Smalltalk resizes the display to the current width x 100 just before saving.
+    When the system resumes, it will be resized to the last actual size.
+    Here we ignore the change to the height of 100. (From dbanay)"
+	height <= 100 ifTrue: [ ^ self ]. 
+	(hal displayWidth: width displayHeight: height)
+		ifFalse: [ self primitiveFail ].
+	currentDisplayWidth := width.
+	currentDisplayHeight := height.
+
 ]
 
 { #category : #'storage management primitives' }
