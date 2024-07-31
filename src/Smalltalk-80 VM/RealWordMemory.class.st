@@ -62,13 +62,13 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
 	"Not BB code. For bit index see BB p. 657"
-	| mask word |
+	| shift mask |
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
 	
-	mask  := (1 << (lastBitIndex - firstBitIndex + 1) - 1) bitShift: firstBitIndex.
-	word  := self segment: s word: w.
-	^ (word bitAnd: mask) bitShift: firstBitIndex negated.
+	shift := (self segment: s word: w) >> (15-lastBitIndex).
+	mask  := (1 << (lastBitIndex - firstBitIndex + 1) - 1).
+	^ (shift & mask)
 ]
 
 { #category : #access }
@@ -78,17 +78,17 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex put: v
 	
 	"Not BB code. For bit index see BB p. 657"
 	|mask word|
-	mask  := (1 << (lastBitIndex - firstBitIndex + 1) - 1).
+	mask  := (1 << (lastBitIndex - firstBitIndex + 1)) - 1.
 	
 	"Some preliminary sanity checks"
 	self assert: ( (s >= 0) and: (s < SegmentCount)).
 	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
-	self assert: ( (value >= 0) and: (value <= mask)).
+	self assert: ( value = (value & mask)).
 	
-	mask := mask bitShift: firstBitIndex.
 	word := self segment: s word: w.
-	word := (word bitAnd: (mask bitInvert)) bitOr: (value bitShift: firstBitIndex).
-	^ self segment: s word: w put: word 
+	word := (word & ((mask << (15-lastBitIndex)) bitInvert)) | (value << (15 - lastBitIndex)).
+	self segment: s word: w put: word.
+	^ value
 ]
 
 { #category : #access }
