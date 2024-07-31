@@ -236,7 +236,7 @@ ObjectMemory >> cantBeIntegerObject: objectPointer [
 	"object-access routine requires that its object pointer argument really be an object table index. This routine is used to trap erroneous calls"
 
 	(self isIntegerObject: objectPointer)
-	   "ERROR: Sensor and notify: not defined"
+	   "Code from BB 661 - ERROR: Sensor and notify: not defined"
 		ifTrue: [ Sensor notify: 'A small integer has no object table entry' ]
 ]
 
