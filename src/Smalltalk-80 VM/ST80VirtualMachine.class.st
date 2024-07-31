@@ -13,15 +13,13 @@ Class {
 	#name : #ST80VirtualMachine,
 	#superclass : #Object,
 	#instVars : [
-		'displayWidth',
-		'displayHeight',
 		'vmImageFile',
 		'vmSourcesFile',
 		'vmChangesFile',
 		'vmImagePath',
-		'interpreter',
 		'vmClassOopsFile',
 		'vmMethodOopsFile',
+		'interpreter',
 		'directory',
 		'debug'
 	],
@@ -36,11 +34,7 @@ ST80VirtualMachine >> initialize [
 	| snapshot |
 	
 	debug := true.
-	
-	"Initial Screen dimensions can be found
-	 in the Xerox ST80 Virtual Image Booklet p. 3"
-	displayWidth := 640.
-	displayHeight := 480.
+
 	vmImagePath := '/misc/applications/Smalltalk/ST80_Image/'.
 	vmImageFile := vmImagePath, 'Smalltalk-80.image'.
 	vmSourcesFile := vmImagePath, 'Smalltalk-80.sources'.
@@ -50,7 +44,10 @@ ST80VirtualMachine >> initialize [
 	
 	"Open snapshot stream"
 	snapshot := vmImageFile asFileReference binaryReadStream.
-	interpreter := Interpreter withSnapshot: snapshot debug: debug.
+	interpreter := Interpreter withSnapshot: snapshot 
+						hal: ST80HardwareAbstractionLayer new
+						fileSystem: ST80FIleSystem new
+						debug: debug.
 	
 	"Load symbol tables if debug activated"
 	debug ifTrue: [ 
