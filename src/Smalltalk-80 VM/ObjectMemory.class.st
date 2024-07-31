@@ -65,16 +65,20 @@ ObjectMemory class >> initialize [
 	ObjectTableSegment := 15.
 	"First word reserved for head of free pointer list"
 	ObjectTableStart := 0.
-	"64K minus the 2 reserved words at the end (e.g. one for FreePointerList, one spare)"
+	"HugeSize	The smallest number that is too large to represent in 
+	an eight-bit count field; that is, 256."
 	HugeSize := 256.
+	"RealWordMemory segment size (in words) minus the 2 reserved words 
+	at the end (e.g. one for FreePointerList, one spare)"
 	ObjectTableSize := 65534.
 	"Definition of NilPointer BB p. 576, p. 661" 
 	NilPointer := 2.
 
 	"Free Space Related Constants part 2 (BB p. 664)"
 	"----------------------------------------"
-   "Head of free chunk pointer list stored in last word of Object Table segment"
-	FreePointerList := 65535.
+   "Head of free chunk pointer list stored in the first of 
+	the 2 words reserved at the end of the Object Table segment"
+	FreePointerList := ObjectTableStart + ObjectTableSize.
 	"Free chunks pointer by size are stored at the end of each segment"
 	FirstFreeChunkList := HeapSpaceStop + 1.
 	LastFreeChunkList := FirstFreeChunkList + BigSize.
