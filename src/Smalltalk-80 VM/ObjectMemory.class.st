@@ -336,7 +336,7 @@ ObjectMemory >> fetchByte: byteIndex ofObject: objectPointer [
 	|value|
 	value := self heapChunkOf: objectPointer byte: (HeaderSize * 2 + byteIndex).
 	debug ifTrue: [ 
-		Transcript show: objectPointer printString; nextPutAll: ' byte '; 
+		Transcript show: objectPointer printString; nextPutAll: ' byte: '; 
 			nextPutAll: byteIndex printString; nextPutAll: ' = ';
 			nextPutAll: value printString; cr.
 		 ].
@@ -644,10 +644,9 @@ ObjectMemory >> integerValueOf: objectPointer [
 	 are actually ST80 negative values. 16384 represents -16384,
 	 16385 is -16383,... and -1 is 32767"
 	integerValue > 16383 ifTrue: [ 
-		Transcript show: 'Converting negative value from '; nextPutAll: integerValue.
+		Transcript show: 'Converting negative value from '; nextPutAll: integerValue printString.
 		integerValue := integerValue - 32768.
-		Transcript show: ' to '; nextPutAll: integerValue; cr.
-		self halt.
+		Transcript show: ' to '; nextPutAll: integerValue printString; cr.
 		].
    ^ integerValue 
 
@@ -1211,7 +1210,7 @@ ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valu
 	value := self heapChunkOf: objectPointer word: chunkIndex put: valuePointer.
 
 	debug ifTrue: [ 
-		Transcript show: objectPointer printString; nextPutAll: ' pointer '; 
+		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
 			nextPutAll: chunkIndex printString; nextPutAll: ' <- ';
 			nextPutAll: value printString; cr.
 		 ].
