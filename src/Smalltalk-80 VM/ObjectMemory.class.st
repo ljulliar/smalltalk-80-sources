@@ -589,7 +589,10 @@ ObjectMemory >> instanceAfter: objectPointer [
 { #category : #'object creation' }
 ObjectMemory >> instantiateClass: classPointer withBytes: length [
    | size |
-   size := HeaderSize + ((length + 1) / 2).
+	"Replace decimal division by integer division"
+	"Original BB code:
+   size := HeaderSize + ((length + 1) / 2)."
+   size := HeaderSize + ((length + 1) // 2).
    ^ self allocate: size odd: length \\ 2 pointer: 0 extra: 0 class: classPointer
 ]
 
