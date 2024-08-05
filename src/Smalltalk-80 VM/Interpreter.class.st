@@ -236,7 +236,7 @@ Interpreter >> arithmeticSelectorPrimitive [
    only if the receiver is a SmallInteger. The actual primitive routines 
    will be described in the section on arithmetic primitives. (BB 619)"
 
-   self success: (memory isIntegerObject: (self stackValue: 1)).
+   "self success: (memory isIntegerObject: (self stackValue: 1))."
    self success
    ifTrue: [currentBytecode = 176 ifTrue: [^self primitiveAdd].
             currentBytecode = 177 ifTrue: [^self primitiveSubtract].
