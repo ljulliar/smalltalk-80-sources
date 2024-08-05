@@ -3042,7 +3042,7 @@ Interpreter >> primitiveValue [
 				         ofObject: activeContext
 				         toIndex: TempFrameStart
 				         ofObject: blockContext.
-			      self pop argumentCount + 1.
+			      self pop: argumentCount + 1.
 			      initialIP := memory fetchPointer: InitialIPIndex
 				                       ofObject: blockContext.
 			      memory storePointer: InstructionPointerIndex
