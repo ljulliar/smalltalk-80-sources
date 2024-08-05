@@ -319,6 +319,11 @@ ObjectMemory >> deallocate: objectPointer [
 	self toFreeChunkList: (space min: BigSize) add: objectPointer
 ]
 
+{ #category : #accessing }
+ObjectMemory >> debug: onOff [
+  debug := onOff.
+]
+
 { #category : #'reference counting' }
 ObjectMemory >> decreaseReferencesTo: objectPointer [
 	"Substract one to the reference count of the object whose object pointer is ObjectPointer"

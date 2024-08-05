@@ -391,6 +391,11 @@ Interpreter >> cycle [
 
 ]
 
+{ #category : #accessing }
+Interpreter >> debug: onOff [
+  debug := onOff.
+]
+
 { #category : #'bytecode dispatch' }
 Interpreter >> dispatchArithmeticPrimitives [
   "There are three sets of arithmetic primitive routines, one for SmallIntegers,
