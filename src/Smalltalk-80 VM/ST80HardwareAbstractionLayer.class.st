@@ -29,7 +29,7 @@ Class {
 ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 	| newDisplayMorph |
-
+	"self halt."
 	"If same dimensions do nothing and return"
 	(displayWidth = width and: displayHeight = height) ifTrue: [ ^ true ].
 	
@@ -39,7 +39,7 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 	"A form cannot be resized so create
 	a new one with proper dimensions even when
 	a form was previously created"
-	displayForm := Form extent: width@height depth: 2.
+	displayForm := Form extent: width@height depth: 1.
 	displayForm fill: (0@0 extent: displayForm extent) rule: Form over fillColor: Color white.
 	newDisplayMorph := displayForm asMorph.
 	
@@ -66,8 +66,25 @@ ST80HardwareAbstractionLayer >> initialize [
 
 	"Initial Screen dimensions can be found
 	in the Xerox ST80 Virtual Image Booklet p. 3"
-	displayWidth := 640.
-	displayHeight := 480.
+	displayWidth := nil. "640."
+	displayHeight := nil. "480."
 	display := nil.
 	
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> updateDisplayRect: rectangle origin: origing corner: corner bitmap: bitmap [
+	"Not BB code"
+	
+	| form morph |
+" code if ST80 bitmap is accessed as stream:
+stream next: aBitmap size into: aBitmap startingAt: 1"
+
+"read as array directly from real wordl memory"
+	form := Form extent: 640@480 depth: 1 fromArray: bitmap offset: 0@0.
+	morph := form asMorph.
+	window removeMorph: displayMorph.
+	window addMorph: morph frame: (0@0 corner: 1@1).
+	displayMorph := morph.
+	displayForm := form.
 ]

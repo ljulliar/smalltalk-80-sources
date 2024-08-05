@@ -2879,6 +2879,22 @@ Interpreter >> primitiveSampleInterval [
 	   ifFalse: [ self unPop: 1 ]
 ]
 
+{ #category : #'primitive methods' }
+Interpreter >> primitiveScanCharacters [
+
+	| scannerPointer  characterScan |
+	
+	scannerPointer := self stackTop.
+	characterScan  := ST80CharacterScanner scannerPointer: scannerPointer memory: memory.
+	
+	self success: ((scannerPointer combinationRule) between: 0 and: 15).
+	success ifFalse: [ 
+		self error: ('Unsupported BitBlt combination rule in Character Scanner: ', scannerPointer combinationRule printString).  
+		].
+	
+
+]
+
 { #category : #'control primitives' }
 Interpreter >> primitiveSignal [
    "The primitiveSignal routine is associated with the signal message in 
