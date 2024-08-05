@@ -20,6 +20,21 @@ Class {
 	#category : #'Smalltalk-80 VM'
 }
 
+{ #category : #'instance creation' }
+ST80Form class >> fromObject: objectPointer memory: memory [
+   "the code below follows the Seaside Object initialization conventions"
+	^ self basicNew
+		initializeFromObject: objectPointer memory: memory;
+		yourself
+]
+
+{ #category : #'class initialization' }
+ST80Form class >> initialize [
+	BitsInForm   := 0.
+	WidthInForm  := 1.
+	HeightInForm := 2.
+]
+
 { #category : #accessing }
 ST80Form >> bits [
 
