@@ -1292,6 +1292,12 @@ ObjectMemory >> toFreePointerListAdd: objectPointer [
 	self headOfFreePointerListPut: objectPointer
 ]
 
+{ #category : #accessing }
+ObjectMemory >> wordMemory [
+
+	^ wordMemory
+]
+
 { #category : #'private - marking gc' }
 ObjectMemory >> zeroReferenceCounts [
 	"Sets the count fields of all objects to 0 is called zeroReferenceCounts. It is superfluous to zero the count field of a free chunk or of a free entry. Nevertheless, the following version zeroes the count field of every entry, because on most computers, it takes less time to zero the first byte of an entry than it takes to test the status of that entry"
