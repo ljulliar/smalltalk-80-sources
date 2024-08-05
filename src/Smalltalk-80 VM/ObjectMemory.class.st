@@ -615,12 +615,15 @@ ObjectMemory >> instantiateClass: classPointer withWords: length [
 ObjectMemory >> integerObjectOf: value [
 	"Return the value of the instance of
    Smalllnteger whose pointer is objectPointer (BB p. 573)"
-
+	"Original BB code:
+	^ (value bitShift: 1) + 1"
+	
 	"NOTE: the value argument here is a Pharo native 31-bit Integer
 	value. If value is positive the code below works. If 
 	value is negative it works too because all bits from 
 	bit 15 to 31 are all ones."
-   ^ (value bitShift: 1) + 1
+	^ ((value bitShift: 1) bitAnd: 16rFFFE) bitOr: 1.
+   
 ]
 
 { #category : #'integer access' }
