@@ -38,6 +38,7 @@ Class {
 	],
 	#classVars : [
 		'ActiveProcessIndex',
+		'BitsInForm',
 		'BlockArgumentCountIndex',
 		'CallerIndex',
 		'CannotReturnSelector',
@@ -117,17 +118,22 @@ Class {
 { #category : #'class initialization' }
 Interpreter class >> initialize [
 	"Not BB code"
+
+	"Helpers to display deubg information in clear"
+	PushBytecodeReceivers := #( 'true' 'false' 'nil' '-1' '0' '1' '2' ).
+	ExtendedPushVariableTypes := #( 'Receiver Variable'
+	                                'Temporary Location'
+	                                'Literal Constant' 'Literal Variable' ).
+	ExtendedStoreVariableTypes := ExtendedPushVariableTypes.
+	ReturnBytecodeTypes := #( 'true' 'false' 'nil' ).
+	ReturnTopStackTypes := #( 'Message' 'Block' )
+
 	
-	PushBytecodeReceivers := #('true' 'false' 'nil' '-1' '0' '1' '2').
-	ExtendedPushVariableTypes := #('Receiver Variable' 'Temporary Location' 'Literal Constant' 'Literal Variable').
-   ExtendedStoreVariableTypes := ExtendedPushVariableTypes.
-	ReturnBytecodeTypes := #('true' 'false' 'nil').
-	ReturnTopStackTypes := #('Message' 'Block').
 ]
 
 { #category : #'instance creation' }
 Interpreter class >> withSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug [
-   "the code below ollows the Seaside Object initialization conventions"
+   "the code below follows the Seaside Object initialization conventions"
 	^ self basicNew
 		initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug;
 		yourself
