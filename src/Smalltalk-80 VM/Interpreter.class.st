@@ -1990,6 +1990,28 @@ Interpreter >> primitiveClass [
 ]
 
 { #category : #'primitive methods' }
+Interpreter >> primitiveCopyBits [
+
+	| bitBltPointer bitBlt |
+	
+	bitBltPointer := self stackTop.
+	bitBlt := ST80BitBlt bitBltPointer: bitBltPointer memory: memory.
+	
+	self success: ((bitBlt combinationRule) between: 0 and: 15).
+	success ifFalse: [ 
+		self error: ('Unsupported BitBlt combination rule: ', bitBlt combinationRule printString).  
+		].
+	bitBlt copyBits.
+
+	"if the copyBits operates on the Display then update the
+	application window"
+	(bitBlt destForm = currentDisplay) ifTrue: [ 
+		hal updateDisplayRect: Rectangle origin: 0@0  corner: 640@480 bitmap: (bitBlt destForm bitsArray).
+		]
+
+]
+
+{ #category : #'primitive methods' }
 Interpreter >> primitiveCoreLeft [
 	"BB p. 653"
 	Exception signal: 'NOT IMPLEMENTED YET !!'
