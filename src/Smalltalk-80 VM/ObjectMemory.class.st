@@ -48,7 +48,6 @@ ObjectMemory class >> initialize [
 
    "Heap Related constants (BB p. 658)"
 	"----------------------------------"
-
 	"All segments minus one used by the Object Table"
 	HeapSegmentCount := 16-1.
 	"Start at the first segment"
@@ -93,6 +92,10 @@ ObjectMemory class >> initialize [
    "object pointer of CompiledMethod"
 	"BB p. 686 and Xerox VM Image Booklet p. 6"
 	MethodClass := 22.
+	
+	"Not BB code
+	For root object pointers in garbage collection"
+	LastSpecialOop := 52.
 
 ]
 
@@ -735,7 +738,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 				
 				"All objects in snapshot are stored one after the other as if it
 				was a contiguous 20 bit address space"
-				address := ((self segmentBitsOf: oop) bitShift: 16) + (self locationBitsOf: oop).
+				address := self addressOf: oop.
 				stream position: (fileOffset + (address * 2)).
 				
 				"read object size"
