@@ -2083,6 +2083,14 @@ Interpreter >> primitiveDivide [
 		ifFalse: [ self unPop: 2 ]
 ]
 
+{ #category : #'as yet unclassified' }
+Interpreter >> primitiveDrawLoop [
+	"BB 652 The primitiveDrawLoop routine is an optional primitive associated
+   with the drawLoopX:Y: message in BitBIt. If implemented line drawing will 
+	go faster."
+	self primitiveFail.
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveEqual [
 	"Test two objects equality (=) (BB 623)"
@@ -2882,8 +2890,10 @@ Interpreter >> primitiveSampleInterval [
 
 { #category : #'primitive methods' }
 Interpreter >> primitiveScanCharacters [
+   "TODO: Do not implement native implementation for now"
+	self primitiveFail.
 
-	| scannerPointer  characterScan |
+"	| scannerPointer  characterScan |
 	
 	scannerPointer := self stackTop.
 	characterScan  := ST80CharacterScanner scannerPointer: scannerPointer memory: memory.
@@ -2893,7 +2903,7 @@ Interpreter >> primitiveScanCharacters [
 		self error: ('Unsupported BitBlt combination rule in Character Scanner: ', scannerPointer combinationRule printString).  
 		].
 	
-
+"
 ]
 
 { #category : #'control primitives' }
@@ -3006,6 +3016,12 @@ Interpreter >> primitiveStringAtPut [
    self success
       ifTrue: [self push: character]
       ifFalse: [self unPop: 3]
+]
+
+{ #category : #'as yet unclassified' }
+Interpreter >> primitiveStringReplace [
+	"BB 648 undocumented"
+	self primitiveFail.
 ]
 
 { #category : #'arithmetic primitives' }
