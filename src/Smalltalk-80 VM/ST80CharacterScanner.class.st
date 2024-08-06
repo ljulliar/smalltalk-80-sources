@@ -1,3 +1,6 @@
+"
+Faster Native implementation of ST80 CharacterScan
+"
 Class {
 	#name : #ST80CharacterScanner,
 	#superclass : #ST80BitBlt,
