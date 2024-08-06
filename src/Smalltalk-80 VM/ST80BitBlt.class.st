@@ -312,19 +312,20 @@ ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
 	self class initialize.
 
 	memory := m.
-   destForm := ST80Form fromObject: (memory fetchPointer: DestFormIndex ofObject: bbp) memory: memory.
-   sourceForm := ST80Form fromObject: (memory fetchPointer: SourceFormIndex ofObject: bbp) memory: memory.
-   destX := memory fetchPointer: DestXIndex ofObject: bbp.
-   destY := memory fetchPointer: DestYIndex ofObject: bbp.
-   clipX := memory fetchPointer: ClipXIndex ofObject: bbp.
-   clipY := memory fetchPointer: ClipYIndex ofObject: bbp.
-   clipWidth := memory fetchPointer: ClipWidthIndex ofObject: bbp.
-   clipHeight := memory fetchPointer: ClipHeightIndex ofObject: bbp.
-   sourceX := memory fetchPointer: SourceXIndex ofObject: bbp.
-   sourceY := memory fetchPointer: SourceYIndex ofObject: bbp.
-   width := memory fetchPointer: WidthIndex ofObject: bbp.
-   height := memory fetchPointer: HeightIndex ofObject: bbp.
-   combinationRule := memory fetchPointer: CombinationRuleIndex ofObject: bbp.
+   destForm := ST80Form fromObject: (m fetchPointer: DestFormIndex ofObject: bbp) memory: m.
+   sourceForm := ST80Form fromObject: (m fetchPointer: SourceFormIndex ofObject: bbp) memory: m.
+   halftoneForm := ST80Form fromObject: (m fetchPointer: HalftoneFormIndex ofObject: bbp) memory: m.
+   destX := m fetchPointer: DestXIndex ofObject: bbp.
+   destY := m fetchPointer: DestYIndex ofObject: bbp.
+   clipX := m fetchPointer: ClipXIndex ofObject: bbp.
+   clipY := m fetchPointer: ClipYIndex ofObject: bbp.
+   clipWidth := m fetchPointer: ClipWidthIndex ofObject: bbp.
+   clipHeight := m fetchPointer: ClipHeightIndex ofObject: bbp.
+   sourceX := m fetchPointer: SourceXIndex ofObject: bbp.
+   sourceY := m fetchPointer: SourceYIndex ofObject: bbp.
+   width := m fetchPointer: WidthIndex ofObject: bbp.
+   height := m fetchPointer: HeightIndex ofObject: bbp.
+   combinationRule := m fetchPointer: CombinationRuleIndex ofObject: bbp.
 
 ]
 
