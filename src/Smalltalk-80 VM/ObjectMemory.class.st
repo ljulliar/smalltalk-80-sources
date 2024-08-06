@@ -24,6 +24,7 @@ Class {
 		'IntegerClass',
 		'LastFreeChunkList',
 		'LastHeapSegment',
+		'LastSpecialOop',
 		'MethodClass',
 		'NilPointer',
 		'NonPointer',
@@ -129,6 +130,15 @@ ObjectMemory >> abandonFreeChunksInSegment: segment [
 				objectPointer := nextPointer ].
 		self resetFreeChunkList: size inSegment: segment ].
 	^ lowWaterMark
+]
+
+{ #category : #accessing }
+ObjectMemory >> addressOf: objectPointer [
+	"Not BB code.
+	This is a method used to get the absolute address in memoryEnd 
+	of an object. Dirty hack needed to speed up ST80Forms and
+	ST80BitBlt operations"
+	^ ((self segmentBitsOf: objectPointer) bitShift: 16) + (self locationBitsOf: objectPointer).
 ]
 
 { #category : #'private - allocation' }
@@ -567,6 +577,17 @@ ObjectMemory >> initialize [
 	It must be set to its proper value once the Object Space 
 	from the VM image is loaded  in theObjectMemory"
 	currentSegment := 0.
+	
+	"BB 682
+	The subroutine markAccessibleObjects invokes the marking algorithm
+   markObjectsAccessibleFrom: for every object in the list rootObjectPointers.
+   Typically, the list rootObjectPointers includes the object pointer of 
+   the current process and the object pointer of the global variable dictionary,
+   from which all other accessible objects are referenced directly or indirectly. 
+	dbanay implmentation suggest that we should add oop from 0 to last special oop
+   (See SystemTracer in Smalltalk.sources"
+   rootObjectPointers := OrderedCollection new.
+	0 to: LastSpecialOop by: 2  do: [ :oop| rootObjectPointers add: oop ].
 	
 ]
 
