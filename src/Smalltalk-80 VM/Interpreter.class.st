@@ -788,8 +788,8 @@ Interpreter >> extractFloat: objectPointer [
    "This routine is not implemented in the BB. It rebuilds a 32 bit
    Float from 2 words"
 
-   (memory fetchWord: 1 ofObject: objectPointer) << 16 | 
-   (memory fetchWord: 0 ofObject: objectPointer)
+   ^ (memory fetchWord: 1 ofObject: objectPointer) << 16 | 
+   	  (memory fetchWord: 0 ofObject: objectPointer)
 ]
 
 { #category : #'primitive methods' }
@@ -1724,8 +1724,8 @@ Interpreter >> primitiveAsFloat [
    	| integerReceiver |
 	integerReceiver := self popInteger.
 	self success
-		ifTrue: [ self pushFloat: integerReceiver asFloat asIEEE32BitWord ]
-		ifFalse: [ self unPop: 2 ]
+		ifTrue: [ self pushFloat: (integerReceiver asFloat asIEEE32BitWord) ]
+		ifFalse: [ self unPop: 1 ]
 ]
 
 { #category : #'storage management primitives' }
@@ -2138,7 +2138,7 @@ Interpreter >> primitiveFloatAdd [
 	floatReceiver := self popFloat.
 	self success
 		ifTrue: [ floatResult := floatReceiver + floatArgument.
-			       self pushFloat: floatResult ]
+			       self pushFloat:  (floatResult asIEEE32BitWord) ]
 		ifFalse: [ self unPop: 2 ]
 ]
 
@@ -2153,7 +2153,7 @@ Interpreter >> primitiveFloatDivide [
 	self success: floatArgument ~= 0.
 	self success
 		ifTrue: [ floatResult := floatReceiver / floatArgument.
-                self pushFloat: floatResult ]
+                self pushFloat:  (floatResult asIEEE32BitWord) ]
 		ifFalse: [ self unPop: 2 ]
 ]
 
@@ -2235,8 +2235,9 @@ Interpreter >> primitiveFloatMultiply [
 	floatArgument := self popFloat.
 	floatReceiver := self popFloat.
 	self success
-		ifTrue: [ floatResult := floatReceiver * floatArgument.
-			       self pushFloat: floatResult ]
+		ifTrue: [ 
+			floatResult := floatReceiver * floatArgument.
+			self pushFloat: (floatResult asIEEE32BitWord) ]
 		ifFalse: [ self unPop: 2 ]
 ]
 
@@ -2263,7 +2264,7 @@ Interpreter >> primitiveFloatSubstract [
 	floatReceiver := self popFloat.
 	self success
 		ifTrue: [ floatResult := floatReceiver - floatArgument.
-			       self pushFloat: floatResult ]
+			       self pushFloat: (floatResult asIEEE32BitWord) ]
 		ifFalse: [ self unPop: 2 ]
 ]
 
@@ -3190,7 +3191,7 @@ Interpreter >> pushConstantBytecode [
 ]
 
 { #category : #'primitive methods' }
-Interpreter >> pushFloat: integerValue [
+Interpreter >> pushFloat: floatValue [
    "This routine is not implemented in the BB. It is needed to push a 32 bit
     Float on the stack (see primitiveAsFloat)"
 
@@ -3198,8 +3199,8 @@ Interpreter >> pushFloat: integerValue [
    "Create a Float object (IEEE 32 bits = 2 words long), split it in 2 words and
    store it in the class instance"
    objectPointer := memory instantiateClass: ClassFloatPointer withWords: 2.
-   memory storeWord: 0 ofObject: objectPointer  withValue: (integerValue bitAnd: 16rffff).
-   memory storeWord: 1 ofObject: objectPointer  withValue: integerValue << 16.
+   memory storeWord: 0 ofObject: objectPointer withValue: (floatValue bitAnd: 16rffff).
+   memory storeWord: 1 ofObject: objectPointer withValue: floatValue >> 16.
 	self push: objectPointer 
 ]
 
