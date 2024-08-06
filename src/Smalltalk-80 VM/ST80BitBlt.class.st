@@ -207,13 +207,15 @@ ST80BitBlt >> computeMasks [
 	mask2 := (RightMasks at: endBits + 1) bitInvert.
 	skewMask := ( skew = 0
 	                ifTrue: [0]
-	                ifFalse: [RightMasks at: 16 - skew + 1])
+	                ifFalse: [RightMasks at: 16 - skew + 1]).
 	"determine number of words stored per line; merge masks if necessary"
 	w < startBits
 	   ifTrue: [ mask1 := mask1 bitAnd: mask2.
 		          mask2 := 0.
 		          nWords := 1 ]
-	   ifFalse: [ nWords := (w - startBits - 1) // 16 + 2 ]
+      "ERROR from dbanay : nWords <-  (w - startBits + 15) // 16 + 1 for False case
+		It's a +1 instead of +2"
+	   ifFalse: [ nWords := (w - startBits - 1) // 16 + 1 ]
 	
 ]
 
@@ -262,7 +264,12 @@ ST80BitBlt >> copyLoop [
 			1 to: nWords do: "here is the inner horizontal loop"
 				[ :word |
 					sourceForm notNil "if source used"
-						ifTrue: [prevWord := prevWord bitAnd: skewMask.
+						ifTrue: [
+							prevWord := prevWord bitAnd: skewMask.
+							"ERROR: from dbanay need to check if out of range. use 0 if that is the case"
+							word <= sourceRaster & (sourceIndex >= 0) & (sourceIndex < (sourceBits size)) 
+								ifTrue: [ thisWord := sourceBits at: sourceIndex + 1 ]
+								ifFalse: [ thisWord := 0 ].
 							thisWord := sourceBits at: sourceIndex + 1.
 							"pick up next word"
 							skewWord :=
@@ -270,8 +277,12 @@ ST80BitBlt >> copyLoop [
 									skewMask bitInvert).
 							prevWord := thisWord.
 							skewWord := (skewWord bitShift: skew) bitOr:
-									(skewWord bitShift: skew - 16)].
-									"16-bit rotate"
+								(skewWord bitShift: skew - 16)].
+							
+					"ERROR Added from dbanay"
+					destIndex >= (destBits size) ifTrue: [ ^ self].
+					
+					"16-bit rotate"
 					mergeWord := self merge: (skewWord bitAnd: halftoneWord)
 							with: (destBits at: destIndex + 1).
 					destBits
