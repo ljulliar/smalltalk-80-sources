@@ -24,6 +24,14 @@ RealWordMemory class >> initialize [
 	WordSegmentCount := 65536.
 ]
 
+{ #category : #access }
+RealWordMemory >> at: address [
+	"Not BB code"
+	"Direct access to memory. Dirty hack to speed up access to
+	Bitmap words"
+	^ realWordMemory at: (address + 1).
+]
+
 { #category : #initialization }
 RealWordMemory >> initialize [
 	"Initialize the real world memory (not BB code)"

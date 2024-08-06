@@ -53,7 +53,7 @@ ST80Form >> bitsArray [
 { #category : #accessing }
 ST80Form >> bitsSize [
 
-	^ memory fetchWordLengthOf: bits.
+	^ width + 15 // 16 * height
 ]
 
 { #category : #accessing }
@@ -68,15 +68,15 @@ ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
 	attributes of the Form coming from the ST80 VM"
 
 	"make sure the class variables are declared"
-
 	self class initialize.
+	
 	oop := objectPointer.
 	memory := objectMemory.
 	width := memory integerValueOf:
 		         (memory fetchWord: WidthInForm ofObject: oop).
 	height := memory integerValueOf:
 		          (memory fetchWord: HeightInForm ofObject: oop).
-	bits := memory fetchWord: BitsInForm ofObject: oop
+	bits := ST80Bitmap fromObject: (memory fetchWord: BitsInForm ofObject: oop) memory: memory.
 ]
 
 { #category : #accessing }
@@ -88,5 +88,5 @@ ST80Form >> width [
 { #category : #'as yet unclassified' }
 ST80Form >> wordCount [
 	"Not BB code"
-	^ (width + 15) / 16 * height.
+	^ (width + 15) // 16 * height.
 ]
