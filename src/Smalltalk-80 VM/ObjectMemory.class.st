@@ -157,8 +157,9 @@ ObjectMemory >> allocate: size odd: oddBit pointer: pointerBit extra: extraWord 
 	default := pointerBit = 0
 		ifTrue: [ 0 ]
 		ifFalse: [ NilPointer ].
-	HeaderSize to: size - 1 do: [ :i | self heapChunkOf: objectPointer word: i put: default ].
-	self sizeBitsOf: objectPointer put: size.
+	HeaderSize to: (size - 1) do: [ :i | 
+		self heapChunkOf: objectPointer word: i put: default ].
+		self sizeBitsOf: objectPointer put: size.
 	^ objectPointer
 ]
 
@@ -291,7 +292,7 @@ ObjectMemory >> countBitsOf: objectPointer put: value [
 
 { #category : #'private - ref count gc' }
 ObjectMemory >> countDown: rootObjectPointer [
-	"Simple garbage collector method to increase reference count (BB p. 677)"
+	"Simple garbage collector method to decrease reference count (BB p. 677)"
 
 	| count |
 	(self isIntegerObject: rootObjectPointer)
