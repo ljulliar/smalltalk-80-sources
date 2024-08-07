@@ -6,6 +6,7 @@ Class {
 	#name : #ST80BitBlt,
 	#superclass : #Object,
 	#instVars : [
+		'interpreter',
 		'memory',
 		'destForm',
 		'sourceForm',
@@ -223,6 +224,20 @@ ST80BitBlt >> computeMasks [
 ST80BitBlt >> copyBits [
 	"BitBltSimulation code BB 356"
 	"The bits copy operation"
+
+	Transcript show: 'copyBits sourceForm: '; nextPutAll: sourceForm oop printString;
+		nextPutAll: ' destForm: '; nextPutAll: destForm oop  printString; cr;
+		nextPutAll: ' destX: '; nextPutAll: destX printString;
+		nextPutAll: ' destY: '; nextPutAll: destY printString; cr;
+		nextPutAll: ' clipX: '; nextPutAll: clipX printString; 			
+		nextPutAll: ' clipY: '; nextPutAll: clipY printString;
+		nextPutAll: ' clipWidth: '; nextPutAll: clipWidth printString; 			
+		nextPutAll: ' clipHeight: '; nextPutAll: clipHeight printString; cr;
+		nextPutAll: ' sourceX: '; nextPutAll: sourceX printString;
+		nextPutAll: ' sourceY: '; nextPutAll: sourceY printString;
+		nextPutAll: ' width: '; nextPutAll: width printString;
+		nextPutAll: ' height: '; nextPutAll: height printString; cr;
+	   nextPutAll: ' combinationRule: '; nextPutAll: height printString; cr.
 	
 	"sets w and h"	
 	self clipRange.
