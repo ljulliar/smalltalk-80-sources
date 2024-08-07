@@ -80,6 +80,12 @@ ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
 ]
 
 { #category : #accessing }
+ST80Form >> oop [
+
+	^ oop
+]
+
+{ #category : #accessing }
 ST80Form >> width [
 
 	^ width
