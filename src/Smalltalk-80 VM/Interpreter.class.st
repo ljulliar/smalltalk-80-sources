@@ -2002,6 +2002,9 @@ Interpreter >> primitiveCopyBits [
 	success ifFalse: [ 
 		self error: ('Unsupported BitBlt combination rule: ', bitBlt combinationRule printString).  
 		].
+	
+	Transcript show: 'bitBltPointer: '; nextPutAll: bitBltPointer printString; cr.
+	Transcript show: 'currentDisplay Form: '; nextPutAll: currentDisplay printString; cr.
 	bitBlt copyBits.
 
 	"if the copyBits operates on the Display then update the
