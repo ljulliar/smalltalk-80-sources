@@ -914,8 +914,8 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	ObjectTableSize-2 to: 2 by: -2 do: [ :i |
 		((self freeBitOf: i) = 1) 
 			ifTrue: [ self toFreePointerListAdd: i.
-		"Transcript show: 'free oop in list: '; nextPutAll: i printString; cr."
-		].
+			"Transcript show: 'free oop in list: '; nextPutAll: i printString; cr."
+			].
 		].
 	
 	debug ifTrue: [ 
