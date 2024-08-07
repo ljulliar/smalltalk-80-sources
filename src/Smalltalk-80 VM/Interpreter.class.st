@@ -2319,10 +2319,6 @@ Interpreter >> primitiveGreaterThan [
 	| integerReceiver integerArgument |
 	integerArgument := self popInteger.
 	integerReceiver := self popInteger.
-	Transcript show: 'primitiveGreaterThan arg: '; 
-	   nextPutAll: integerArgument printString; 
-	   nextPutAll: ' recv: '; nextPutAll: integerReceiver printString; cr.
-	 
 	self success
 		ifTrue: [ integerReceiver > integerArgument
 			          ifTrue: [ self push: TruePointer ]
