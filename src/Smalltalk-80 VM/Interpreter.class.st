@@ -2084,7 +2084,7 @@ Interpreter >> primitiveDivide [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'primitive methods' }
 Interpreter >> primitiveDrawLoop [
 	"BB 652 The primitiveDrawLoop routine is an optional primitive associated
    with the drawLoopX:Y: message in BitBIt. If implemented line drawing will 
@@ -3015,7 +3015,7 @@ Interpreter >> primitiveStringAtPut [
       ifFalse: [self unPop: 3]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'primitive methods' }
 Interpreter >> primitiveStringReplace [
 	"BB 648 undocumented"
 	self primitiveFail.
