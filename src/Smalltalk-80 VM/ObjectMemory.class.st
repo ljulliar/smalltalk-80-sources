@@ -15,6 +15,7 @@ Class {
 	#classVars : [
 		'BigSize',
 		'FirstFreeChunkList',
+		'FirstFreeChunkListSize',
 		'FirstHeapSegment',
 		'FreePointerList',
 		'HeaderSize',
@@ -43,8 +44,11 @@ ObjectMemory class >> initialize [
 	
 	"Free Space Related Constants part #1 (BB p. 664)"
 	"------------------------------------------------"
-	"All free chunks of size 20 and below are kept in a linked list"
-	BigSize := 21.
+	"All free chunks of size 20 and below are kept in a linked list
+	 of their own. Chunks of size greater than 20 are kept in a single
+	 list"
+	BigSize := 20.
+	FirstFreeChunkListSize := BigSize + 1. "Not BB code ljulliard"
 
    "Heap Related constants (BB p. 658)"
 	"----------------------------------"
@@ -55,7 +59,7 @@ ObjectMemory class >> initialize [
 	"Last segment occupied by Object Table (see below)"
 	LastHeapSegment := (FirstHeapSegment + HeapSegmentCount - 1). 
 	"Reserve the last Bigsize words of each segment for Free chunk list heads"
-	HeapSpaceStop := 65535 - (BigSize + 1).
+	HeapSpaceStop := 65536 - FirstFreeChunkListSize - 1.
 	"An object header is 2-word size"
 	HeaderSize := 2.
 	
