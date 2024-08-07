@@ -184,7 +184,8 @@ ObjectMemory >> allocateChunk: size [
 			ifTrue: [ self outOfMemoryError ].	"give up" 
 			].
 	debug ifTrue: [ 
-		Transcript show: 'allocating oop: '; nextPutAll: objectPointer printString; cr.
+		Transcript show: 'allocating oop: '; nextPutAll: objectPointer printString;
+			nextPutAll: ' size: '; nextPutAll: size printString; cr.
 		 ].
 	^ objectPointer.
 
@@ -192,10 +193,14 @@ ObjectMemory >> allocateChunk: size [
 
 { #category : #'private - allocation' }
 ObjectMemory >> attemptToAllocateChunk: size [
-	"First tries to allocate chunk in currentSegment, the segment currently targeted for allocations. 
-If it fails (returns nil), then the routine compacts the next segment and retries the allocation there. This procedure continues until the original segment has been compacted and searched. If no space can be found anywhere, the routine returns nil. "
+	"First tries to allocate chunk in currentSegment, the segment currently
+	targeted for allocations. If it fails (returns nil), then the routine
+	compacts the next segment and retries the allocation there. This procedure
+	continues until the original segment has been compacted and searched. 
+	If no space can be found anywhere, the routine returns nil. "
 
 	| objectPointer |
+	self assert: (currentSegment between: FirstHeapSegment  and: LastHeapSegment). 
 	objectPointer := self attemptToAllocateChunkInCurrentSegment: size.
 	objectPointer isNil
 		ifFalse: [ ^ objectPointer ].
@@ -673,9 +678,9 @@ ObjectMemory >> integerValueOf: objectPointer [
 	 are actually ST80 negative values. 16384 represents -16384,
 	 16385 is -16383,... and -1 is 32767"
 	integerValue > 16383 ifTrue: [ 
-		Transcript show: 'Converting negative value from '; nextPutAll: integerValue printString.
+		"Transcript show: 'Converting negative value from '; nextPutAll: integerValue printString."
 		integerValue := integerValue - 32768.
-		Transcript show: ' to '; nextPutAll: integerValue printString; cr.
+		"Transcript show: ' to '; nextPutAll: integerValue printString; cr."
 		].
    ^ integerValue 
 
