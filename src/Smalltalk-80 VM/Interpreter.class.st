@@ -2455,29 +2455,29 @@ Interpreter >> primitiveMakePoint [
 
 	| integerReceiver integerArgument pointResult |
 	"BB code ERROR modified from dbanay implementation"
-	integerArgument := self popStack.
-	integerReceiver := self popStack.
-	"integerArgument := self popInteger.
-	integerReceiver := self popInteger."
+	"integerArgument := self popStack.
+	integerReceiver := self popStack."
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
 	self success: (memory isIntegerValue: integerReceiver).
 	self success: (memory isIntegerValue: integerArgument).
 	self success
 		ifTrue: [ pointResult := memory instantiateClass: ClassPointPointer
 				                          withPointers: ClassPointSize.
 					"BB code ERROR modified from dbanay implementation"
-					memory storePointer: XIndex
+					"memory storePointer: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			      memory storePointer: YIndex
 				           ofObject: pointResult
-				           withValue: integerArgument.
-			       "self storeInteger: XIndex
+				           withValue: integerArgument."
+			       self storeInteger: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			       self storeInteger: YIndex
 				           ofObject: pointResult
 				           withValue: integerArgument.
-			       self push: pointResult" ]
+			       self push: pointResult ]
 		ifFalse: [ self unPop: 2 ]
 ]
 
