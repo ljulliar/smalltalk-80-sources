@@ -6,7 +6,6 @@ Class {
 	#name : #ST80BitBlt,
 	#superclass : #Object,
 	#instVars : [
-		'interpreter',
 		'memory',
 		'destForm',
 		'sourceForm',
@@ -322,7 +321,6 @@ ST80BitBlt >> destForm [
 
 { #category : #initialization }
 ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
-
 	"Make sure class variables ar initialized"
 	self class initialize.
 
@@ -330,17 +328,17 @@ ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
    destForm := ST80Form fromObject: (m fetchPointer: DestFormIndex ofObject: bbp) memory: m.
    sourceForm := ST80Form fromObject: (m fetchPointer: SourceFormIndex ofObject: bbp) memory: m.
    halftoneForm := ST80Form fromObject: (m fetchPointer: HalftoneFormIndex ofObject: bbp) memory: m.
-   destX := m fetchPointer: DestXIndex ofObject: bbp.
-   destY := m fetchPointer: DestYIndex ofObject: bbp.
-   clipX := m fetchPointer: ClipXIndex ofObject: bbp.
-   clipY := m fetchPointer: ClipYIndex ofObject: bbp.
-   clipWidth := m fetchPointer: ClipWidthIndex ofObject: bbp.
-   clipHeight := m fetchPointer: ClipHeightIndex ofObject: bbp.
-   sourceX := m fetchPointer: SourceXIndex ofObject: bbp.
-   sourceY := m fetchPointer: SourceYIndex ofObject: bbp.
-   width := m fetchPointer: WidthIndex ofObject: bbp.
-   height := m fetchPointer: HeightIndex ofObject: bbp.
-   combinationRule := m fetchPointer: CombinationRuleIndex ofObject: bbp.
+   destX := m integerValueOf: (m fetchWord: DestXIndex ofObject: bbp).
+   destY := m integerValueOf: (m fetchWord: DestYIndex ofObject: bbp).
+   clipX := m integerValueOf: (m fetchWord: ClipXIndex ofObject: bbp).
+   clipY := m integerValueOf: (m fetchWord: ClipYIndex ofObject: bbp).
+   clipWidth := m integerValueOf: (m fetchWord: ClipWidthIndex ofObject: bbp).
+   clipHeight := m integerValueOf: (m fetchWord: ClipHeightIndex ofObject: bbp).
+   sourceX := m integerValueOf: (m fetchWord: SourceXIndex ofObject: bbp).
+   sourceY := m integerValueOf: (m fetchWord: SourceYIndex ofObject: bbp).
+   width := m integerValueOf: (m fetchWord: WidthIndex ofObject: bbp).
+   height := m integerValueOf: (m fetchWord: HeightIndex ofObject: bbp).
+   combinationRule := m integerValueOf: (m fetchWord: CombinationRuleIndex ofObject: bbp).
 
 ]
 
