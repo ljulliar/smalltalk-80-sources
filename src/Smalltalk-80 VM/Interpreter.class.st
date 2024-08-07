@@ -1858,6 +1858,7 @@ Interpreter >> primitiveBeDisplay [
 	height <= 100 ifTrue: [ ^ self ]. 
 	(hal displayWidth: width displayHeight: height)
 		ifFalse: [ self primitiveFail ].
+	currentDisplay := newDisplay.
 	currentDisplayWidth := width.
 	currentDisplayHeight := height.
 
