@@ -809,7 +809,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	"First initialize the free chunk list entries"
 	FirstHeapSegment to: LastHeapSegment do: [ :s |
 		"Reset all segment entries as if the list was empty"
-		0 to: BigSize do: [ :sz |
+		HeaderSize to: BigSize do: [ :sz |
 			self resetFreeChunkList: sz inSegment: s
 			]
 		].
