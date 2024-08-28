@@ -42,7 +42,7 @@ ST80Form >> bits [
 	^ bits
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 ST80Form >> bitsArray [
    "TODO: Quick and Dirty to test Display update"
 	| wm bitsStartIndex |
@@ -91,7 +91,7 @@ ST80Form >> width [
 	^ width
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 ST80Form >> wordCount [
 	"Not BB code"
 	^ (width + 15) // 16 * height.
