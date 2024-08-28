@@ -184,8 +184,8 @@ ObjectMemory >> allocateChunk: size [
 			ifTrue: [ self outOfMemoryError ].	"give up" 
 			].
 	debug ifTrue: [ 
-		Transcript show: 'allocating oop: '; nextPutAll: objectPointer printString;
-			nextPutAll: ' size: '; nextPutAll: size printString; cr.
+		Logger << 'allocating oop: ' << objectPointer printString
+			<< ' size: ' << size printString; cr.
 		 ].
 	^ objectPointer.
 
@@ -343,6 +343,11 @@ ObjectMemory >> deallocate: objectPointer [
 ]
 
 { #category : #accessing }
+ObjectMemory >> debug [
+  ^ debug
+]
+
+{ #category : #accessing }
 ObjectMemory >> debug: onOff [
   debug := onOff.
 ]
@@ -359,9 +364,8 @@ ObjectMemory >> fetchByte: byteIndex ofObject: objectPointer [
 	|value|
 	value := self heapChunkOf: objectPointer byte: (HeaderSize * 2 + byteIndex).
 	debug ifTrue: [ 
-		Transcript show: objectPointer printString; nextPutAll: ' byte: '; 
-			nextPutAll: byteIndex printString; nextPutAll: ' = ';
-			nextPutAll: value printString; cr.
+		Logger << objectPointer printString << ' byte: ' 
+			<< byteIndex printString << ' = '	<< value printString; cr.
 		 ].
 	^ value
 ]
@@ -387,9 +391,8 @@ ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 	self assert: (fieldIndex >= 0 & (fieldIndex < (self fetchWordLengthOf: objectPointer))).
 	value := self heapChunkOf: objectPointer word: (HeaderSize + fieldIndex).
 	debug ifTrue: [ 
-		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
-			nextPutAll: fieldIndex printString; nextPutAll: ' = ';
-			nextPutAll: value printString; cr.
+		Logger << objectPointer printString << ' pointer: ' 
+			<< fieldIndex printString << ' = ' << value printString; cr.
 		 ].
 	^ value
 ]
@@ -400,9 +403,8 @@ ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	|value|
 	value := self heapChunkOf: objectPointer word: HeaderSize + wordIndex.
 	debug ifTrue: [ 
-		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
-			nextPutAll: wordIndex printString; nextPutAll: ' = ';
-			nextPutAll: value printString; cr.
+		Logger << objectPointer printString << ' pointer: ' 
+			<< wordIndex printString << ' = ' << value printString; cr.
 		 ].
 	^ value
 ]
@@ -729,9 +731,9 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	objectSize space objectPointer remainingSpaceInSegment |
 
 	debug ifTrue: [
-		Transcript show: '>>>>>> Loading Object Space ...'; cr.
-		Transcript show: ' - Object space length (in words): '; nextPutAll: osLength printString;
-			nextPutAll: '   starting at file offset: '; nextPutAll: fileOffset printString; cr; cr.
+		Logger << '>>>>>> Loading Object Space ...'; cr.
+		Logger << ' - Object space length (in words): ' << osLength printString
+			<< '   starting at file offset: ' << fileOffset printString; cr; cr.
 		].
 	
 	"Keep track of remaining free space remining in each segment"
@@ -759,11 +761,11 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 				"read object size"
 				objectSize := self class readUInt16From: stream.
 				debug ifTrue: [
-					Transcript show: '----- Loading object...'; cr;
-						nextPutAll: 'oop: '; nextPutAll: oop printString;
-					  	nextPutAll: ' size: '; nextPutAll: objectSize printString; 
-						nextPutAll: ' address: '; nextPutAll: address printString;
-						nextPutAll: ' snapshot position '; nextPutAll: address printString; cr.
+					Logger << '----- Loading object...'; cr.
+					Logger << 'oop: ' << oop printString
+					  	<< ' size: ' << objectSize printString 
+						<< ' address: ' << address printString
+						<< ' snapshot position ' << address printString; cr.
 					].
 		
 				"Ooes this object requires an extra word ? (see 
@@ -783,8 +785,8 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 						offset := 0.
 					 	].
 				debug ifTrue: [
-					Transcript show: 'relocated at segment: '; nextPutAll: segment printString; 
-					nextPutAll: ', offset: '; nextPutAll: offset printString; cr.
+					Logger << 'relocated at segment: ' << segment printString 
+						<< ', offset: ' << offset printString; cr.
 					].
 	
 				"Update the Object table entry to reflect the object location in memory"
@@ -830,9 +832,9 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 			"offset in segment where free chunk starts"
 			offset := HeapSpaceStop - remainingSpaceInSegment + 1. 
 			debug ifTrue: [
-				Transcript show: 'Creating free chunk of size: '; nextPutAll: remainingSpaceInSegment printString; 
-					nextPutAll: ' in segment: '; nextPutAll: s printString;
-					nextPutAll: ' at offset: '; nextPutAll: offset printString; cr.
+				Logger << 'Creating free chunk of size: ' << remainingSpaceInSegment printString 
+					<< ' in segment: ' << s printString
+					<< ' at offset: ' << offset printString; cr.
 				].
 
 			"BB p. 664, 665 each free chunk uses an object table entry
@@ -847,7 +849,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
    currentSegment := FirstHeapSegment.
 
 	debug ifTrue: [
-		Transcript show: '>>>>>> Finished loading Object Space ...'; cr; cr.
+		Logger << '>>>>>> Finished loading Object Space ...'; cr; cr.
 		].
 	
 	^ true
@@ -860,16 +862,14 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	"Load object table from VM snapshot. The length is given in 16-bit words"
 	
 	| word1 word2 |
-	
-   "Transcript show: 'ot offset: '; nextPutAll: fileOffset printString; cr."
 
 	"----------------------------------------------------------"
 	"Skip to the object table offset, rounding to the nearest
 	 upper multiple of page length (= 512 bytes)"
 	stream position: fileOffset.
 	debug ifTrue: [ 
-		Transcript show: '>>>>>> Loading Object Table ...'; cr.
-		Transcript show: ' - Object table entries to load: '; nextPutAll: (otLength / 2) printString; cr; cr.
+		Logger << '>>>>>> Loading Object Table ...'; cr.
+		Logger << ' - Object table entries to load: ' << (otLength / 2) printString; cr; cr.
 		].
 
 	0 to: (otLength - 2) by: 2 do: [ :i |
@@ -878,14 +878,14 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		self ot: i put: word1.
 		
 		debug ifTrue: [ 
-			Transcript show: '----------------------------'; cr; 
-		   		nextPutAll: 'oop: '; nextPutAll: i printString;
-				nextPutAll: ' count: '; nextPutAll: (self countBitsOf: i) printString;
-				nextPutAll: ' o: '; nextPutAll: (self oddBitOf: i)  printString;
-				nextPutAll: ' p: '; nextPutAll: (self pointerBitOf: i) printString;
-				nextPutAll: ' f: '; nextPutAll: (self freeBitOf: i) printString;
-				nextPutAll: ' segment: '; nextPutAll: (self segmentBitsOf: i) printString;
-				nextPutAll: ' (value: '; nextPutAll: word1 printString; nextPutAll: ')';
+			Logger << '----------------------------'; cr. 
+		   	Logger << 'oop: ' << i printString
+				<< ' count: ' << (self countBitsOf: i) printString
+				<< ' o: ' << (self oddBitOf: i)  printString
+				<< ' p: ' << (self pointerBitOf: i) printString
+				<< ' f: ' << (self freeBitOf: i) printString
+				<< ' segment: ' << (self segmentBitsOf: i) printString
+				<< ' (value: ' << word1 printString; << ')';
 		 	 	cr.
 				].
 
@@ -894,12 +894,12 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		word2 := self class readUInt16From: stream.
 		self locationBitsOf: i put: word2.
 		debug ifTrue: [ 
-			Transcript show: 'location: '; nextPutAll: word2 printString; cr.
+			Logger << 'location: ' << word2 printString; cr.
 			].
 		
-		"Transcript show: 'oop: '; nextPutAll: i printString;
-			nextPutAll: ' word1: '; nextPutAll: word1 printString;
-			nextPutAll: ' word2: '; nextPutAll: word2 printString; cr."
+		"Transcript show: 'oop: '; << i printString;
+			<< ' word1: '; << word1 printString;
+			<< ' word2: '; << word2 printString; cr."
 		
 		].
 
@@ -911,7 +911,7 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		self ot: i put: 0.
 		self freeBitOf: i put: 1.
 		self locationBitsOf: i put: 0.
-		"Transcript show: 'mark free oop: '; nextPutAll: i printString; cr."
+		"Transcript show: 'mark free oop: '; << i printString; cr."
 		].
 	
 	"Build the object table free entry list"
@@ -920,12 +920,12 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	ObjectTableSize-2 to: 2 by: -2 do: [ :i |
 		((self freeBitOf: i) = 1) 
 			ifTrue: [ self toFreePointerListAdd: i.
-			"Transcript show: 'free oop in list: '; nextPutAll: i printString; cr."
+			"Transcript show: 'free oop in list: '; << i printString; cr."
 			].
 		].
 	
 	debug ifTrue: [ 
-		Transcript show: '<<<<<<< Finshed loading Object Table.'; cr; cr.
+		Logger << '<<<<<<< Finshed loading Object Table.'; cr; cr.
 		].
 
 	^ true
@@ -950,32 +950,32 @@ ObjectMemory >> loadWithSnapshot: stream debug: onOff [
 	"Page length in bytes. See Xerox Virtual Image Booklet p. 2"
 	pageLength := 512.
 	
-	Transcript show: '>>>>>>>> Reading VM Snapshot preamble...'; cr.
+	Logger << '>>>>>>>> Reading VM Snapshot ...'; cr.
 	"See Xerox Virtual Image Booklet p. 2 for details on VM image file format"
 	"First 4 bytes is the Object Space length  and the next 4 bytes
 	are the Object Table Length (both length are in 16-bit word)"
 	objectSpaceLength := self class readUInt32From: stream.
 	objectTableLength := self class readUInt32From: stream.
-	Transcript show: ' - Object Space length (in words): '; nextPutAll: objectSpaceLength printString; cr.
-	Transcript show: ' - Object Table length (in words): '; nextPutAll: objectTableLength printString; cr.
+	Logger << ' - Object Space length (in words): ' << objectSpaceLength printString; cr.
+	Logger << ' - Object Table length (in words): ' << objectTableLength printString; cr.
 	
 	"Read the next 2 byte word and make sure it is 0 (VM Interchange format)"
 	vmImageFormat := self class readUInt16From: stream.
 	(vmImageFormat = 0) ifFalse: [ Exception signal: 'VM Image is not Interchange format' ].
-	Transcript show: ' - Vm Image format: '; nextPutAll: vmImageFormat printString; cr.
+	Logger << ' - Vm Image format: ' << vmImageFormat printString; cr.
 	
 	"Calculate Object space and object table offsets in file"
 	osFileOffset := pageLength.
 	otFileOffset := osFileOffset + (((objectSpaceLength * 2 + pageLength - 1) // pageLength) * pageLength).
-	Transcript show: ' - Object space offset: '; nextPutAll: osFileOffset printString; cr.
-	Transcript show: ' - Object table offset: '; nextPutAll: otFileOffset printString; cr.
-	debug := false.
+	Logger << ' - Object space offset: ' << osFileOffset printString; cr.
+	Logger << ' - Object table offset: ' << otFileOffset printString; cr.
+
 	(self loadObjectTableWithSnapshot: stream at: otFileOffset length: objectTableLength )
 		ifFalse: [ Exception signal: 'Error loading object table' ].
 	
 	(self loadObjectSpaceWithSnapshot: stream at: osFileOffset length: objectSpaceLength )
 		ifFalse: [ Exception signal: 'Error loading object space' ].
-	debug := onOff.
+
 	^ true
 ]
 
@@ -1250,9 +1250,8 @@ ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valu
 	value := self heapChunkOf: objectPointer word: chunkIndex put: valuePointer.
 
 	debug ifTrue: [ 
-		Transcript show: objectPointer printString; nextPutAll: ' pointer: '; 
-			nextPutAll: chunkIndex printString; nextPutAll: ' <- ';
-			nextPutAll: value printString; cr.
+		Logger << objectPointer printString << ' pointer: ' 
+			<< chunkIndex printString << ' <- ' << value printString; cr.
 		 ].
 	^ value
 ]

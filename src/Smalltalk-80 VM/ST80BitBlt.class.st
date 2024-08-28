@@ -121,13 +121,14 @@ ST80BitBlt >> calculateOffsets [
 		(sourceRaster * vDir) -
 		(nWords + (preload ifTrue: [1] ifFalse: [0]) * hDir).
 	destDelta := (destRaster * vDir) - (nWords * hDir).
-	
-	Transcript show: '-- calculateOffsets'; cr;
-	   nextPutAll: ' sourceIndex: '; nextPutAll: sourceIndex printString;
-		nextPutAll: ' destIndex: '; nextPutAll: destIndex printString; cr;
-		nextPutAll: ' sourceDelta '; nextPutAll: sourceDelta printString;
-		nextPutAll: ' destDelta: '; nextPutAll: destDelta printString; cr;
-		nextPutAll: ' preload: '; nextPutAll: sourceIndex printString; cr.		
+	memory debug ifTrue: [  
+		Logger << '-- calculateOffsets'; cr.
+	   Logger << ' sourceIndex: ' << sourceIndex printString
+			<< ' destIndex: ' << destIndex printString; cr.
+		Logger << ' sourceDelta ' << sourceDelta printString
+			<< ' destDelta: ' << destDelta printString; cr.
+		Logger << ' preload: ' << sourceIndex printString; cr.
+		]	
 ]
 
 { #category : #private }
@@ -152,20 +153,20 @@ ST80BitBlt >> checkOverlap [
 							mask1 := mask2.
 						mask2 := t]]].
 			
-	
-	Transcript show: '-- checkOverlap'; cr;
-	   nextPutAll: ' hDir: '; nextPutAll: hDir printString;
-		nextPutAll: ' vDir: '; nextPutAll: vDir printString; cr;
-		nextPutAll: ' w:  '; nextPutAll: w printString;
-		nextPutAll: ' h: '; nextPutAll: h printString;
-		nextPutAll: ' sx:  '; nextPutAll: sx printString;
-		nextPutAll: ' dx: '; nextPutAll: dx printString;
-		nextPutAll: ' sy: '; nextPutAll: sy printString;
-		nextPutAll: ' dy: '; nextPutAll: dy printString; cr;
-		nextPutAll: ' skewMask: '; nextPutAll: skewMask printString;
-		nextPutAll: ' mask1: '; nextPutAll: mask1 printString;
-		nextPutAll: ' mask2: '; nextPutAll: mask2 printString; 		
-		cr.	
+	memory debug ifTrue: [ 
+		Logger << '-- checkOverlap'; cr.
+	   Logger << ' hDir: ' << hDir printString
+			<< ' vDir: ' << vDir printString; cr.
+		Logger << ' w:  ' << w printString
+			<< ' h: ' << h printString
+			<< ' sx:  ' << sx printString
+			<< ' dx: ' << dx printString
+			<< ' sy: ' << sy printString
+			<< ' dy: ' << dy printString; cr.
+		Logger << ' skewMask: ' << skewMask printString
+			<< ' mask1: ' << mask1 printString
+			<< ' mask2: ' << mask2 printString; cr.
+		]
 ]
 
 { #category : #private }
@@ -250,12 +251,13 @@ ST80BitBlt >> computeMasks [
 	    BB: (w - startBits - 1) // 16 + 2"
 	   ifFalse: [ nWords := (w - startBits - 1) // 16 + 2 ].
 
-	Transcript show: '-- checkMasks'; cr;
-		nextPutAll: ' skewMask: '; nextPutAll: skewMask printString;
-		nextPutAll: ' mask1: '; nextPutAll: mask1 printString;
-		nextPutAll: ' mask2: '; nextPutAll: mask2 printString; 	
-		nextPutAll: ' nWords '; nextPutAll: nWords printString; 			
-		cr.	
+	memory debug ifTrue: [ 
+		Logger << '-- computeMasks'; cr.
+		Logger << ' skewMask: ' << skewMask printString
+			<< ' mask1: ' << mask1 printString
+			<< ' mask2: ' << mask2 printString	
+			<< ' nWords ' << nWords printString; cr.	
+		]
 ]
 
 { #category : #operations }
@@ -263,22 +265,22 @@ ST80BitBlt >> copyBits [
 	"BitBltSimulation code BB 356"
 	"The bits copy operation"
 
-
-	Transcript show: 'copyBits sourceForm: '; nextPutAll: (sourceForm ifNotNil: [ sourceForm oop ]) printString;
-		nextPutAll: ' destForm: '; nextPutAll: destForm oop  printString;
-		nextPutAll: ' halftoneForm: '; nextPutAll: halftoneForm oop  printString; cr;
-		nextPutAll: ' destX: '; nextPutAll: destX printString;
-		nextPutAll: ' destY: '; nextPutAll: destY printString; cr;
-		nextPutAll: ' clipX: '; nextPutAll: clipX printString; 			
-		nextPutAll: ' clipY: '; nextPutAll: clipY printString;
-		nextPutAll: ' clipWidth: '; nextPutAll: clipWidth printString; 			
-		nextPutAll: ' clipHeight: '; nextPutAll: clipHeight printString; cr;
-		nextPutAll: ' sourceX: '; nextPutAll: sourceX printString;
-		nextPutAll: ' sourceY: '; nextPutAll: sourceY printString;
-		nextPutAll: ' width: '; nextPutAll: width printString;
-		nextPutAll: ' height: '; nextPutAll: height printString; cr;
-	   nextPutAll: ' combinationRule: '; nextPutAll: combinationRule printString; cr.
-	
+	memory debug ifTrue: [ 
+		Logger << 'copyBits sourceForm: ' << (sourceForm ifNotNil: [ sourceForm oop ]) printString
+			<< ' destForm: ' << destForm oop  printString
+			<< ' halftoneForm: ' << halftoneForm oop  printString; cr.
+		Logger << ' destX: ' << destX printString
+			<< ' destY: ' << destY printString; cr.
+		Logger << ' clipX: ' << clipX printString 			
+			<< ' clipY: ' << clipY printString
+			<< ' clipWidth: ' << clipWidth printString			
+			<< ' clipHeight: ' << clipHeight printString; cr.
+		Logger << ' sourceX: ' << sourceX printString
+			<< ' sourceY: ' << sourceY printString
+			<< ' width: ' << width printString
+			<< ' height: ' << height printString; cr.
+	   Logger << ' combinationRule: ' << combinationRule printString; cr.
+	].
 	"sets w and h"	
 	self clipRange.
 	
@@ -291,8 +293,8 @@ ST80BitBlt >> copyBits [
 		ifFalse: [ 
 			updatedRect := Rectangle origin: dx@dy extent: w@h ].
 		
-	Transcript show: 'Updated rectangle: '; nextPutAll: updatedRect origin printString;
-	nextPutAll: ' '; nextPutAll: updatedRect corner printString; cr.
+	Logger << 'Updated rectangle: ' << updatedRect origin printString
+		<< ' ' << updatedRect corner printString; cr.
 	
 	
 	"Not BB code
