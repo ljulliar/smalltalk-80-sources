@@ -276,18 +276,26 @@ ST80BitBlt >> copyBits [
 { #category : #'inner loop' }
 ST80BitBlt >> copyLoop [
 	"BitBltSimulation code BB 359"
+	"With some optimization from ljulliard"
 
-	| prevWord thisWord skewWord mergeMask halftoneWord mergeWord |
+	| prevWord thisWord skewWord mergeMask halftoneWord mergeWord destWord |
 	1 to: h do: "here is the vertical loop"
 		[ :i |
 			(halftoneForm notNil)
 				ifTrue: [halftoneWord := halftoneBits at: (1 + (dy bitAnd: 15)).
+					"Transcript show: 'vloop '; nextPutAll: halftoneBits oop printString;
+					 nextPutAll: ' htword '; nextPutAll: (dy bitAnd: 15) printString;
+					 nextPutAll: ' = '; nextPutAll: halftoneWord printString; cr."
 					dy := dy + vDir]
 				ifFalse: [halftoneWord := AllOnes].
 			skewWord := halftoneWord.
 			preload
-				ifTrue: [prevWord := sourceBits at: sourceIndex + 1.
+				ifTrue: [
 					"load the 32-bit shifter"
+					prevWord := sourceBits at: sourceIndex + 1.
+					"Transcript show: 'vloop '; nextPutAll: sourceBits oop printString;
+					 nextPutAll: ' preword '; nextPutAll: sourceIndex printString;
+					 nextPutAll: ' = '; nextPutAll: prevWord printString; cr."
 					sourceIndex := sourceIndex + hDir]
 				ifFalse: [prevWord := 0].
 			mergeMask := mask1.
@@ -301,26 +309,33 @@ ST80BitBlt >> copyLoop [
 							word <= sourceRaster & (sourceIndex >= 0) & (sourceIndex < (sourceBits size)) 
 								ifTrue: [ thisWord := sourceBits at: sourceIndex + 1 ]
 								ifFalse: [ thisWord := 0 ].
-							thisWord := sourceBits at: sourceIndex + 1.
 							"pick up next word"
-							skewWord :=
-								prevWord bitOr: (thisWord bitAnd:
-									skewMask bitInvert).
+							skewWord :=	prevWord bitOr: (thisWord bitAnd:	skewMask bitInvert & 16rFFFF).
 							prevWord := thisWord.
-							skewWord := (skewWord bitShift: skew) bitOr:
-								(skewWord bitShift: skew - 16)].
+							skewWord := (skewWord bitShift: skew) bitOr: (skewWord bitShift: skew - 16).
+							"Transcript show: 'ihloop '; nextPutAll: sourceBits oop printString;
+					 			nextPutAll: ' thisword '; nextPutAll: sourceIndex printString;
+					 			nextPutAll: ' = '; nextPutAll: thisWord printString; cr."
+							].
 							
 					"ERROR Added from dbanay"
 					destIndex >= (destBits size) ifTrue: [ ^ self].
 					
 					"16-bit rotate"
+					destWord := destBits at: destIndex + 1. "ljulliard optimization"
+					"Transcript show: 'ihloop '; nextPutAll: destBits oop printString;
+						nextPutAll: ' destword '; nextPutAll: destIndex printString;
+						nextPutAll: ' = '; nextPutAll: destWord printString; cr."
 					mergeWord := self merge: (skewWord bitAnd: halftoneWord)
-							with: (destBits at: destIndex + 1).
+							with: destWord. "ljulliard optimization"				
 					destBits
 						at: destIndex + 1
 						put: ((mergeMask bitAnd: mergeWord)
-							bitOr: (mergeMask bitInvert
-								bitAnd: (destBits at: destIndex + 1))).
+							bitOr: (mergeMask bitInvert & 16rFFFF
+								bitAnd: destWord)). "ljulliard optimization"
+					"Transcript show: 'ihloop '; nextPutAll: destBits oop printString;
+					 nextPutAll: ' destword '; nextPutAll: destIndex printString;
+					 nextPutAll: ' <- '; nextPutAll: ((mergeMask bitAnd: mergeWord) bitOr: (mergeMask bitInvert & 16rFFFF	bitAnd: destWord)) printString; cr."
 					sourceIndex := sourceIndex + hDir.
 					destIndex := destIndex + hDir.
 					word = (nWords - 1)
