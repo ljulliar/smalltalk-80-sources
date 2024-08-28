@@ -241,8 +241,10 @@ ST80BitBlt >> copyBits [
 	"BitBltSimulation code BB 356"
 	"The bits copy operation"
 
-	Transcript show: 'copyBits sourceForm: '; nextPutAll: sourceForm oop printString;
-		nextPutAll: ' destForm: '; nextPutAll: destForm oop  printString; cr;
+
+	Transcript show: 'copyBits sourceForm: '; nextPutAll: (sourceForm ifNotNil: [ sourceForm oop ]) printString;
+		nextPutAll: ' destForm: '; nextPutAll: destForm oop  printString;
+		nextPutAll: ' halftoneForm: '; nextPutAll: halftoneForm oop  printString; cr;
 		nextPutAll: ' destX: '; nextPutAll: destX printString;
 		nextPutAll: ' destY: '; nextPutAll: destY printString; cr;
 		nextPutAll: ' clipX: '; nextPutAll: clipX printString; 			
@@ -253,18 +255,30 @@ ST80BitBlt >> copyBits [
 		nextPutAll: ' sourceY: '; nextPutAll: sourceY printString;
 		nextPutAll: ' width: '; nextPutAll: width printString;
 		nextPutAll: ' height: '; nextPutAll: height printString; cr;
-	   nextPutAll: ' combinationRule: '; nextPutAll: height printString; cr.
+	   nextPutAll: ' combinationRule: '; nextPutAll: combinationRule printString; cr.
 	
 	"sets w and h"	
 	self clipRange.
-	(w <= 0 or: [h <= 0]) ifTrue: [ ^ self ]. "null range"
+	
+	"Not BB code. Keep track of the rectangle updated on the destForm
+	 as we will need it in primitiveCopyBits to update the host display"
+	(w <= 0 or: [h <= 0]) 
+		ifTrue: [ "null range"
+			updatedRect := Rectangle origin: 0@0 extent: 0@0.
+		 	^ self ]
+		ifFalse: [ 
+			updatedRect := Rectangle origin: dx@dy extent: w@h ].
+		
+	Transcript show: 'Updated rectangle: '; nextPutAll: updatedRect origin printString;
+	nextPutAll: ' '; nextPutAll: updatedRect corner printString; cr.
+	
 	
 	"Not BB code
 	Some sanity check before doing the actual copy. Make sure 
-	source and dest	form objects have the proper number of bits
-	to copy"
-	self assert: (sourceForm notNil & (sourceForm wordCount = sourceForm bitsSize)).
-	self assert: (destForm notNil & (destForm wordCount = destForm bitsSize)).
+	source and dest	form objects do exist and have the proper number
+	of bits to copy"
+	(sourceForm notNil and: [ sourceForm wordCount ~= sourceForm bitsSize ]) ifTrue: [ ^ false ].
+	(destForm notNil and: [ destForm wordCount ~= destForm bitsSize ]) ifTrue: [ ^ false ].
 	
 	self computeMasks.
 	self checkOverlap.
