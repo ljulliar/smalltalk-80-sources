@@ -10,7 +10,8 @@ Class {
 		'width',
 		'height',
 		'oop',
-		'memory'
+		'memory',
+		'offset'
 	],
 	#classVars : [
 		'BitsInForm',
@@ -63,7 +64,7 @@ ST80Form >> height [
 ]
 
 { #category : #initialization }
-ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
+ST80Form >> initializeFromObject: objectPointer memory: objectMemory [ 
 	"initialize a proxy Form object based on the
 	attributes of the Form coming from the ST80 VM"
 
@@ -72,11 +73,10 @@ ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
 	
 	oop := objectPointer.
 	memory := objectMemory.
-	width := memory integerValueOf:
-		         (memory fetchWord: WidthInForm ofObject: oop).
-	height := memory integerValueOf:
-		          (memory fetchWord: HeightInForm ofObject: oop).
+	width := memory integerValueOf: (memory fetchWord: WidthInForm ofObject: oop).
+	height := memory integerValueOf: (memory fetchWord: HeightInForm ofObject: oop).
 	bits := ST80Bitmap fromObject: (memory fetchWord: BitsInForm ofObject: oop) memory: memory.
+
 ]
 
 { #category : #accessing }
