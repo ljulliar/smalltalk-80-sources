@@ -1993,7 +1993,7 @@ Interpreter >> primitiveClass [
 { #category : #'primitive methods' }
 Interpreter >> primitiveCopyBits [
 
-	| bitBltPointer bitBlt |
+	| bitBltPointer bitBlt updatedRect |
 	
 	bitBltPointer := self stackTop.
 	bitBlt := ST80BitBlt bitBltPointer: bitBltPointer memory: memory.
@@ -2007,10 +2007,13 @@ Interpreter >> primitiveCopyBits [
 	Transcript show: 'currentDisplay Form: '; nextPutAll: currentDisplay printString; cr.
 	bitBlt copyBits.
 
-	"if the copyBits operates on the Display then update the
-	application window"
-	(bitBlt destForm = currentDisplay) ifTrue: [ 
-		hal updateDisplayRect: Rectangle origin: 0@0  corner: 640@480 bitmap: (bitBlt destForm bitsArray).
+	"if the copyBits operates on the current Display then update the
+	dirty rectangle from the dest form on the host display"
+	(bitBlt destForm oop = currentDisplay) ifTrue: [ 
+		updatedRect := bitBlt updatedRect.
+		updatedRect width > 0 & (updatedRect height > 0) ifTrue: [ 
+			hal updateDisplayRect: (bitBlt updatedRect) fromForm: bitBlt destForm.
+			]
 		]
 
 ]

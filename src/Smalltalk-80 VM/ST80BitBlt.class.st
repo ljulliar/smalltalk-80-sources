@@ -463,3 +463,9 @@ ST80BitBlt >> merge: sourceWord with: destinationWord [
 		ifTrue: [^AllOnes]
 
 ]
+
+{ #category : #accessing }
+ST80BitBlt >> updatedRect [
+
+	^ updatedRect
+]

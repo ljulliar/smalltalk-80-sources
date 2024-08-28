@@ -36,6 +36,33 @@ ST80Form class >> initialize [
 	HeightInForm := 2.
 ]
 
+{ #category : #initialization }
+ST80Form >> asNativeFormCropped: rectangle [
+	"Create a host native form from an area of the ST80 Form (self)
+	 limited to the cropping rectangle"
+	
+	| startIndex nWords nWordsInRectangle nativeForm i j iSaved word16 nativeBits st80Bits |
+	nativeForm := Form extent: rectangle extent depth: 1.
+	startIndex := (width + 15) // 16 * rectangle origin y + ((rectangle origin x + 15) // 16).
+	nWordsInRectangle := (rectangle width + 15) // 16.
+	nWords := (self width + 15) // 16.
+	nativeBits := nativeForm bits.
+	st80Bits := self bits.
+	
+	i := startIndex.
+	j := 0.
+	1 to: rectangle height do: [:y |
+		iSaved := i.
+		1 to: nWordsInRectangle do: [:x16 |
+			word16 := st80Bits at: (i := i + 1).
+			x16 odd ifTrue: [nativeBits at: (j := j+1) put: (word16 bitShift: 16)]
+					  ifFalse: [nativeBits at: j put: ((nativeBits at: j) bitOr: word16)]].
+			"Point to beginning of next row of the cropped rectangle"
+			i := iSaved + nWords.
+				].
+	^ nativeForm 
+]
+
 { #category : #accessing }
 ST80Form >> bits [
 
@@ -77,6 +104,12 @@ ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
 	height := memory integerValueOf: (memory fetchWord: HeightInForm ofObject: oop).
 	bits := ST80Bitmap fromObject: (memory fetchWord: BitsInForm ofObject: oop) memory: memory.
 
+]
+
+{ #category : #accessing }
+ST80Form >> memory [
+
+	^ memory
 ]
 
 { #category : #accessing }

@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'oop',
 		'memory',
-		'bits'
+		'bits',
+		'index'
 	],
 	#category : #'Smalltalk-80 VM'
 }
@@ -38,6 +39,12 @@ ST80Bitmap >> initializeFromObject: objectPointer memory: objectMemory [
 	oop := objectPointer.
 	memory := objectMemory.
 	bits := ST80BitmapArray fromObject: objectPointer memory: memory.
+]
+
+{ #category : #accessing }
+ST80Bitmap >> oop [
+
+	^ oop
 ]
 
 { #category : #accessing }

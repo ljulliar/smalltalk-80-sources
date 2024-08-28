@@ -72,19 +72,39 @@ ST80HardwareAbstractionLayer >> initialize [
 	
 ]
 
-{ #category : #'as yet unclassified' }
-ST80HardwareAbstractionLayer >> updateDisplayRect: rectangle origin: origing corner: corner bitmap: bitmap [
+{ #category : #'display access' }
+ST80HardwareAbstractionLayer >> updateDisplayRect: rectangle fromForm: sourceForm [
 	"Not BB code"
+	"Create a native bitBlt operation to update the dirty rectangle
+	on the display screen."
+		
+	| bitBlt nativeSourceForm align16Rectangle |
 	
-	| form morph |
-" code if ST80 bitmap is accessed as stream:
-stream next: aBitmap size into: aBitmap startingAt: 1"
+	"Adjust Rectangle left side to nearest lower 16 bits multiple 
+	and the Rectangle right side to the nearest upper 16 bit multiple
+	so as to copy the entire native form created"
+	align16Rectangle := rectangle left: rectangle left // 16 * 16.
+	align16Rectangle := align16Rectangle right: (align16Rectangle right + 15) // 16 * 16.
+	nativeSourceForm := sourceForm asNativeFormCropped: align16Rectangle.
+	"nativeForm := Form extent: align16Rectangle extent depth: 1 fromArray: (sourceForm bits) offset: 0@0."
+	
+	bitBlt := BitBlt destForm: displayForm sourceForm: nativeSourceForm halftoneForm: nil 
+					combinationRule: 3	 destOrigin: align16Rectangle origin sourceOrigin: 0@0
+					extent: nativeSourceForm extent clipRect: (Rectangle origin: 0@0 extent: displayForm extent ).
+	
+	"asNativeSourceForm := ST80AsNativeForm fromForm: sourceForm.
+	bitBlt := BitBlt destForm: displayForm sourceForm: asNativeSourceForm halftoneForm: nil 
+					combinationRule: 3	 destOrigin: rectangle origin sourceOrigin: rectangle origin
+					extent: rectangle extent clipRect: rectangle."
+	bitBlt copyBits.
+	displayMorph changed.
+	"Transcript clear."
 
-"read as array directly from real wordl memory"
-	form := Form extent: 640@480 depth: 1 fromArray: bitmap offset: 0@0.
+	"read as array directly from real world memory"
+	"form := Form extent: 640@480 depth: 1 fromArray: sourceForm bits offset: 0@0.
 	morph := form asMorph.
 	window removeMorph: displayMorph.
 	window addMorph: morph frame: (0@0 corner: 1@1).
 	displayMorph := morph.
-	displayForm := form.
+	displayForm := form."
 ]
