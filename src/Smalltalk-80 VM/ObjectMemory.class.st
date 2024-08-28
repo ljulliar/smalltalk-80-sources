@@ -702,6 +702,12 @@ ObjectMemory >> isIntegerValue: valueWord [
    ^ valueWord >= -16384 and: [valueWord <= 16383]
 ]
 
+{ #category : #accessing }
+ObjectMemory >> isObjectNil: objectPointer [
+	"Not BB code. Used by ST80 proxy classes (e.g. ST80Form, etc...)"
+	^ objectPointer = NilPointer.
+]
+
 { #category : #'private - object table entries' }
 ObjectMemory >> lastPointerOf: objectPointer [
 	| methodHeader |

@@ -338,12 +338,17 @@ ST80BitBlt >> destForm [
 
 { #category : #initialization }
 ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
+
+	| sourceFormOop |
+
 	"Make sure class variables ar initialized"
 	self class initialize.
 
 	memory := m.
    destForm := ST80Form fromObject: (m fetchPointer: DestFormIndex ofObject: bbp) memory: m.
-   sourceForm := ST80Form fromObject: (m fetchPointer: SourceFormIndex ofObject: bbp) memory: m.
+	sourceFormOop := m fetchPointer: SourceFormIndex ofObject: bbp.
+	(m isObjectNil: sourceFormOop) ifFalse: [ 
+   		sourceForm := ST80Form fromObject: sourceFormOop memory: m ].
    halftoneForm := ST80Form fromObject: (m fetchPointer: HalftoneFormIndex ofObject: bbp) memory: m.
    destX := m integerValueOf: (m fetchWord: DestXIndex ofObject: bbp).
    destY := m integerValueOf: (m fetchWord: DestYIndex ofObject: bbp).
@@ -356,6 +361,11 @@ ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
    width := m integerValueOf: (m fetchWord: WidthIndex ofObject: bbp).
    height := m integerValueOf: (m fetchWord: HeightIndex ofObject: bbp).
    combinationRule := m integerValueOf: (m fetchWord: CombinationRuleIndex ofObject: bbp).
+
+	"copyBits and the methods it calls expect some integer instance 
+	variables to be initialized to 0 or it crashes"
+	sourceRaster := 0.
+	
 
 ]
 
