@@ -43,7 +43,8 @@ Class {
 		'dx',
 		'dy',
 		'w',
-		'h'
+		'h',
+		'updatedRect'
 	],
 	#classVars : [
 		'AllOnes',
@@ -167,6 +168,9 @@ ST80BitBlt >> clipRange [
 	              dy := clipY ].
    (dy + h) > (clipY + clipHeight)
       ifTrue: [ h := h - ((dy + h) - (clipY + clipHeight)) ].
+
+   "ERROR skip code below if sourceForm is nil. (also in dbanay)"
+	sourceForm ifNil: [ ^ false ].
    sx < 0
       ifTrue: [ dx := dx - sx. w := w + sx. sx := 0 ].
    sx + w > sourceForm width 
@@ -174,7 +178,8 @@ ST80BitBlt >> clipRange [
    sy < 0
       ifTrue: [ dy := dy - sy. h := h + sy. sy := 0 ].
    sy + h > sourceForm height  
-      ifTrue: [ h := h - (sy + h - sourceForm height) ]
+      ifTrue: [ h := h - (sy + h - sourceForm height) ].
+	^ true "Not BB code. This is to behave like modern Pharo clipRange"
 
 ]
 
@@ -204,7 +209,8 @@ ST80BitBlt >> computeMasks [
 	mask1 := RightMasks at: startBits + 1.
 	endBits := 15 - ((dx + w - 1) bitAnd: 15).
 	"how many bits in last word"
-	mask2 := (RightMasks at: endBits + 1) bitInvert.
+	"ljulliard: & 16rFFFF added to keep a 16 bit value"
+	mask2 := (RightMasks at: endBits + 1) bitInvert bitAnd: 16rFFFF.
 	skewMask := ( skew = 0
 	                ifTrue: [0]
 	                ifFalse: [RightMasks at: 16 - skew + 1]).
@@ -213,10 +219,21 @@ ST80BitBlt >> computeMasks [
 	   ifTrue: [ mask1 := mask1 bitAnd: mask2.
 		          mask2 := 0.
 		          nWords := 1 ]
-      "ERROR from dbanay : nWords <-  (w - startBits + 15) // 16 + 1 for False case
-		It's a +1 instead of +2"
-	   ifFalse: [ nWords := (w - startBits - 1) // 16 + 1 ]
-	
+      "ERROR from dbanay says that the formula should use + 1
+      instead of + 2 but dbanay doesn't use the formula given
+      in the BB p. 358.
+      For values of startBits between 0 and 16, I checked that both
+      formulas give the same results. So the + 2 in the BB is correct.
+       dbanay : (w - startBits + 15) // 16 + 1
+	    BB: (w - startBits - 1) // 16 + 2"
+	   ifFalse: [ nWords := (w - startBits - 1) // 16 + 2 ].
+
+	Transcript show: '-- checkMasks'; cr;
+		nextPutAll: ' skewMask: '; nextPutAll: skewMask printString;
+		nextPutAll: ' mask1: '; nextPutAll: mask1 printString;
+		nextPutAll: ' mask2: '; nextPutAll: mask2 printString; 	
+		nextPutAll: ' nWords '; nextPutAll: nWords printString; 			
+		cr.	
 ]
 
 { #category : #operations }
