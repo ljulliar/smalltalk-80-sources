@@ -120,7 +120,14 @@ ST80BitBlt >> calculateOffsets [
 	sourceDelta :=
 		(sourceRaster * vDir) -
 		(nWords + (preload ifTrue: [1] ifFalse: [0]) * hDir).
-	destDelta := (destRaster * vDir) - (nWords * hDir)
+	destDelta := (destRaster * vDir) - (nWords * hDir).
+	
+	Transcript show: '-- calculateOffsets'; cr;
+	   nextPutAll: ' sourceIndex: '; nextPutAll: sourceIndex printString;
+		nextPutAll: ' destIndex: '; nextPutAll: destIndex printString; cr;
+		nextPutAll: ' sourceDelta '; nextPutAll: sourceDelta printString;
+		nextPutAll: ' destDelta: '; nextPutAll: destDelta printString; cr;
+		nextPutAll: ' preload: '; nextPutAll: sourceIndex printString; cr.		
 ]
 
 { #category : #private }
@@ -143,7 +150,22 @@ ST80BitBlt >> checkOverlap [
 							skewMask := skewMask bitInvert.
 							t := mask1.
 							mask1 := mask2.
-						mask2 := t]]]
+						mask2 := t]]].
+			
+	
+	Transcript show: '-- checkOverlap'; cr;
+	   nextPutAll: ' hDir: '; nextPutAll: hDir printString;
+		nextPutAll: ' vDir: '; nextPutAll: vDir printString; cr;
+		nextPutAll: ' w:  '; nextPutAll: w printString;
+		nextPutAll: ' h: '; nextPutAll: h printString;
+		nextPutAll: ' sx:  '; nextPutAll: sx printString;
+		nextPutAll: ' dx: '; nextPutAll: dx printString;
+		nextPutAll: ' sy: '; nextPutAll: sy printString;
+		nextPutAll: ' dy: '; nextPutAll: dy printString; cr;
+		nextPutAll: ' skewMask: '; nextPutAll: skewMask printString;
+		nextPutAll: ' mask1: '; nextPutAll: mask1 printString;
+		nextPutAll: ' mask2: '; nextPutAll: mask2 printString; 		
+		cr.	
 ]
 
 { #category : #private }
