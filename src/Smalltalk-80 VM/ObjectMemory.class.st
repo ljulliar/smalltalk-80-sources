@@ -10,7 +10,9 @@ Class {
 		'currentSegment',
 		'wordMemory',
 		'rootObjectPointers',
-		'debug'
+		'debug',
+		'freeOops',
+		'freeWords'
 	],
 	#classVars : [
 		'BigSize',
@@ -167,6 +169,9 @@ ObjectMemory >> allocate: size odd: oddBit pointer: pointerBit extra: extraWord 
 	HeaderSize to: (size - 1) do: [ :i | 
 		self heapChunkOf: objectPointer word: i put: default ].
 		self sizeBitsOf: objectPointer put: size.
+		
+	self freeOopsLeft: (self freeOopsLeft - 1). "Not BB code"
+	
 	^ objectPointer
 ]
 
@@ -181,7 +186,8 @@ ObjectMemory >> allocateChunk: size [
 			self reclaimInaccessibleObjects.	"garbage collect and try again"
 			objectPointer := self attemptToAllocateChunk: size.
 			objectPointer isNil
-			ifTrue: [ self outOfMemoryError ].	"give up" 
+				ifTrue: [ self outOfMemoryError ]	"give up" 
+				ifFalse: [ self freeWordsLeft: ((self freeWordsLeft - size) max: 0) ] "Not BB code"
 			].
 	debug ifTrue: [ 
 		Logger << 'allocating oop: ' << objectPointer printString
@@ -311,15 +317,19 @@ ObjectMemory >> countDown: rootObjectPointer [
 		ifTrue: [ ^ rootObjectPointer ]
 		ifFalse: [ "this is a pointer, so decrement its reference count"
 			^ self
-				  forAllObjectsAccessibleFrom: rootObjectPointer
-				  suchThat: [ :objectPointer | "the predicate decrements the count and tests for zero"
-					  count := (self countBitsOf: objectPointer) - 1.
-					  count < 127 ifTrue: [
-						  self countBitsOf: objectPointer put: count ].
-					  count = 0 ]
+				forAllObjectsAccessibleFrom: rootObjectPointer
+				suchThat: [ :objectPointer | "the predicate decrements the count and tests for zero"
+				  	count := (self countBitsOf: objectPointer) - 1.
+				  	count < 127 ifTrue: [
+					  self countBitsOf: objectPointer put: count ].
+					count = 0 ]
 				  do: [ :objectPointer | "the action zeroes the count and deallocates the object"
-					  self countBitsOf: objectPointer put: 0.
-					  self deallocate: objectPointer ] ]
+						self countBitsOf: objectPointer put: 0.
+						"Not BB code"
+					  	self freeOopsLeft: (self freeOopsLeft + 1).
+						self freeWordsLeft: (self freeWordsLeft + (self spaceOccupiedBy: objectPointer)).
+						"End of Not BB code"
+					   self deallocate: objectPointer ] ]
 ]
 
 { #category : #'private - ref count gc' }
@@ -477,6 +487,47 @@ ObjectMemory >> freeBitOf: objectPointer [
 { #category : #'private - object table entries' }
 ObjectMemory >> freeBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 10 to: 10 put: value
+]
+
+{ #category : #'memory counting' }
+ObjectMemory >> freeOopsCount [
+   "Not BB code"
+	"Count how many free object table entries are available"
+	| count |
+	count := 0.
+	2 to: ObjectTableSize by: 2 do: [ :oop|
+		(self hasObject: oop) ifFalse: [ count := count + 1 ]
+	].
+
+	^ count
+]
+
+{ #category : #'memory counting' }
+ObjectMemory >> freeOopsLeft [
+	"Not BB code."
+	"returns the number of objecttable entries left"
+	^ freeOops
+]
+
+{ #category : #'memory counting' }
+ObjectMemory >> freeOopsLeft: count [
+	"Not BB code"
+	"Upddate count of free object table entries"
+	freeOops := count
+]
+
+{ #category : #'memory counting' }
+ObjectMemory >> freeWordsLeft [
+	"Not BB code."
+	"returns the number of words available in memory"
+	^ freeWords
+]
+
+{ #category : #'memory counting' }
+ObjectMemory >> freeWordsLeft: count [
+	"Not BB code"
+	"Upddate count of free words in memory"
+	freeWords := count
 ]
 
 { #category : #testing }
@@ -826,8 +877,10 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	"Note: there is no need to scan the object table for free chunks entry
 	as the Xerox Virtuel Image Booklet p. 3 says that no free chunks are stored
 	in the VM snapshot"
+	self freeWordsLeft: 0. "Not BB code"
 	FirstHeapSegment to: LastHeapSegment do: [ :s |
 		remainingSpaceInSegment := heapSpaceRemaining at: (s - FirstHeapSegment + 1).
+		self freeWordsLeft: self freeWordsLeft + remainingSpaceInSegment. "Not BB code"
 		remainingSpaceInSegment >= HeaderSize ifTrue: [ 
 			"offset in segment where free chunk starts"
 			offset := HeapSpaceStop - remainingSpaceInSegment + 1. 
@@ -923,6 +976,8 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 			"Transcript show: 'free oop in list: '; << i printString; cr."
 			].
 		].
+	
+	freeOops := self freeOopsCount.
 	
 	debug ifTrue: [ 
 		Logger << '<<<<<<< Finshed loading Object Table.'; cr; cr.
@@ -1127,16 +1182,27 @@ ObjectMemory >> rectifyCountsAndDeallocateGarbage [
 		(self freeBitOf: objectPointer) = 0
 			ifTrue: [ "if it is not a free entry"
 				(count := self countBitsOf: objectPointer) = 0
-					ifTrue: [ "it is unmarked, so deallocate it" self deallocate: objectPointer ]
+					ifTrue: [
+						"it is unmarked, so deallocate it"
+						self freeWordsLeft: (self freeWordsLeft + self spaceOccupiedBy: objectPointer). "Not BB code"
+						self deallocate: objectPointer ]
 					ifFalse: [ "it is marked, so rectify reference counts"
 						count < 128
 							ifTrue: [ "subtract 1 to compensate for the mark" self countBitsOf: objectPointer put: count - 1 ].
 						1 to: (self lastPointerOf: objectPointer) - 1 do:
-							[ :offset | "increment the reference count of each pointer" self countUp: (self heapChunkOf: objectPointer word: offset) ] ] ] ].
+							[ :offset |
+								"increment the reference count of each pointer" 
+								self countUp: (self heapChunkOf: objectPointer word: offset) ] ] ] ].
+	
 	"be sure the root objects don't disappear"
 	rootObjectPointers
 		do: [ :rootObjectPointer | self countUp: rootObjectPointer ].
-	self countBitsOf: NilPointer put: 128
+		
+	self countBitsOf: NilPointer put: 128.
+	
+	"update count of free object table entries"
+	self freeOopsLeft: self freeOopsCount.
+	
 ]
 
 { #category : #'private - compaction' }

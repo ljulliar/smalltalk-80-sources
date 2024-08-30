@@ -1690,6 +1690,61 @@ Interpreter >> positive16BitValueOf: integerPointer [
 	^ value
 ]
 
+{ #category : #'as yet unclassified' }
+Interpreter >> positive32BitIntegerFor: integerValue [
+	"Since the largest indexable collections may have 65534 indexable elements,
+   and SmallIntegers can only represent values up to 16383, primitive routines 
+   that deal with indices or sizes must be able to manipulate LargePositiveIntegers. 
+   This routine convert between 16-bit unsigned values and object pointers 
+   to SmallIntegers or LargePositiveIntegers. (BB 617)"
+
+	| newLargeInteger |
+	"ERROR BB code ljulliard. Integer value here is a native integer
+	of the host platform, not a ST80 integer value. So replace the line below:
+	(self extractBits: 0 to: 1 of: integerValue) = 0
+	with: "
+	(memory isIntegerValue: integerValue)
+		ifTrue: [ ^ memory integerObjectOf: integerValue ].
+
+	newLargeInteger := memory instantiateClass: ClassLargePositiveIntegerPointer
+		                       withBytes: 4.
+	memory storeByte: 0
+		    ofObject: newLargeInteger
+		    withValue: (self lowByteOf: integerValue).
+	memory storeByte: 1
+          ofObject: newLargeInteger
+          withValue: (self highByteOf: integerValue).
+	memory storeByte: 2
+          ofObject: newLargeInteger
+          withValue: (integerValue bitShift: -16).
+	memory storeByte: 3
+          ofObject: newLargeInteger
+          withValue: (integerValue bitShift: -24).
+	^ newLargeInteger
+]
+
+{ #category : #'primitive methods' }
+Interpreter >> positive32BitValueOf: integerPointer [
+	"Not BB code.
+	This message doesn't exist in the BB or in the Smalltalk source code
+	but we need it in some places (e.g. when ST80 primtive sends 32 bit
+	integer values"
+
+	| value bytes |
+	(memory isIntegerObject: integerPointer)
+		ifTrue: [ ^ memory integerValueOf: integerPointer ].
+	(memory fetchClassOf: integerPointer) = ClassLargePositiveIntegerPointer
+		ifFalse: [ ^ self primitiveFail ].
+	
+	bytes := memory fetchByteLengthOf: integerPointer.
+	
+	value := (memory fetchByte: 3 ofObject: integerPointer).
+	bytes > 1 ifTrue: [ value := value bitOr: (memory fetchByte: 2 ofObject: integerPointer) << 8 ].
+	bytes > 2 ifTrue: [ value := value bitOr: (memory fetchByte: 1 ofObject: integerPointer) << 16].
+	bytes > 3 ifTrue: [ value := value bitOr: (memory fetchByte: 0 ofObject: integerPointer) << 24].
+	^ value
+]
+
 { #category : #'arithmetic primitives' }
 Interpreter >> primitiveAdd [
 	"Primitive add operation (BB 622)"
@@ -2013,7 +2068,8 @@ Interpreter >> primitiveCopyBits [
 { #category : #'primitive methods' }
 Interpreter >> primitiveCoreLeft [
 	"BB p. 653"
-	Exception signal: 'NOT IMPLEMENTED YET !!'
+	self pop: 1. "discard receiver"
+	self push: (self positive32BitIntegerFor: memory freeWordsLeft).
 ]
 
 { #category : #'io primitives' }
@@ -2745,7 +2801,8 @@ Interpreter >> primitiveObjectAtPut [
 { #category : #'primitive methods' }
 Interpreter >> primitiveOopsLeft [
 	"BB p. 653"
-	Exception signal: 'NOT IMPLEMENTED YET !!'
+	self pop: 1. "discard receiver"
+	self push: (self positive16BitIntegerFor: memory freeOopsLeft).
 ]
 
 { #category : #'control primitives' }
@@ -2915,7 +2972,31 @@ Interpreter >> primitiveSignal [
 { #category : #'primitive methods' }
 Interpreter >> primitiveSignalAtOopsLeftWordsLeft [
 	"BB p. 653"
-	Exception signal: 'NOT IMPLEMENTED YET !!'
+	"From the Smalltalk 80 sources file:
+	Tell the object memory to signal the Semaphore when either the number 
+	of object pointers remaining drops below numOops, or the number of  
+	words in the object space remaining drops below numWords.  Fail if the  
+	frist argument is neither a Semaphore nor nil.  Fail if numOops is not a 
+	16-bit Integer, or if numWords is not a 32-bit LargePositiveInteger.  
+	Essential.  See Object documentation whatIsAPrimitive."
+	
+	| numWords numOops semaphore |
+	
+	numWords  := self positive32BitValueOf: self popStack.
+	numOops   := self positive16BitValueOf: self popStack.
+	semaphore := self popStack.
+	
+	self success: (memory isObjectNil: semaphore) | ((memory fetchClassOf: semaphore) == ClassSemaphorePointer).
+	success
+		ifTrue: [ 
+			lowSpaceSemaphore := semaphore.
+			oopsLeftLimit := numOops.
+			wordsLeftLimit := numWords.
+		 ]
+		ifFalse: [ 
+			self unPop: 3
+		 ]
+	
 ]
 
 { #category : #'array stream primitives' }
