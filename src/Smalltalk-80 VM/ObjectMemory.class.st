@@ -1325,7 +1325,10 @@ ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valu
 { #category : #'word access' }
 ObjectMemory >> storeWord: wordIndex ofObject: objectPointer withValue: valueWord [
 	"Store the 16 bit numerical value valueWord in the byte numbered fieldIndex of the object associated with objectPointer"
-
+	debug ifTrue: [ 
+		Logger << objectPointer printString << ' word: ' << wordIndex printString
+			<< ' <- ' << valueWord printString; cr.
+		 ].
 	^self heapChunkOf: objectPointer word: HeaderSize + wordIndex put: valueWord
 ]
 
