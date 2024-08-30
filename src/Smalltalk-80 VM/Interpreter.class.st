@@ -34,7 +34,11 @@ Class {
 		'currentDisplayWidth',
 		'currentDisplayHeight',
 		'hal',
-		'fileSystem'
+		'fileSystem',
+		'currentCursor',
+		'lowSpaceSemaphore',
+		'oopsLeftLimit',
+		'wordsLeftLimit'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -313,7 +317,7 @@ Interpreter >> checkProcessSwitch [
                                               ofObject: newProcess).
                "From dbanay: Need to remove reference"
                memory decreaseReferencesTo: newProcess.
-               newProcess := nil]
+               newProcess := NilPointer]
 
 ]
 
@@ -885,8 +889,9 @@ Interpreter >> firstContext [
    the scheduler's active Process. (BB 644)"
 
    newProcessWaiting := false.
-   "ERROR From dbanay need to initialize new Process"
-	newProcess := nil.
+   "BB code ERROR from dbanay: need to initialize 
+    newProcess to ST80 nil"
+	newProcess := NilPointer.
    ^memory fetchPointer: SuspendedContextIndex
            ofObject: self activeProcess
 ]
