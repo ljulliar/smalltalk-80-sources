@@ -85,6 +85,11 @@ ST80Form >> bitsSize [
 ]
 
 { #category : #accessing }
+ST80Form >> extent [
+	^ width @ height
+]
+
+{ #category : #accessing }
 ST80Form >> height [
 
 	^ height

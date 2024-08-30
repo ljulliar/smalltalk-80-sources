@@ -20,17 +20,90 @@ Class {
 		'displayHeight',
 		'window',
 		'displayMorph',
-		'displayForm'
+		'displayForm',
+		'cursor',
+		'inputSemaphore',
+		'inputQueue'
+	],
+	#classVars : [
+		'AbsoluteTime',
+		'AlphaLockKey',
+		'BackspaceKey',
+		'ButtonCenter',
+		'ButtonLeft',
+		'ButtonRight',
+		'ControlKey',
+		'DeleteKey',
+		'DeltaTime',
+		'DeviceOff',
+		'DeviceOn',
+		'EscapeKey',
+		'LeftShiftKey',
+		'LineFeedKey',
+		'ReturnKey',
+		'RightShiftKey',
+		'SpaceKey',
+		'TabKey',
+		'XLocation',
+		'YLocation'
 	],
 	#category : #'Smalltalk-80 VM'
 }
+
+{ #category : #'class initialization' }
+ST80HardwareAbstractionLayer class >> initialize [
+	"Not BB code"
+
+	"Input Event type values as expected by the ST80 VM. See BB p. 649"
+	DeltaTime    := 0.
+	XLocation    := 1.
+	YLocation    := 2.
+	DeviceOn     := 3.
+	DeviceOff    := 4.
+	AbsoluteTime := 5.
+	
+	"Special char keys parameters. See BB p. 650"
+	BackspaceKey := 8.
+	TabKey       := 9.
+	LineFeedKey  := 10.
+	ReturnKey    := 13.
+	EscapeKey    := 27.
+	SpaceKey     := 32.
+	DeleteKey    := 127.
+	
+	"Meta keys parameters (undecoded keyboard)"
+	LeftShiftKey  := 136.
+	RightShiftKey := 137.
+	ControlKey    := 138.
+	AlphaLockKey  := 139.
+	
+   "Bi-state devices parameters. See BB p. 650"
+	ButtonLeft   := 130.
+	ButtonCenter := 131.
+	ButtonRight  := 132.
+]
+
+{ #category : #'cursor access' }
+ST80HardwareAbstractionLayer >> cursor: aCursor [
+	"This message receives a pointer to a 16x16 Proxy ST80 Form
+	to use as the current cursor on the display screen"
+	
+	"Convert the ST80 cursor form to a native Form.
+	No cropping here as we want the entire cursor form of course"
+	cursor := aCursor asNativeFormCropped: (Rectangle origin: 0@0 extent: aCursor extent).
+	
+	"TODO: add some display logic here. Like if the mouse pointer
+	is in the display window then the cursor must be updated on screen"
+	
+	^ true
+]
 
 { #category : #'display access' }
 ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 	| newDisplayMorph |
-	"self halt."
-	"If same dimensions do nothing and return"
+
+	"If same dimensionsas current display do nothing and return"
 	(displayWidth = width and: displayHeight = height) ifTrue: [ ^ true ].
 	
 	displayWidth := width.
@@ -55,6 +128,16 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 			window := newDisplayMorph openInWindowLabeled: 'Smalltalk-80'.
 		 ].
 	displayMorph := newDisplayMorph.
+	
+	"Install Morph UI handlers to capture the input events
+	that we will forward to the ST80 VM"
+	displayMorph on: #MouseEnter send: #mouseEnterST80Morph to: self.
+	displayMorph on: #MouseLeave send: #mouseLeaveST80Morph to: self.
+	displayMorph on: #MouseDown  send: #mouseDownST80Morph to: self.
+	displayMorph on: #MouseUp    send: #mouseUpST80Morph to: self.
+	displayMorph on: #MouseMove  send: #mouseUpST80Morph to: self.	
+	displayMorph on: #keyStroke  send: #mouseKeyStrokeST80Morph to: self. 
+	
 	^ true.
 	
 	
@@ -64,12 +147,56 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 { #category : #initialization }
 ST80HardwareAbstractionLayer >> initialize [
 
+	"Make sure to initialize class variables"
+	self class initialize.
+	
 	"Initial Screen dimensions can be found
-	in the Xerox ST80 Virtual Image Booklet p. 3"
-	displayWidth := nil. "640."
-	displayHeight := nil. "480."
+	in the Xerox ST80 Virtual Image Booklet p. 3.
+	The original ST80 VM will set them up at start time
+	at 640x480"
+	displayWidth := nil.
+	displayHeight := nil.
 	display := nil.
 	
+	"I/O Device (keyboard, mouse, location,...) 
+	Input event queue"
+	inputQueue := OrderedCollection new.
+	
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
+	"keep track of the semaphore to signal when input event occur"	
+	inputSemaphore = aSemaphore.
+	
+
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> mouseDownST80Morph: event [
+	"One of the mouse buttons was clicked down"
+	self halt.
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> mouseEnterST80Morph: event [
+	"The mouse pointer is entering the ST80 Morph"
+	Transcript show: 'Mouse enters ST80 Morph'.
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> mouseLeaveST80Morph: event [
+	"The mouse pointer is leaving the ST80 Morph"
+	Transcript show: 'Mouse leaves ST80 Morph'.
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> nextInputWord [
+	"Pick the next 16 bit word event from the event queue"
+	inputQueue isEmpty 
+		ifTrue: [ ^ nil ]
+		ifFalse: [ ^ inputQueue removeFirst ]
+
 ]
 
 { #category : #'display access' }

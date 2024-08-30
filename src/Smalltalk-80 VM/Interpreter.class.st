@@ -1255,6 +1255,11 @@ Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem
 	"Cycle counter"
 	cycleCounter := 0.
 	
+	"ST80 Memory space parameters"
+	lowSpaceSemaphore := NilPointer.
+	oopsLeftLimit := 0.
+	wordsLeftLimit := 0.
+	
 	
 ]
 
@@ -1873,6 +1878,35 @@ Interpreter >> primitiveAtPut [
 ]
 
 { #category : #'primitive methods' }
+Interpreter >> primitiveBeCursor [
+	"Not BB code - This primitive is implementation dependent
+	From BB p. 651
+	The instance of Cursor that should be ORed into
+   the screen is designated by sending it the message beCursor.
+   This message invokes the primitiveBeCursor primitive routine. "
+	
+	| newCursor cursor |
+	
+	"Fetch the dimensions of the current display"
+	newCursor := self stackTop.
+	currentCursor = newCursor ifTrue: [ ^ self ].
+	
+	"Create a Proxy ST80 Form for the ST80 cursor"
+	cursor := ST80Form fromObject: newCursor memory: memory.
+
+   	debug ifTrue: [ 
+		Logger << 'BeCursor: ' << newCursor printString
+		   	<< ' width: ' << cursor width printString
+			<< ' height: ' << cursor height printString; cr.
+		].
+
+	(hal cursor: cursor)
+		ifFalse: [ self primitiveFail ].
+	currentCursor := newCursor.
+
+]
+
+{ #category : #'primitive methods' }
 Interpreter >> primitiveBeDisplay [
 	"Not BB code - This primitive is implementation dependent
 	From BB p. 651
@@ -2404,11 +2438,11 @@ Interpreter >> primitiveInputSemaphore [
 			
 	| semaphore  |
 	semaphore := self popStack.
-	self success: (semaphore = NilPointer | memory fetchClassOf: semaphore = ClassSemaphorePointer).
+	self success: semaphore = NilPointer | ((memory fetchClassOf: semaphore) = ClassSemaphorePointer).
 	
 	self success
       "TODO: adjust for Semaphore handling in the VM"	   
-	   ifTrue: [ self vm hal inputSemaphore: semaphore ]
+	   ifTrue: [ hal inputSemaphore: semaphore ]
 	   ifFalse: [ self unPop: 1 ]
 	
 ]
@@ -2421,8 +2455,8 @@ Interpreter >> primitiveInputWord [
    buffer is empty. (BB 648)"	
 			
 	| word |
-	word := self vm hal nextInputWord.
-	self success: (word ~= 0). "A value of 0 should not happen so use it as an error code"
+	word := hal nextInputWord.
+	self success: word notNil. 
 	
 	self success
 		ifTrue: [ self pop: 1.
@@ -2505,29 +2539,36 @@ Interpreter >> primitiveMakePoint [
 	whose x value is the receiver and whose y value is the argument. (BB 625)"
 
 	| integerReceiver integerArgument pointResult |
-	"BB code ERROR modified from dbanay implementation"
-	"integerArgument := self popStack.
-	integerReceiver := self popStack."
-	integerArgument := self popInteger.
-	integerReceiver := self popInteger.
+
+	integerArgument := self popStack.
+	integerReceiver := self popStack.
+	"Code variant from dbanay implementation.
+	 However it doesn't work with the original
+	 implementation of popInteger from the BB at
+	 cyle 24616 of the original VM snapshot.
+	 so I decided to stick to the BB implementation"
+	"integerArgument := self popInteger.
+	integerReceiver := self popInteger."
+
 	self success: (memory isIntegerValue: integerReceiver).
 	self success: (memory isIntegerValue: integerArgument).
 	self success
 		ifTrue: [ pointResult := memory instantiateClass: ClassPointPointer
 				                          withPointers: ClassPointSize.
-					"BB code ERROR modified from dbanay implementation"
-					"memory storePointer: XIndex
+					memory storePointer: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			      memory storePointer: YIndex
 				           ofObject: pointResult
-				           withValue: integerArgument."
-			       self storeInteger: XIndex
+				           withValue: integerArgument.
+					"Code variant from dbanay implementation.
+					 See comment above"
+			       "self storeInteger: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			       self storeInteger: YIndex
 				           ofObject: pointResult
-				           withValue: integerArgument.
+				           withValue: integerArgument."
 			       self push: pointResult ]
 		ifFalse: [ self unPop: 2 ]
 ]
