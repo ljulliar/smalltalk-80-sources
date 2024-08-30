@@ -536,7 +536,7 @@ ObjectMemory >> hasObject: objectPointer [
 	I implemented from the first page of the Part 4
 	Errata in the Xerox VM Booklet - bullet 3"
 	self cantBeIntegerObject: objectPointer.
-	^ (self freeBitOf: objectPointer = 0) & (self countBitsOf: objectPointer ~= 0)
+	^ ((self freeBitOf: objectPointer) = 0) & ((self countBitsOf: objectPointer) ~= 0)
 ]
 
 { #category : #'private - object table entries' }
