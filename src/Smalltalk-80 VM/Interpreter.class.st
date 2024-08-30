@@ -4065,10 +4065,13 @@ Interpreter >> transferTo: aProcess [
    detected. It sets the newProcessWaiting and newProcess registers. (BB 643)"
 
    newProcessWaiting := true.
-   "dbanay needs ref count newProcess line below addedd"
+   "BB code ERROR from dbanay: needs to decrease ref count on the current
+    newProcess before it is overridden with the new one (aProcess) to avoid
+    memory leak"
    newProcess ~~ NilPointer ifTrue: [ memory decreaseReferencesTo: newProcess ].
    newProcess := aProcess.
-   "dbanay needs ref count newProcess line below addedd"
+   "BB code ERROR from dbanay: same as above but this time increase ref count
+   on the new newprocess object"
 	memory increaseReferencesTo: newProcess
 ]
 
