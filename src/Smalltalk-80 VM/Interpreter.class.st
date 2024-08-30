@@ -1662,8 +1662,13 @@ Interpreter >> positive16BitIntegerFor: integerValue [
    to SmallIntegers or LargePositiveIntegers. (BB 617)"
 
 	| newLargeInteger |
+	"ERROR BB code ljulliard. Integer value here is a native integer
+	of the host platform, not a ST80 integer value. So replace the line below:
 	(self extractBits: 0 to: 1 of: integerValue) = 0
-		ifTrue: [ ^ memory integerObjectOf: integerValue ].
+	with: "
+	integerValue < 0
+		ifTrue: [ ^ self primitiveFail ]
+		ifFalse: [ ^ memory integerObjectOf: integerValue  ]. 
 	newLargeInteger := memory instantiateClass: ClassLargePositiveIntegerPointer
 		                       withBytes: 2.
 	memory storeByte: 0
