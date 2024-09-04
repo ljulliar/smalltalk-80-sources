@@ -785,8 +785,8 @@ Interpreter >> extractBits: firstBitIndex to: lastBitIndex of: anInteger [
 
 { #category : #'primitive methods' }
 Interpreter >> extractFloat: objectPointer [
-   "This routine is not implemented in the BB. It rebuilds a 32 bit
-   Float from 2 words"
+   "This routine is not implemented in the BB. It builds a 32 bit
+   Float from 2 ST80 16 bit words"
 
    ^ (memory fetchWord: 1 ofObject: objectPointer) << 16 | 
    	  (memory fetchWord: 0 ofObject: objectPointer)
@@ -1610,7 +1610,7 @@ Interpreter >> pop: number [
 
 { #category : #'primitive methods' }
 Interpreter >> popFloat [
-   "This routine is not implementedin the BB. It is needed to pop a Float
+   "This routine is not implemented in the BB. It is needed to pop a Float
    object from the stack"
 
    | objectPointer |

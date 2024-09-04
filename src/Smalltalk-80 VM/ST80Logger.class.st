@@ -20,7 +20,7 @@ ST80Logger class >> withFile: aFileReference [
 	"^ ZnBufferedWriteStream on: (filesystem binaryWriteStreamOn: self path)"
 ]
 
-{ #category : #'stop conditions' }
+{ #category : #accessing }
 ST80Logger >> cr [
 	"redefine cr to send lf so that it works on Linux"
 	self lf.
