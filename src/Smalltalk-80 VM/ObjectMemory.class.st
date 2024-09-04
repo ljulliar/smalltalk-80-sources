@@ -730,7 +730,7 @@ ObjectMemory >> integerValueOf: objectPointer [
 	"^ (objectPointer bitAnd: 16rFFFE) // 2."
 	
 	integerValue := objectPointer // 2.
-	"Native Intergers on Pharo are 31 bit long so we must 
+	"Native SmallIntegers on Pharo are 31 bit long so we must 
 	 transform ST80 15 bit negative integers into its 
 	 31-bit equivalent.
 	 Positive values greater than the max 15-bit positive value
