@@ -1632,6 +1632,11 @@ Interpreter >> popInteger [
    self success: (memory isIntegerObject: integerPointer).
    self success
       ifTrue: [^ memory integerValueOf: integerPointer]
+		"Line below not BB code. Return a value out of the ST80 
+		SmallInteger range so that the isIntegerValue: message 
+		used subsequently at the caller level fails properly"
+		ifFalse: [ ^ ST80SmallInteger maxVal + 1 ]
+
 ]
 
 { #category : #contexts }
@@ -2545,35 +2550,34 @@ Interpreter >> primitiveMakePoint [
 
 	| integerReceiver integerArgument pointResult |
 
-	integerArgument := self popStack.
-	integerReceiver := self popStack.
-	"Code variant from dbanay implementation.
-	 However it doesn't work with the original
-	 implementation of popInteger from the BB at
-	 cyle 24616 of the original VM snapshot.
-	 so I decided to stick to the BB implementation"
-	"integerArgument := self popInteger.
-	integerReceiver := self popInteger."
+	"integerArgument := self popStack.
+	integerReceiver := self popStack."
+	
+	"Code variant from dbanay implementation."
+	integerArgument := self popInteger.
+	integerReceiver := self popInteger.
 
 	self success: (memory isIntegerValue: integerReceiver).
 	self success: (memory isIntegerValue: integerArgument).
+		
 	self success
 		ifTrue: [ pointResult := memory instantiateClass: ClassPointPointer
 				                          withPointers: ClassPointSize.
-					memory storePointer: XIndex
+					"Original BB code"
+					"memory storePointer: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			      memory storePointer: YIndex
 				           ofObject: pointResult
-				           withValue: integerArgument.
+				           withValue: integerArgument."
 					"Code variant from dbanay implementation.
 					 See comment above"
-			       "self storeInteger: XIndex
+			       self storeInteger: XIndex
 				           ofObject: pointResult
 				          withValue: integerReceiver.
 			       self storeInteger: YIndex
 				           ofObject: pointResult
-				           withValue: integerArgument."
+				           withValue: integerArgument.
 			       self push: pointResult ]
 		ifFalse: [ self unPop: 2 ]
 ]
