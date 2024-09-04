@@ -191,6 +191,13 @@ ST80HardwareAbstractionLayer >> mouseLeaveST80Morph: event [
 	Transcript show: 'Mouse leaves ST80 Morph'.
 ]
 
+{ #category : #'cursor access' }
+ST80HardwareAbstractionLayer >> mousePosition [
+	"returns the current mouse position"
+	^ 320@240
+	"^ displayMorph cursorPoint"
+]
+
 { #category : #'event handling' }
 ST80HardwareAbstractionLayer >> nextInputWord [
 	"Pick the next 16 bit word event from the event queue"
@@ -198,6 +205,12 @@ ST80HardwareAbstractionLayer >> nextInputWord [
 		ifTrue: [ ^ nil ]
 		ifFalse: [ ^ inputQueue removeFirst ]
 
+]
+
+{ #category : #accessing }
+ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
+
+	sampleInterval := anInterval.
 ]
 
 { #category : #'display access' }
