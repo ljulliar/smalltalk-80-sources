@@ -23,7 +23,8 @@ Class {
 		'displayForm',
 		'cursor',
 		'inputSemaphore',
-		'inputQueue'
+		'inputQueue',
+		'sampleInterval'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -164,7 +165,7 @@ ST80HardwareAbstractionLayer >> initialize [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
 	"keep track of the semaphore to signal when input event occur"	
 	inputSemaphore = aSemaphore.
@@ -172,25 +173,25 @@ ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> mouseDownST80Morph: event [
 	"One of the mouse buttons was clicked down"
 	self halt.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> mouseEnterST80Morph: event [
 	"The mouse pointer is entering the ST80 Morph"
 	Transcript show: 'Mouse enters ST80 Morph'.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> mouseLeaveST80Morph: event [
 	"The mouse pointer is leaving the ST80 Morph"
 	Transcript show: 'Mouse leaves ST80 Morph'.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> nextInputWord [
 	"Pick the next 16 bit word event from the event queue"
 	inputQueue isEmpty 
