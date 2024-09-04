@@ -384,9 +384,10 @@ Interpreter >> cycle [
    (perhaps from a new process), and a dispatch is made to the appropriate routine. (BB 594)"
    
    cycleCounter := cycleCounter + 1.
+	Logger flush.
 	"cycleCounter >= 1176 & ((cycleCounter rem: 5) = 0) ifTrue: [ self debug: true. memory debug: true. self halt. ]."
 	"cycleCounter = 10000 ifTrue: [ self debug: true. memory debug: true ]."
-	"cycleCounter = 11000 ifTrue: [ self halt ]."
+	"cycleCounter = 1680 ifTrue: [ self halt ]."
 	self checkProcessSwitch.
 	currentBytecode := self fetchByte.
 	debug ifTrue: [

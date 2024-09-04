@@ -187,12 +187,14 @@ ObjectMemory >> allocateChunk: size [
 			objectPointer := self attemptToAllocateChunk: size.
 			objectPointer isNil
 				ifTrue: [ self outOfMemoryError ]	"give up" 
-				ifFalse: [ self freeWordsLeft: ((self freeWordsLeft - size) max: 0) ] "Not BB code"
 			].
+		
 	debug ifTrue: [ 
 		Logger << 'allocating oop: ' << objectPointer printString
 			<< ' size: ' << size printString; cr.
 		 ].
+	
+	self freeWordsLeft: ((self freeWordsLeft - size) max: 0). "Not BB code"
 	^ objectPointer.
 
 ]
