@@ -413,9 +413,13 @@ ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	"Return the 16 bit numerical value found in the word numbered fieldIndex of the object associated with ObjectPointer"
 	|value|
+	
+	"Line below not BB code"
+	self assert: (wordIndex between: 0 and: (self fetchWordLengthOf: objectPointer) - 1).
+	
 	value := self heapChunkOf: objectPointer word: HeaderSize + wordIndex.
 	debug ifTrue: [ 
-		Logger << objectPointer printString << ' pointer: ' 
+		Logger << objectPointer printString << ' word: ' 
 			<< wordIndex printString << ' = ' << value printString; cr.
 		 ].
 	^ value
