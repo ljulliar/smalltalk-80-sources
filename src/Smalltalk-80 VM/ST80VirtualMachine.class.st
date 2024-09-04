@@ -35,7 +35,7 @@ ST80VirtualMachine >> initialize [
 	
 	debug := true.
 	
-	Smalltalk globals at: #Logger put: ('/tmp/st80ljulliard.log' asFileReference writeStream).
+	Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80ljulliard.log' asFileReference).
 	Logger truncate.
 
 	vmImagePath := '/misc/applications/Smalltalk/ST80_Image/'.
