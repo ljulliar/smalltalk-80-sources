@@ -2608,9 +2608,10 @@ Interpreter >> primitiveMousePoint [
 	 pointing device in its x and y fields. (BB 651)"
 			
 	| currentPoint pointResult |
+	"^ self primitiveFail."
+	
 	self pop: 1. "remove receiver from stack"
-	"TODO: Adapt to get coordinates relative to the simulated screen"
-   currentPoint := self currentWorld activeHand position.
+   currentPoint := hal mousePosition. 
    "Create a point object and push it to the VM stack"
    pointResult := memory instantiateClass: ClassPointPointer withPointers: ClassPointSize.
    self storeInteger: XIndex ofObject: pointResult withValue: currentPoint x.
