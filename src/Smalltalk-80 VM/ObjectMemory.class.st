@@ -954,12 +954,7 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		self locationBitsOf: i put: word2.
 		debug ifTrue: [ 
 			Logger << 'location: ' << word2 printString; cr.
-			].
-		
-		"Transcript show: 'oop: '; << i printString;
-			<< ' word1: '; << word1 printString;
-			<< ' word2: '; << word2 printString; cr."
-		
+			]
 		].
 
 	"Initialize Free pointer list pointer"
@@ -970,7 +965,9 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		self ot: i put: 0.
 		self freeBitOf: i put: 1.
 		self locationBitsOf: i put: 0.
-		"Transcript show: 'mark free oop: '; << i printString; cr."
+		debug ifTrue: [
+			Logger << 'mark free oop: ' << i printString; cr.
+			]
 		].
 	
 	"Build the object table free entry list"
@@ -979,8 +976,10 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	ObjectTableSize-2 to: 2 by: -2 do: [ :i |
 		((self freeBitOf: i) = 1) 
 			ifTrue: [ self toFreePointerListAdd: i.
-			"Transcript show: 'free oop in list: '; << i printString; cr."
-			].
+				debug ifTrue: [ 
+					Logger << 'free oop in list: ' << i printString; cr.
+				]
+			]
 		].
 	
 	freeOops := self freeOopsCount.
@@ -990,8 +989,6 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 		].
 
 	^ true
-	
-
 ]
 
 { #category : #'vm image loading' }

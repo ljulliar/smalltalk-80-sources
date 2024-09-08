@@ -1292,7 +1292,7 @@ Interpreter >> instructionPointerOfContext: contextPointer [
 { #category : #'main loop' }
 Interpreter >> interpret [
 	"Never ending interpreter loop (BB 594)"
-	[ true ] whileTrue: [ self cycle ]
+	[ true ] whileTrue: [ self cycle. "Processor yield" ]
 ]
 
 { #category : #contexts }
