@@ -24,7 +24,8 @@ Class {
 		'cursor',
 		'inputSemaphore',
 		'inputQueue',
-		'sampleInterval'
+		'sampleInterval',
+		'vm'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -84,6 +85,11 @@ ST80HardwareAbstractionLayer class >> initialize [
 	ButtonRight  := 132.
 ]
 
+{ #category : #'class initialization' }
+ST80HardwareAbstractionLayer class >> withVM: aVm [
+	^ self basicNew initializeWithVM: aVm; yourself
+]
+
 { #category : #'cursor access' }
 ST80HardwareAbstractionLayer >> cursor: aCursor [
 	"This message receives a pointer to a 16x16 Proxy ST80 Form
@@ -104,40 +110,29 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 	| newDisplayMorph |
 
-	"If same dimensionsas current display do nothing and return"
+	"If same dimensions as current display do nothing and return"
 	(displayWidth = width and: displayHeight = height) ifTrue: [ ^ true ].
 	
 	displayWidth := width.
 	displayHeight := height.
 	
-	"A form cannot be resized so create
-	a new one with proper dimensions even when
-	a form was previously created"
-	displayForm := Form extent: width@height depth: 1.
-	displayForm fill: (0@0 extent: displayForm extent) rule: Form over fillColor: Color white.
-	newDisplayMorph := displayForm asMorph.
+	"ST80 Screen display chenged. Create a new Display Morph on host"
+	newDisplayMorph := ST80DisplayMorph extent: displayWidth@displayHeight vm: vm.
 	
 	window
 		ifNotNil: [ 
-			"Replace display morph in existing window"
+			"Replace existing display morph in app  window with 
+			the new one"
 			window removeMorph: displayMorph.
 			window addMorph: newDisplayMorph frame: (0@0 corner: 1@1).
 			window extent: displayWidth@displayHeight.
 			]
 		ifNil: [ 
-			"First time display is set so create the host window"
+			"First time display is set, so create the host app window"
 			window := newDisplayMorph openInWindowLabeled: 'Smalltalk-80'.
 		 ].
 	displayMorph := newDisplayMorph.
-	
-	"Install Morph UI handlers to capture the input events
-	that we will forward to the ST80 VM"
-	displayMorph on: #MouseEnter send: #mouseEnterST80Morph to: self.
-	displayMorph on: #MouseLeave send: #mouseLeaveST80Morph to: self.
-	displayMorph on: #MouseDown  send: #mouseDownST80Morph to: self.
-	displayMorph on: #MouseUp    send: #mouseUpST80Morph to: self.
-	displayMorph on: #MouseMove  send: #mouseUpST80Morph to: self.	
-	displayMorph on: #keyStroke  send: #mouseKeyStrokeST80Morph to: self. 
+	displayForm := displayMorph displayForm.
 	
 	^ true.
 	

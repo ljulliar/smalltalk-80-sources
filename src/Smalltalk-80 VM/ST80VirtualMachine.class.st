@@ -21,10 +21,31 @@ Class {
 		'vmMethodOopsFile',
 		'interpreter',
 		'directory',
-		'debug'
+		'debug',
+		'fs',
+		'hal',
+		'vmProcess'
 	],
 	#category : #'Smalltalk-80 VM'
 }
+
+{ #category : #running }
+ST80VirtualMachine class >> run [
+	"Launch the VM in a separate process"
+	^ self basicNew initializeRun; yourself.
+]
+
+{ #category : #accessing }
+ST80VirtualMachine >> fs [
+
+	^ fs
+]
+
+{ #category : #accessing }
+ST80VirtualMachine >> hal [
+
+	^ hal
+]
 
 { #category : #initialization }
 ST80VirtualMachine >> initialize [
@@ -33,7 +54,7 @@ ST80VirtualMachine >> initialize [
 	
 	| snapshot |
 	
-	debug := true.
+	debug := false.
 	
 	Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80ljulliard.log' asFileReference).
 	Logger truncate.
@@ -46,10 +67,11 @@ ST80VirtualMachine >> initialize [
 	vmMethodOopsFile := vmImagePath, 'method.oops'.
 	
 	"Open snapshot stream"
+	hal := ST80HardwareAbstractionLayer withVM: self.
+	fs := ST80FileSystem new.
 	snapshot := vmImageFile asFileReference binaryReadStream.
 	interpreter := Interpreter withSnapshot: snapshot 
-						hal: ST80HardwareAbstractionLayer new
-						fileSystem: ST80FIleSystem new
+						hal: hal fileSystem: fs
 						debug: debug.
 	
 	"Load symbol tables if debug activated"
@@ -62,4 +84,18 @@ ST80VirtualMachine >> initialize [
 	interpreter interpret.
 
 
+]
+
+{ #category : #initialization }
+ST80VirtualMachine >> initializeRun [
+	
+	"Fork the VM process at a standard User priority"
+	vmProcess := [ 
+		[ self initialize  ] forkAt: Processor userSchedulingPriority ] 
+		ensure: [  Logger flush ]
+]
+
+{ #category : #'debugging actions' }
+ST80VirtualMachine >> terminate [
+	vmProcess terminate.
 ]
