@@ -141,10 +141,12 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 ]
 
 { #category : #initialization }
-ST80HardwareAbstractionLayer >> initialize [
+ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 
 	"Make sure to initialize class variables"
 	self class initialize.
+	
+	vm := aVm.
 	
 	"Initial Screen dimensions can be found
 	in the Xerox ST80 Virtual Image Booklet p. 3.
