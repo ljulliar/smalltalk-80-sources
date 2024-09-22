@@ -2136,7 +2136,7 @@ Interpreter >> primitiveCursorLink [
 	| flag |
 	flag := self popStack.
 	" set cursor link to true here"
-	self hal cursorLink: (flag class = TruePointer)
+	hal cursorLink: (flag class = TruePointer)
 ]
 
 { #category : #'io primitives' }
@@ -2146,7 +2146,7 @@ Interpreter >> primitiveCursorLocPut [
 			
 	| point x y |
    point := self popStack.
-   self success: (memory fetchClassOf: point == ClassPointPointer).
+   self success: (memory fetchClassOf: point) = ClassPointPointer.
    self success
       ifTrue: [ x := self fetchInteger: XIndex ofObject: point.
 	             y := self fetchInteger: YIndex ofObject: point.
