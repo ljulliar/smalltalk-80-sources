@@ -257,10 +257,13 @@ ST80HardwareAbstractionLayer >> mouseMove: position [
 	environment and feed it into the ST80 input events queue.
 	According to BB p. 649 We only have to send time word once for any 
 	number of type 1 and 2 events that follows"
-	mousePosition := position.
+	
+	"When the mouse mocves the end point is using float for x and y
+	position. Convert them to integer"
+	mousePosition := position asIntegerPoint.
 	self inputTimeWord.
-	self inputWordType: 1 parameter:  (position x) asInteger.
-	self inputWordType: 2 parameter:  (position y) asInteger.
+	self inputWordType: 1 parameter: mousePosition x.
+	self inputWordType: 2 parameter: mousePosition y.
 ]
 
 { #category : #'cursor access' }
