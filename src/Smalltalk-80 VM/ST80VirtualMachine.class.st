@@ -95,6 +95,12 @@ ST80VirtualMachine >> initializeRun [
 		ensure: [  Logger flush ]
 ]
 
+{ #category : #accessing }
+ST80VirtualMachine >> interpreter [
+
+	^ interpreter
+]
+
 { #category : #'debugging actions' }
 ST80VirtualMachine >> terminate [
 	vmProcess terminate.

@@ -261,6 +261,17 @@ Interpreter >> arithmeticSelectorPrimitive [
 
 ]
 
+{ #category : #'as yet unclassified' }
+Interpreter >> asynchronousSignal: aSemaphore [
+	"The asynchronousSignal: routine adds a Semaphore to the buffer.
+   The Semaphores will actually be signaled in the checkProcessSwitch
+   routine which calls the synchronousSignal: routine once for each 
+   Semaphore in the buffer. BB p.642"
+
+	semaphoreIndex := semaphoreIndex + 1.
+	semaphoreList at: semaphoreIndex put: aSemaphore
+]
+
 { #category : #contexts }
 Interpreter >> caller [
 	"This routine fetch the caller field from contexts needed by the interpreter. Access is infrequent
@@ -1237,7 +1248,7 @@ Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem
 	
 	"BB doesn't say how large the semaphore list must be..."
 	"TODO: turn it into an #initializeSemaphore method when code is stable"
-	semaphoreList := Array new: 255 withAll: 0.
+	semaphoreList := Array new: 4096 withAll: 0.
 	semaphoreIndex := 0.
 	
 	debug ifTrue: [ 
@@ -2125,7 +2136,7 @@ Interpreter >> primitiveCursorLink [
 	| flag |
 	flag := self popStack.
 	" set cursor link to true here"
-	self vm hal cursorLink: (flag class = TruePointer)
+	self hal cursorLink: (flag class = TruePointer)
 ]
 
 { #category : #'io primitives' }
@@ -2139,8 +2150,8 @@ Interpreter >> primitiveCursorLocPut [
    self success
       ifTrue: [ x := self fetchInteger: XIndex ofObject: point.
 	             y := self fetchInteger: YIndex ofObject: point.
-	             "TODO: adapt to set cursor location of the VM window"
-	             self currentWorld activeHand position: x@y ]
+					 hal cursorLocation: x@y.
+	              ]
       ifFalse: [ self unPop: 1 ]
 
 ]
@@ -2988,7 +2999,7 @@ Interpreter >> primitiveSampleInterval [
 	
 	self success
       "TODO: adjust for call below handling in the VM"	   
-	   ifTrue: [ hal sampleInterval: interval ]
+	   ifTrue: [ hal sampleInterval: (memory integerValueOf: interval) ]
 	   ifFalse: [ self unPop: 1 ]
 ]
 
@@ -3179,6 +3190,40 @@ Interpreter >> primitiveSuspend [
       ifTrue: [self popStack.
                self push: NilPointer.
                self suspendActive]
+]
+
+{ #category : #'io primitives' }
+Interpreter >> primitiveTickWordsInto [
+	"The primitiveTickWordslnto routine stores the number of ticks 
+	of the millisecond clock (since it last was reset or rolled overUptime."
+	
+	| time byteIndexObject |
+	
+	time := hal millisecondsUptime.
+	byteIndexObject := self popStack.
+	
+	memory storeByte: 0 ofObject: byteIndexObject withValue: (time & 16rFF).
+	memory storeByte: 1 ofObject: byteIndexObject withValue: ((time >> 8) & 16rFF).
+	memory storeByte: 2 ofObject: byteIndexObject withValue: ((time >> 16) & 16rFF).
+	memory storeByte: 3 ofObject: byteIndexObject withValue: ((time >> 24) & 16rFF).
+]
+
+{ #category : #'io primitives' }
+Interpreter >> primitiveTimeWordsInto [
+	"The primitiveTimeWordslnto routine stores the
+	number of seconds since the midnight previous to 
+	January 1, 1901	as an unsigned 32-bit integer into
+	the first four bytes of the argument (BB p. 652)"
+	
+	| time byteIndexObject |
+	
+	time := hal secondsSinceSmalltalkEpoch.
+	byteIndexObject := self popStack.
+	
+	memory storeByte: 0 ofObject: byteIndexObject withValue: (time & 16rFF).
+	memory storeByte: 1 ofObject: byteIndexObject withValue: ((time >> 8) & 16rFF).
+	memory storeByte: 2 ofObject: byteIndexObject withValue: ((time >> 16) & 16rFF).
+	memory storeByte: 3 ofObject: byteIndexObject withValue: ((time >> 24) & 16rFF).
 ]
 
 { #category : #'arithmetic primitives' }

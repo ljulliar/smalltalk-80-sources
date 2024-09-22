@@ -25,7 +25,10 @@ Class {
 		'inputSemaphore',
 		'inputQueue',
 		'sampleInterval',
-		'vm'
+		'vm',
+		'mousePosition',
+		'lastEventTime',
+		'cursorLink'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -105,6 +108,21 @@ ST80HardwareAbstractionLayer >> cursor: aCursor [
 	^ true
 ]
 
+{ #category : #'cursor access' }
+ST80HardwareAbstractionLayer >> cursorLink: aBoolean [
+	"TODO ? Keep track of the boolean flag but we
+	are not using it for now"
+	cursorLink := aBoolean.
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> cursorLocation: aPoint [
+	"Place the cursor at the location given (position is relative
+	to the upperleft corner of the ST80 display. This message is
+	used by Interpreter#primitiveCursorLocPut"
+   self currentWorld activeHand position: aPoint.
+]
+
 { #category : #'display access' }
 ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
@@ -160,39 +178,103 @@ ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	Input event queue"
 	inputQueue := OrderedCollection new.
 	
+	"Set the initial mouse position to the upper left corner
+	as we are sure that this position exists whatever the size 
+	of the ST780 display is"
+	mousePosition := 0@0.
+	
+	"Initialize last input event time to now"
+	lastEventTime := Time millisecondClockValue.
+	
 ]
 
 { #category : #'event handling' }
 ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
-	"keep track of the semaphore to signal when input event occur"	
-	inputSemaphore = aSemaphore.
+	"keep track of the semaphore to signal when input events occur"
+	self assert: aSemaphore notNil.
+	inputSemaphore := aSemaphore.
 	
 
 ]
 
-{ #category : #'event handling' }
-ST80HardwareAbstractionLayer >> mouseDownST80Morph: event [
-	"One of the mouse buttons was clicked down"
-	self halt.
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> inputTimeWord [
+  "As per BB p. 649:
+   A type 0 word will be used if the number of milliseconds since the last
+   event can be represented in 12 bits. Otherwise, a type 5 event is used 
+   followed by two words representing the absolute time. 
+   Absolute time is a 32-bit unsigned number that is the absolute value of
+   the millisecond clock) "
+
+	| now elapsedTime |
+	now := Time  millisecondClockValue.
+	elapsedTime := now - lastEventTime.
+	
+	(elapsedTime <= 4095)
+		ifTrue: [ self inputWordType: 0 parameter: elapsedTime ]
+		ifFalse: [ 
+			self inputWordType: 5 parameter: 0.
+			self inputWord: (now >> 16). "High bytes first"
+			self inputWord: (now & 16rFFFF). "Low bytes second"
+			].
+		
+	lastEventTime := now.
+	
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> inputWord: aValue [
+	"Push a 16 bit value in the input event queue
+	and signal the input semaphore. BB p. 648"
+	self assert: (aValue between: 0 and: 16rFFFF).
+	inputQueue add: aValue.
+	vm interpreter asynchronousSignal: inputSemaphore.
+
+	
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> inputWordType: anEventType parameter: aParameter [
+	"For a description of the format for input event words see
+	BB p. 649"
+	
+	"Make sure type and parameter fit in their respective bit field"
+	self assert: (aParameter between: 0 and: 4095).
+	self assert: (anEventType between: 0 and: 15).
+	self inputWord: (anEventType << 12) | (aParameter & 16rFFF).
+]
+
+{ #category : #'as yet unclassified' }
+ST80HardwareAbstractionLayer >> millisecondsUptime [
+	"number of ticks of the millisecond clock (since it 
+	last was reset or rolled over)"
+	^ Time millisecondClockValue.
 ]
 
 { #category : #'event handling' }
-ST80HardwareAbstractionLayer >> mouseEnterST80Morph: event [
-	"The mouse pointer is entering the ST80 Morph"
-	Transcript show: 'Mouse enters ST80 Morph'.
-]
-
-{ #category : #'event handling' }
-ST80HardwareAbstractionLayer >> mouseLeaveST80Morph: event [
-	"The mouse pointer is leaving the ST80 Morph"
-	Transcript show: 'Mouse leaves ST80 Morph'.
+ST80HardwareAbstractionLayer >> mouseMove: position [
+	"Process the mouse move events received from the host Smalltalk
+	environment and feed it into the ST80 input events queue.
+	According to BB p. 649 We only have to send time word once for any 
+	number of type 1 and 2 events that follows"
+	mousePosition := position.
+	self inputTimeWord.
+	self inputWordType: 1 parameter:  (position x) asInteger.
+	self inputWordType: 2 parameter:  (position y) asInteger.
 ]
 
 { #category : #'cursor access' }
 ST80HardwareAbstractionLayer >> mousePosition [
 	"returns the current mouse position"
-	^ 320@240
+	^ mousePosition
 	"^ displayMorph cursorPoint"
+]
+
+{ #category : #'event handling' }
+ST80HardwareAbstractionLayer >> mouseUpST80Morph: event [
+	"One of the mouse buttons was clicked down"
+
+	Transcript show: 'Mouse up'; cr.
 ]
 
 { #category : #'event handling' }
@@ -206,8 +288,16 @@ ST80HardwareAbstractionLayer >> nextInputWord [
 
 { #category : #accessing }
 ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
-
+	"For now we accept the intrnval value from primitiveSampleInterval 
+	but we actually don't do anything with it"
 	sampleInterval := anInterval.
+]
+
+{ #category : #'time management' }
+ST80HardwareAbstractionLayer >> secondsSinceSmalltalkEpoch [
+	"number of seconds since the midnight previous to 
+	January 1, 1901"
+	^ Time totalSeconds.
 ]
 
 { #category : #'display access' }
