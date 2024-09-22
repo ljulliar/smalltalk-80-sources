@@ -120,7 +120,7 @@ ST80HardwareAbstractionLayer >> cursorLocation: aPoint [
 	"Place the cursor at the location given (position is relative
 	to the upperleft corner of the ST80 display. This message is
 	used by Interpreter#primitiveCursorLocPut"
-   self currentWorld activeHand position: aPoint.
+   self currentWorld activeHand position: (displayMorph position + aPoint).
 ]
 
 { #category : #'display access' }
