@@ -240,7 +240,7 @@ ST80HardwareAbstractionLayer >> inputWordType: anEventType parameter: aParameter
 	
 	"Make sure type and parameter fit in their respective bit field"
 	self assert: (aParameter between: 0 and: 4095).
-	self assert: (anEventType between: 0 and: 15).
+	self assert: (anEventType between: 0 and: 5).
 	self inputWord: (anEventType << 12) | (aParameter & 16rFFF).
 ]
 
