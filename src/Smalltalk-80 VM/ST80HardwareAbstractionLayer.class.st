@@ -96,17 +96,12 @@ ST80HardwareAbstractionLayer class >> withVM: aVm [
 ]
 
 { #category : #'cursor access' }
-ST80HardwareAbstractionLayer >> cursor: aCursor [
+ST80HardwareAbstractionLayer >> cursor: aCursorOop memory: memory [
 	"This message receives a pointer to a 16x16 Proxy ST80 Form
 	to use as the current cursor on the display screen"
 	
-	"Convert the ST80 cursor form to a native Form.
-	No cropping here as we want the entire cursor form of course"
-	cursor := aCursor asNativeFormCropped: (Rectangle origin: 0@0 extent: aCursor extent).
-	
-	"TODO: add some display logic here. Like if the mouse pointer
-	is in the display window then the cursor must be updated on screen"
-	
+	cursor := ST80Cursor fromObject: aCursorOop memory: memory.
+	self currentHand showTemporaryCursor: cursor. 
 	^ true
 ]
 
