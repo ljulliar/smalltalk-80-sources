@@ -89,10 +89,10 @@ ST80VirtualMachine >> initialize [
 { #category : #initialization }
 ST80VirtualMachine >> initializeRun [
 	
-	"Fork the VM process at a standard User priority"
+	"Fork the VM process at standard User priority"
 	vmProcess := [ 
-		[ self initialize  ] forkAt: Processor userSchedulingPriority ] 
-		ensure: [  Logger flush ]
+		[ self initialize ] forkAt: Processor userSchedulingPriority ] 
+		ensure: [ Logger flush ]
 ]
 
 { #category : #accessing }
