@@ -68,7 +68,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 ST80BitBlt class >> bitBltPointer: bitBltPointer memory: memory [
-  	^ self basicNew
+  	^ (super fromObject: bitBltPointer memory: memory)
 		  initializeWithBitBltPointer: bitBltPointer memory: memory;
 		  yourself
 ]

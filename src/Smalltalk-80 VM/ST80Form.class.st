@@ -4,18 +4,17 @@ instances that the BitBlt operations receive as arguments
 "
 Class {
 	#name : #ST80Form,
-	#superclass : #Object,
+	#superclass : #ST80Object,
 	#instVars : [
 		'bits',
 		'width',
 		'height',
-		'oop',
-		'memory',
 		'offset'
 	],
 	#classVars : [
 		'BitsInForm',
 		'HeightInForm',
+		'OffsetInForm',
 		'WidthInForm'
 	],
 	#category : #'Smalltalk-80 VM'
@@ -24,16 +23,17 @@ Class {
 { #category : #'instance creation' }
 ST80Form class >> fromObject: objectPointer memory: memory [
    "the code below follows the Seaside Object initialization conventions"
-	^ self basicNew
+	^ (super fromObject: objectPointer memory: memory) 
 		initializeFromObject: objectPointer memory: memory;
 		yourself
 ]
 
 { #category : #'class initialization' }
 ST80Form class >> initialize [
-	BitsInForm   := 0.
-	WidthInForm  := 1.
-	HeightInForm := 2.
+	BitsInForm    := 0.
+	WidthInForm   := 1.
+	HeightInForm  := 2.
+	OffsetInForm  := 3.
 ]
 
 { #category : #initialization }
@@ -70,15 +70,6 @@ ST80Form >> bits [
 ]
 
 { #category : #accessing }
-ST80Form >> bitsArray [
-   "TODO: Quick and Dirty to test Display update"
-	| wm bitsStartIndex |
-	wm := memory wordMemory.
-	bitsStartIndex := ((memory segmentBitsOf: bits) * 65536) + (memory locationBitsOf: bits) + 1.
-	^ wm copyFrom: bitsStartIndex to: (bitsStartIndex + self bitsSize - 1).
-]
-
-{ #category : #accessing }
 ST80Form >> bitsSize [
 
 	^ width + 15 // 16 * height
@@ -100,27 +91,19 @@ ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
 	"initialize a proxy Form object based on the
 	attributes of the Form coming from the ST80 VM"
 
-	"make sure the class variables are declared"
-	self class initialize.
-	
-	oop := objectPointer.
-	memory := objectMemory.
-	width := memory integerValueOf: (memory fetchWord: WidthInForm ofObject: oop).
-	height := memory integerValueOf: (memory fetchWord: HeightInForm ofObject: oop).
-	bits := ST80Bitmap fromObject: (memory fetchWord: BitsInForm ofObject: oop) memory: memory.
+	super initializeFromObject: objectPointer memory: objectMemory.
+	width := objectMemory integerValueOf: (objectMemory fetchWord: WidthInForm ofObject: objectPointer).
+	height := objectMemory integerValueOf: (objectMemory fetchWord: HeightInForm ofObject: objectPointer).
+	bits := ST80Bitmap fromObject: (objectMemory fetchWord: BitsInForm ofObject: objectPointer) memory: objectMemory.
+	offset := ST80Point fromObject: (objectMemory fetchWord: OffsetInForm ofObject: objectPointer) memory: objectMemory.
 
 ]
 
 { #category : #accessing }
-ST80Form >> memory [
-
-	^ memory
-]
-
-{ #category : #accessing }
-ST80Form >> oop [
-
-	^ oop
+ST80Form >> offset [
+	"Return a native point for the offset as the offset instance
+	variable is a ST80Point proxy object"
+	^ offset point.
 ]
 
 { #category : #accessing }

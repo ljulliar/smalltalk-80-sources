@@ -3,7 +3,7 @@ Proxy class to ST80 SmallIntegers (15 bit signed integers)
 "
 Class {
 	#name : #ST80SmallInteger,
-	#superclass : #Object,
+	#superclass : #ST80Object,
 	#category : #'Smalltalk-80 VM'
 }
 
