@@ -279,6 +279,13 @@ ST80HardwareAbstractionLayer >> nextInputWord [
 
 ]
 
+{ #category : #protocol }
+ST80HardwareAbstractionLayer >> quit [
+	"message sent by primitiveQuit"
+	window close.
+	vm terminate.
+]
+
 { #category : #accessing }
 ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
 	"For now we accept the intrnval value from primitiveSampleInterval 
