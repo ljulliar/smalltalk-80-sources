@@ -35,7 +35,7 @@ Class {
 		'currentDisplayHeight',
 		'hal',
 		'fileSystem',
-		'currentCursor',
+		'currentCursorOop',
 		'lowSpaceSemaphore',
 		'oopsLeftLimit',
 		'wordsLeftLimit'
@@ -261,7 +261,7 @@ Interpreter >> arithmeticSelectorPrimitive [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'control primitives' }
 Interpreter >> asynchronousSignal: aSemaphore [
 	"The asynchronousSignal: routine adds a Semaphore to the buffer.
    The Semaphores will actually be signaled in the checkProcessSwitch
@@ -2619,15 +2619,19 @@ Interpreter >> primitiveMousePoint [
 	 pointing device in its x and y fields. (BB 651)"
 			
 	| currentPoint pointResult |
-	"^ self primitiveFail."
 	
-	self pop: 1. "remove receiver from stack"
-   currentPoint := hal mousePosition. 
-   "Create a point object and push it to the VM stack"
-   pointResult := memory instantiateClass: ClassPointPointer withPointers: ClassPointSize.
-   self storeInteger: XIndex ofObject: pointResult withValue: currentPoint x.
-   self storeInteger: YIndex ofObject: pointResult withValue: currentPoint y.
-	self push: pointResult
+	hal isInputEventDriven 
+		ifTrue: [ self primitiveFail ]
+		ifFalse: [ 
+			"remove receiver from stack"
+			self pop: 1.
+   			currentPoint := hal mousePosition.
+   			"Create a point object and push it to the VM stack"
+   			pointResult := memory instantiateClass: ClassPointPointer withPointers: ClassPointSize.
+   			self storeInteger: XIndex ofObject: pointResult withValue: currentPoint x.
+   			self storeInteger: YIndex ofObject: pointResult withValue: currentPoint y.
+			self push: pointResult
+			]
 ]
 
 { #category : #'arithmetic primitives' }
