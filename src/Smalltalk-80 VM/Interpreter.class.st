@@ -2941,8 +2941,11 @@ Interpreter >> primitivePerformWithArgs [
 
 { #category : #'primitive methods' }
 Interpreter >> primitiveQuit [
-	"BB p. 653"
-	Exception signal: 'NOT IMPLEMENTED YET !!'
+	"The primitiveQuit routine exits to another operating
+	system for the host machine, if one exists. BB p. 653"
+	"ljulliard: Here we simply terminate the ST80 VM"
+
+	hal quit.
 ]
 
 { #category : #'arithmetic primitives' }
