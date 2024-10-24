@@ -421,12 +421,6 @@ ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
 
 ]
 
-{ #category : #accessing }
-ST80BitBlt >> memory [
-
-	^ memory
-]
-
 { #category : #'inner loop' }
 ST80BitBlt >> merge: sourceWord with: destinationWord [
 	"These are the 16 combination rules:"
