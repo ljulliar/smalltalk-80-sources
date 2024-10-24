@@ -42,7 +42,10 @@ ST80DisplayMorph >> displayForm [
 { #category : #'event handling' }
 ST80DisplayMorph >> handlesKeyboard: anEvent [
 	"A key on the kayboard was clicked"
-	^ true
+	"Ignore input events till the ST80 VM 
+	input semaphore is set"
+	^ hal inputSemaphore notNil.
+	
 ]
 
 { #category : #'event handling' }
@@ -86,11 +89,13 @@ ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 
 { #category : #'event handling' }
 ST80DisplayMorph >> keyDown: anEvent [
-	"A key on the kayboard was clicked"
-	Transcript show: anEvent keyValue; 
-		show: anEvent anyModifierKeyPressed;
-		show: anEvent modifierString; 
+	"A key on the keyboard was clicked"
+	Transcript show: 'Key: '; nextPutAll: anEvent keyValue printString; 
+		nextPutAll:  anEvent anyModifierKeyPressed printString;
+		nextPutAll:  anEvent modifierString printString; 
 		cr; flush.
+		
+	hal handleKeyboardEvent: anEvent.
 ]
 
 { #category : #'event handling' }

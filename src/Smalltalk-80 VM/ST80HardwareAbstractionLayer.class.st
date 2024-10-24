@@ -95,6 +95,12 @@ ST80HardwareAbstractionLayer class >> withVM: aVm [
 	^ self basicNew initializeWithVM: aVm; yourself
 ]
 
+{ #category : #accessing }
+ST80HardwareAbstractionLayer >> cursor [
+
+	^ cursor
+]
+
 { #category : #'cursor access' }
 ST80HardwareAbstractionLayer >> cursor: aCursorOop memory: memory [
 	"This message receives a pointer to a 16x16 Proxy ST80 Form
@@ -112,11 +118,12 @@ ST80HardwareAbstractionLayer >> cursorLink: aBoolean [
 	cursorLink := aBoolean.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'cursor access' }
 ST80HardwareAbstractionLayer >> cursorLocation: aPoint [
 	"Place the cursor at the location given (position is relative
 	to the upperleft corner of the ST80 display. This message is
 	used by Interpreter#primitiveCursorLocPut"
+	Transcript show: 'cursorLoc: '; nextPutAll: aPoint printString; cr; flush.
    self currentWorld activeHand position: (displayMorph position + aPoint).
 ]
 
@@ -155,6 +162,60 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 ]
 
+{ #category : #'event handling' }
+ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent [
+	"Receives keyboard events from the Display morph and	turn it into a 
+	keyboard input event well formatted for the ST80VM. Events here 
+	are received for a decoded keyboard meaning that all the 'mete' keys
+	(Ctrl, Shift..) are reported as modifiers in addition to the key scan code
+	
+	Per BB p. 650:
+	An undecoded keyboard is made up of independent keys with independent down and up
+	transitions. A decoded keyboard consists of some independent keys and
+	some 'meta'' keys (shift and escape) that cannot be detected on their
+	own, but that change the value of the other keys. 
+	
+	The keys on a decoded keyboard only indicate their down transition, not their 
+	up transition. On an undecoded keyboard, the standard keys produce parameters 
+	that are the ASCII code of the character on the keytop without
+	shift or control information (i.e,, the key with 'A' on it produces the
+	ASCII for 'a'' and the key with '2'' and '@'' on it produces the ASCII
+	for '2'"
+	
+	
+
+]
+
+{ #category : #'event handling' }
+ST80HardwareAbstractionLayer >> handleMouseEvent: anEvent way: way [
+
+	"ERROR in BB p. 650 the parameter values for the left and right
+	buuttons are actuelly the other way around. So here is the
+	proper naming and parameter numbering for a mouse configured 
+	for a right handed user:
+	
+		Usual naming   | Xerox naming   | ST80 Parameter | Pharo whichButton
+		---------------+----------------+----------------+-------------
+		Left button    | Red button     |   130          |     4 (click)
+		Middle button  | Yellow button  |   129          |     ? (meta-click)
+		Left button    | Blue button    |   128		      |     2 (action-click)
+	"
+	
+	| event_type |
+
+	event_type := (way = #down) ifTrue: [ 3 ] ifFalse: [ 4 ].
+	
+	anEvent redButtonChanged ifTrue: [ 
+		self inputTimeWord.
+		self inputWordType: event_type parameter: RedButton. 
+		^self ].
+	anEvent yellowButtonChanged ifTrue: [
+		self inputTimeWord.
+		self inputWordType: event_type parameter: YellowButton.
+		^self ].
+	Error new signal: 'Unknown mouse button: ', anEvent whichButton printString.
+]
+
 { #category : #initialization }
 ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 
@@ -180,9 +241,17 @@ ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	of the ST780 display is"
 	mousePosition := 0@0.
 	
-	"Initialize last input event time to now"
-	lastEventTime := Time millisecondClockValue.
+	"Initialize last input event time to zero"
+	lastEventTime := 0.
 	
+	"Scheduler timer semaphore"
+	scheduledSemaphore := Semaphore new.
+	
+]
+
+{ #category : #'event handling' }
+ST80HardwareAbstractionLayer >> inputSemaphore [
+	^ inputSemaphore
 ]
 
 { #category : #'event handling' }
@@ -194,7 +263,7 @@ ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> inputTimeWord [
   "As per BB p. 649:
    A type 0 word will be used if the number of milliseconds since the last
@@ -204,9 +273,9 @@ ST80HardwareAbstractionLayer >> inputTimeWord [
    the millisecond clock) "
 
 	| now elapsedTime |
-	now := Time  millisecondClockValue.
+	now := Time millisecondClockValue.
 	elapsedTime := now - lastEventTime.
-	
+
 	(elapsedTime <= 4095)
 		ifTrue: [ self inputWordType: 0 parameter: elapsedTime ]
 		ifFalse: [ 
@@ -219,29 +288,40 @@ ST80HardwareAbstractionLayer >> inputTimeWord [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> inputWord: aValue [
 	"Push a 16 bit value in the input event queue
 	and signal the input semaphore. BB p. 648"
 	self assert: (aValue between: 0 and: 16rFFFF).
 	inputQueue add: aValue.
+	"Transcript show: '-> IQ (size: '; nextPutAll: inputQueue size printString; 
+		nextPutAll: ') :'; nextPutAll: (aValue >> 12) printString;
+		 nextPutAll: ' / '; nextPutAll: (aValue & 16rFFF) printString; cr; flush."
 	vm interpreter asynchronousSignal: inputSemaphore.
 
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> inputWordType: anEventType parameter: aParameter [
 	"For a description of the format for input event words see
 	BB p. 649"
 	
-	"Make sure type and parameter fit in their respective bit field"
+	"Make sure type and parameter values are correct"
 	self assert: (aParameter between: 0 and: 4095).
 	self assert: (anEventType between: 0 and: 5).
 	self inputWord: (anEventType << 12) | (aParameter & 16rFFF).
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'event handling' }
+ST80HardwareAbstractionLayer >> isInputEventDriven [
+	"If set to False, the ST80 interpreter will poll the mouse 
+	position at every cycle which is very time consuming and 
+	unnecessary as the event	driven approach works well in this HAL"
+	^ true
+]
+
+{ #category : #'time management' }
 ST80HardwareAbstractionLayer >> millisecondsUptime [
 	"number of ticks of the millisecond clock (since it 
 	last was reset or rolled over)"
@@ -255,8 +335,8 @@ ST80HardwareAbstractionLayer >> mouseMove: position [
 	According to BB p. 649 We only have to send time word once for any 
 	number of type 1 and 2 events that follows"
 	
-	"When the mouse mocves the end point is using float for x and y
-	position. Convert them to integer"
+	"When the mouse moves the end point of the move is using float for x and y
+	position. Convert them to integer as expected by the ST80 source code"
 	mousePosition := position asIntegerPoint.
 	self inputTimeWord.
 	self inputWordType: 1 parameter: mousePosition x.
@@ -266,6 +346,8 @@ ST80HardwareAbstractionLayer >> mouseMove: position [
 { #category : #'cursor access' }
 ST80HardwareAbstractionLayer >> mousePosition [
 	"returns the current mouse position"
+	Transcript show: 'MousePt: '; nextPutAll: mousePosition printString; 
+	nextPutAll: Time now printString; cr; flush.
 	^ mousePosition
 	"^ displayMorph cursorPoint"
 ]
@@ -290,6 +372,8 @@ ST80HardwareAbstractionLayer >> quit [
 ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
 	"For now we accept the intrnval value from primitiveSampleInterval 
 	but we actually don't do anything with it"
+	
+	Transcript show: 'Sample Interval: '; nextPutAll: anInterval printString ; cr; flush.
 	sampleInterval := anInterval.
 ]
 
@@ -298,6 +382,24 @@ ST80HardwareAbstractionLayer >> secondsSinceSmalltalkEpoch [
 	"number of seconds since the midnight previous to 
 	January 1, 1901"
 	^ Time totalSeconds.
+]
+
+{ #category : #'time management' }
+ST80HardwareAbstractionLayer >> signal: aST80Semaphore atMilliseconds: time [
+	"This is called by the ST80 primitiveSignalAtTick primitive.
+	From BB p 652: If a new call is made on it before the last timer
+	value has been reached the lastSemaphore will not be signaled.
+	This is also how the native primSignal:atMilliseconds: primitive 
+	below behaves. So there is no need for additional logic in the code"
+	Transcript show: 'signal: atMilliseconds:'; cr; flush.
+	DelayMillisecondTicker new primSignal: scheduledSemaphore atMilliseconds: time.
+	[
+		scheduledSemaphore wait.
+		vm interpreter asynchronousSignal: aST80Semaphore.
+	] forkAt: Processor userInterruptPriority.
+	
+
+	
 ]
 
 { #category : #'display access' }
