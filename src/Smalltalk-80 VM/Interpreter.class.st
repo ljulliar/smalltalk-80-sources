@@ -3074,6 +3074,53 @@ Interpreter >> primitiveSignalAtOopsLeftWordsLeft [
 	
 ]
 
+{ #category : #'io primitives' }
+Interpreter >> primitiveSignalAtTick [
+	" The primitiveSignalAtTick routine is associated with the signal:atTick:
+     messages in ProcessorScheduler. His message takes a Semaphore as the first
+     argument and a byte indexable object of at least four bytes as the second
+     argument. The first four bytes of the second argument are interpreted as an
+     unsigned 32-bit integer of the type stored by the primitiveTickWordsInto
+     routine. The interpreter should signal the Semaphore argument when the
+     millisecond clock reaches the value specified by the second argument.
+     If the specified time has passed,the Semaphore is signaled immediately.
+     This primitive signals the last Semaphore to be passed to it. If a new
+     call is made on it before the last timer value has been reached the last
+     Semaphore will not be signaled. If the first argument is not a Semaphore
+     any currently waiting Semaphore will be forgotten. (BB p 652)
+
+     ERROR From the Smalltalk80.sources file: this primitive is actually called from
+     the method signal:atMilliseconds: not signal:atTick:as written in the 
+     Blue Book p. 652.
+     Comment from the Smalltalk80 source file:
+     Signal the semaphore when the millisecond clock reaches the value of 
+	  the second argument.  The second argument is a byte indexable object at 
+	  least four bytes long (a 32-bit unsigned number with the low order 
+	  8-bits stored in the byte with the lowest index).  Fail if the first 
+	  argument is neither a Semaphore nor nil.  Essential.  See Object 
+	  documentation whatIsAPrimitive."
+
+	| timePointer semaphore time |
+	
+	timePointer := self popStack.
+	semaphore := self popStack.
+	self success: true.
+	
+	self success: semaphore = NilPointer | ((memory fetchClassOf: semaphore) = ClassSemaphorePointer).
+	success 
+		ifTrue: [ 
+			semaphore = NilPointer ifTrue: [ semaphore := nil ].
+			time := (memory fetchByte: 0 ofObject: timePointer).
+			time := time bitOr: (memory fetchByte: 1 ofObject: timePointer) << 8.
+			time := time bitOr: (memory fetchByte: 1 ofObject: timePointer) << 16.
+			time := time bitOr: (memory fetchByte: 1 ofObject: timePointer) << 24.
+			hal signal: semaphore atMilliseconds: time.
+		]
+		ifFalse: [ 
+			self unPop: 2.
+		]
+]
+
 { #category : #'array stream primitives' }
 Interpreter >> primitiveSize [
    "The primitiveSize routine returns the number of indexable fields the receiver 
