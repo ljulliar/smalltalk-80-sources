@@ -4,9 +4,8 @@ Bitblt instances coming from the ST80 Virtual Machine
 "
 Class {
 	#name : #ST80BitBlt,
-	#superclass : #Object,
+	#superclass : #ST80Object,
 	#instVars : [
-		'memory',
 		'destForm',
 		'sourceForm',
 		'halftoneForm',
@@ -356,7 +355,7 @@ ST80BitBlt >> copyLoop [
 					 			nextPutAll: ' = '; nextPutAll: thisWord printString; cr."
 							].
 							
-					"ERROR Added from dbanay"
+					"BB ERROR Added from dbanay"
 					destIndex >= (destBits size) ifTrue: [ ^ self].
 					
 					"16-bit rotate"
