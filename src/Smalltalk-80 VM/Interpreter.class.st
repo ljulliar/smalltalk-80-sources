@@ -1675,17 +1675,17 @@ Interpreter >> positive16BitIntegerFor: integerValue [
 	"Since the largest indexable collections may have 65534 indexable elements, 
    and SmallIntegers can only represent values up to 16383, primitive routines 
    that deal with indices or sizes must be able to manipulate LargePositiveIntegers. 
-   This routine convert between 16-bit unsigned values and object pointers 
-   to SmallIntegers or LargePositiveIntegers. (BB 617)"
+   This routine convert from a host native  16-bit unsigned values to 
+   to a SmallInteger or a LargePositiveIntegers object pointer.  (BB 617)"
 
 	| newLargeInteger |
-	"ERROR BB code ljulliard. Integer value here is a native integer
-	of the host platform, not a ST80 integer value. So replace the line below:
-	(self extractBits: 0 to: 1 of: integerValue) = 0
-	with: "
+	"NOTE ljulliard: the integer value passed as an argument is a 
+	host native integer"
 	integerValue < 0
-		ifTrue: [ ^ self primitiveFail ]
-		ifFalse: [ ^ memory integerObjectOf: integerValue  ]. 
+		ifTrue: [ ^ self primitiveFail ].
+	(memory isIntegerValue: integerValue)
+		ifTrue: [^ memory integerObjectOf: integerValue]. 
+
 	newLargeInteger := memory instantiateClass: ClassLargePositiveIntegerPointer
 		                       withBytes: 2.
 	memory storeByte: 0
@@ -1899,7 +1899,7 @@ Interpreter >> primitiveAtPut [
       ifFalse: [self unPop: 3]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : #'io primitives' }
 Interpreter >> primitiveBeCursor [
 	"Not BB code - This primitive is implementation dependent
 	From BB p. 651
@@ -1907,25 +1907,29 @@ Interpreter >> primitiveBeCursor [
    the screen is designated by sending it the message beCursor.
    This message invokes the primitiveBeCursor primitive routine. "
 	
-	| newCursor cursor |
+	| newCursorOop |
 	
-	"Fetch the dimensions of the current display"
-	newCursor := self stackTop.
-	currentCursor = newCursor ifTrue: [ ^ self ].
-	
-	"Create a Proxy ST80 Form for the ST80 cursor"
-	cursor := ST80Form fromObject: newCursor memory: memory.
+	"Get the new cursor Form from the stack.
+	Do nothing if it is the same as the currently
+	active cursor"
+	newCursorOop := self stackTop.
+	currentCursorOop = newCursorOop 
+		ifTrue: [
+			Transcript show: 'BeCursor: same oop ignored '; nextPutAll: newCursorOop printString; cr.
+			debug ifTrue: [ 
+				Logger << 'BeCursor: same oop ignored ' << newCursorOop printString; cr.
+				].
+			]
+		ifFalse: [ 
+			Transcript show: 'BeCursor: new oop '; nextPutAll: newCursorOop printString; cr.
+			debug ifTrue: [ 
+				Logger << 'BeCursor: new oop ' << newCursorOop printString; cr.
+				]. 
 
-   	debug ifTrue: [ 
-		Logger << 'BeCursor: ' << newCursor printString
-		   	<< ' width: ' << cursor width printString
-			<< ' height: ' << cursor height printString; cr.
-		].
-
-	(hal cursor: cursor)
-		ifFalse: [ self primitiveFail ].
-	currentCursor := newCursor.
-
+			(hal cursor: newCursorOop memory: memory)
+				ifFalse: [ self primitiveFail ].
+			currentCursorOop := newCursorOop.				
+			]
 ]
 
 { #category : #'primitive methods' }
@@ -2106,8 +2110,11 @@ Interpreter >> primitiveCopyBits [
 		self error: ('Unsupported BitBlt combination rule: ', bitBlt combinationRule printString).  
 		].
 	
-	Logger << 'bitBltPointer: ' << bitBltPointer printString; cr.
-	Logger << 'currentDisplay Form: ' << currentDisplay printString; cr.
+	debug ifTrue: [ 
+		Logger << 'bitBltPointer: ' << bitBltPointer printString; cr.
+		Logger << 'currentDisplay Form: ' << currentDisplay printString; cr.
+		].
+	
 	bitBlt copyBits.
 
 	"if the copyBits operates on the current Display then update the
@@ -2481,7 +2488,7 @@ Interpreter >> primitiveInputWord [
 	self success: word notNil. 
 	
 	self success
-		ifTrue: [ self pop: 1.
+		ifTrue: [ self pop: 1. "remove receiver from stack"
 			       self push: (self positive16BitIntegerFor: word) ]
 		ifFalse: [ self primitiveFail ]
 ]
@@ -3003,9 +3010,7 @@ Interpreter >> primitiveSampleInterval [
 	| interval |
 	interval := self popStack.
 	self success: (memory isIntegerObject: interval).
-	
-	self success
-      "TODO: adjust for call below handling in the VM"	   
+	self success	   
 	   ifTrue: [ hal sampleInterval: (memory integerValueOf: interval) ]
 	   ifFalse: [ self unPop: 1 ]
 ]
