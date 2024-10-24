@@ -291,10 +291,10 @@ ST80BitBlt >> copyBits [
 		 	^ self ]
 		ifFalse: [ 
 			updatedRect := Rectangle origin: dx@dy extent: w@h ].
-		
-	Logger << 'Updated rectangle: ' << updatedRect origin printString
-		<< ' ' << updatedRect corner printString; cr.
-	
+
+	memory debug ifTrue: [ 
+		Logger << 'Updated rectangle: ' << updatedRect origin printString
+			<< ' ' << updatedRect corner printString; cr. ].
 	
 	"Not BB code
 	Some sanity check before doing the actual copy. Make sure 
