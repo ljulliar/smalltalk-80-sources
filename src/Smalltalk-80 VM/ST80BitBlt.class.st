@@ -391,17 +391,15 @@ ST80BitBlt >> destForm [
 { #category : #initialization }
 ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
 
-	| sourceFormOop |
+	| sourceFormOop halftoneFormOop |
 
-	"Make sure class variables ar initialized"
-	self class initialize.
-
-	memory := m.
    destForm := ST80Form fromObject: (m fetchPointer: DestFormIndex ofObject: bbp) memory: m.
 	sourceFormOop := m fetchPointer: SourceFormIndex ofObject: bbp.
 	(m isObjectNil: sourceFormOop) ifFalse: [ 
    		sourceForm := ST80Form fromObject: sourceFormOop memory: m ].
-   halftoneForm := ST80Form fromObject: (m fetchPointer: HalftoneFormIndex ofObject: bbp) memory: m.
+ 	halftoneFormOop := m fetchPointer: HalftoneFormIndex ofObject: bbp.
+	(m isObjectNil: halftoneFormOop) ifFalse: [ 
+		halftoneForm := ST80Form fromObject: (halftoneFormOop) memory: m ].
    destX := m integerValueOf: (m fetchWord: DestXIndex ofObject: bbp).
    destY := m integerValueOf: (m fetchWord: DestYIndex ofObject: bbp).
    clipX := m integerValueOf: (m fetchWord: ClipXIndex ofObject: bbp).
