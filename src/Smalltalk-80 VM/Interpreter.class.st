@@ -1702,8 +1702,8 @@ Interpreter >> positive16BitValueOf: integerPointer [
 	"Since the largest indexable collections may have 65534 indexable elements, 
    and SmallIntegers can only represent values up to 16383, primitive routines 
    that deal with indices or sizes must be able to manipulate LargePositiveIntegers. 
-   This routine convert between from SmallIntegers or LargePositiveIntegers
-   16-bit unsigned values and object pointers. (BB 617)"
+   This routine convert from a SmallIntegers or LargePositiveIntegers to a host native
+   16-bit unsigned values. (BB 617)"
 
 	| value |
 	(memory isIntegerObject: integerPointer)
@@ -1717,7 +1717,7 @@ Interpreter >> positive16BitValueOf: integerPointer [
 	^ value
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'primitive methods' }
 Interpreter >> positive32BitIntegerFor: integerValue [
 	"Since the largest indexable collections may have 65534 indexable elements,
    and SmallIntegers can only represent values up to 16383, primitive routines 
