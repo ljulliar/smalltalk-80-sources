@@ -271,13 +271,6 @@ ST80HardwareAbstractionLayer >> mousePosition [
 ]
 
 { #category : #'event handling' }
-ST80HardwareAbstractionLayer >> mouseUpST80Morph: event [
-	"One of the mouse buttons was clicked down"
-
-	Transcript show: 'Mouse up'; cr.
-]
-
-{ #category : #'event handling' }
 ST80HardwareAbstractionLayer >> nextInputWord [
 	"Pick the next 16 bit word event from the event queue"
 	inputQueue isEmpty 
