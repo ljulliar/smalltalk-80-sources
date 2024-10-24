@@ -28,15 +28,15 @@ Class {
 		'vm',
 		'mousePosition',
 		'lastEventTime',
-		'cursorLink'
+		'cursorLink',
+		'scheduledSemaphore',
+		'st80ScheduledSemaphore'
 	],
 	#classVars : [
 		'AbsoluteTime',
 		'AlphaLockKey',
 		'BackspaceKey',
-		'ButtonCenter',
-		'ButtonLeft',
-		'ButtonRight',
+		'BlueButton',
 		'ControlKey',
 		'DeleteKey',
 		'DeltaTime',
@@ -45,12 +45,14 @@ Class {
 		'EscapeKey',
 		'LeftShiftKey',
 		'LineFeedKey',
+		'RedButton',
 		'ReturnKey',
 		'RightShiftKey',
 		'SpaceKey',
 		'TabKey',
 		'XLocation',
-		'YLocation'
+		'YLocation',
+		'YellowButton'
 	],
 	#category : #'Smalltalk-80 VM'
 }
@@ -82,10 +84,10 @@ ST80HardwareAbstractionLayer class >> initialize [
 	ControlKey    := 138.
 	AlphaLockKey  := 139.
 	
-   "Bi-state devices parameters. See BB p. 650"
-	ButtonLeft   := 130.
-	ButtonCenter := 131.
-	ButtonRight  := 132.
+   "Bi-state devices parameters. ERROR in BB p. 650"
+	RedButton    := 130.
+	YellowButton := 129.
+	BlueButton   := 128.
 ]
 
 { #category : #'class initialization' }
