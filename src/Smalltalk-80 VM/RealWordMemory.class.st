@@ -32,6 +32,15 @@ RealWordMemory >> at: address [
 	^ realWordMemory at: (address + 1).
 ]
 
+{ #category : #copying }
+RealWordMemory >> copyFrom: startIndex to: endIndex [
+	"Return an Array representing a copy of the memory. Values
+	are 16-bit integer. CAUTION !! The start Index and endIndex
+	are expected to be 0 based to be consistent with the other
+	messages. (Not BB code)"
+	^ realWordMemory copyFrom:  (startIndex + 1) to: (endIndex + 1) 
+]
+
 { #category : #initialization }
 RealWordMemory >> initialize [
 	"Initialize the real world memory (not BB code)"
