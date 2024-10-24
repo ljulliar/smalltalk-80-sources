@@ -142,12 +142,23 @@ ObjectMemory >> abandonFreeChunksInSegment: segment [
 ]
 
 { #category : #accessing }
-ObjectMemory >> addressOf: objectPointer [
+ObjectMemory >> addressOfObject: objectPointer [
 	"Not BB code.
-	This is a method used to get the absolute address in memoryEnd 
-	of an object. Dirty hack needed to speed up ST80Forms and
-	ST80BitBlt operations"
+	This is a method used to get the absolute address in memory
+	of an object. It's a kind of DMA (Direct Memory Access) 
+	mechanism used by the Hardware Abstraction Layer to speed up
+	operations on ST80Forms and ST80BitBlt operations"
 	^ ((self segmentBitsOf: objectPointer) bitShift: 16) + (self locationBitsOf: objectPointer).
+]
+
+{ #category : #accessing }
+ObjectMemory >> addressOfWord: objectPointer [
+	"Not BB code.
+	This is a method used to get the absolute address in memory
+	of an object. It's a kind of DMA (Direct Memory Access) 
+	mechanism used by the Hardware Abstraction Layer to speed up
+	operations on ST80Forms and ST80BitBlt operations"
+	^ (self addressOfObject: objectPointer) + HeaderSize
 ]
 
 { #category : #'private - allocation' }
@@ -812,7 +823,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 				
 				"All objects in snapshot are stored one after the other as if it
 				was a contiguous 20 bit address space"
-				address := self addressOf: oop.
+				address := self addressOfObject: oop.
 				stream position: (fileOffset + (address * 2)).
 				
 				"read object size"
