@@ -98,6 +98,39 @@ ST80HardwareAbstractionLayer class >> initialize [
 	RedButton    := 130.
 	YellowButton := 129.
 	BlueButton   := 128.
+
+	"Map to shifted character ASCII code. Needed by
+	 undecoded keyboard events"
+	ShiftKeyMap :=
+	#( 0 1  2  3  4  5  6  7  8  9 10
+       11 12 13 14 15 16 17 18 19 20
+       21 22 23 24 25 26 27 28 29 30
+       31 32 $! $" $# $$ $% $& $" $(
+       $) $* $+ $< $_ $> $? $) $! $@
+       $# $$ $% $^ $& $* $( $: $: $<
+       $+ $> $? $@ $A $B $C $D $E $F
+       $G $H $I $J $K $L $M $N $O $P
+       $Q $R $S $T $U $V $W $X $Y $Z
+       ${ $| $} $^ $_ $~ $A $B $C $D
+       $E $F $G $H $I $J $K $L $M $N
+       $O $P $Q $R $S $T $U $V $W $X
+       $Y $Z ${ $| $} $~ 127).
+
+	"The SDL Constants used in the HAL.
+	Note: those constants are already defined in 
+	the SDL2Constants class but there is no accessor
+	defined"
+	SDLK_CAPSLOCK := 57.  "Caps Lock"
+	SDLK_DELETE   := 127. "Delete"
+	SDLK_LCTRL    := 224. "Left Control"
+	SDLK_LSHIFT   := 225. "Left Shift"
+	SDLK_LALT     := 226. "Left Alt"
+	SDLK_LGUI     := 227. "Left Windows, Command (Apple), Meta (linux)..."
+	SDLK_RCTRL    := 228. "Right Control"
+	SDLK_RSHIFT   := 229. "Right Shift"
+	SDLK_LALT     := 230. "Left Alt"
+	SDLK_RGUI     := 231. "Right Windows, Command (Apple), Meta (linux)..."
+
 ]
 
 { #category : #'class initialization' }
@@ -173,7 +206,7 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 ]
 
 { #category : #'event handling' }
-ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent [
+ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 	"Receives keyboard events from the Display morph and	turn it into a 
 	keyboard input event well formatted for the ST80VM. Events here 
 	are received for a decoded keyboard meaning that all the 'mete' keys
@@ -189,10 +222,54 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent [
 	up transition. On an undecoded keyboard, the standard keys produce parameters 
 	that are the ASCII code of the character on the keytop without
 	shift or control information (i.e,, the key with 'A' on it produces the
-	ASCII for 'a'' and the key with '2'' and '@'' on it produces the ASCII
+	ASCII for 'a'' and the key with '2' and '@' on it produces the ASCII
 	for '2'"
 	
+	"ljulliard: here we apply a mixed strategy when it come to keyboard
+	event handling:
+	  - Modifier states  (down and up) such as CTRL, Caps Lock are passed 
+	    to the ST80 VM as is or in other words undecoded
+     - All other ASCII chars including those shifted are passed already
+		 decoded in a single down transition. 
+		 The reason for that is because on the Alto keyboard
+		 shifted character are not standard e.g ~ is Shift-6
+	"
 	
+	| eventType keyValue parameter |
+	
+	eventType := (way = #down) ifTrue: [ DeviceOn ] ifFalse: [ DeviceOff ].
+	keyValue := anEvent keyValue.
+	
+	(parameter := self keyScanCode: anEvent)
+		ifNil: [ 
+			(keyValue = 0 or: [keyValue > 127]) ifTrue: [ ^ self ]. "Ignore: no and ASCII code"
+			parameter := keyValue.
+			 ].
+
+	parameter < 128
+		ifTrue: [
+			(eventType = DeviceOn) ifTrue: [ 
+				anEvent shiftPressed ifTrue: [ 
+					parameter := (ShiftKeyMap at: (keyValue + 1)) asInteger
+					 ].
+					Transcript show: '>> keyboard down/up event type: ';
+						nextPutAll: eventType printString; 
+						nextPutAll: ' param: ';
+						nextPutAll: parameter printString; cr; flush.
+				
+				self inputTimeWord.
+				self inputWordType: DeviceOn parameter: parameter.
+				self inputWordType: DeviceOff parameter: parameter.
+				 ]
+			]
+		ifFalse: [ 
+			Transcript show: '>> keyboard event type: ';
+				nextPutAll: eventType printString; 
+				nextPutAll: ' param: ';
+				nextPutAll: parameter printString; cr; flush.
+			self inputWordType: eventType parameter: parameter.
+			 ].
+	 
 
 ]
 
@@ -211,17 +288,17 @@ ST80HardwareAbstractionLayer >> handleMouseEvent: anEvent way: way [
 		Left button    | Blue button    |   128		      |     2 (action-click)
 	"
 	
-	| event_type |
+	| eventType |
 
-	event_type := (way = #down) ifTrue: [ 3 ] ifFalse: [ 4 ].
+	eventType := (way = #down) ifTrue: [ DeviceOn ] ifFalse: [ DeviceOff ].
 	
 	anEvent redButtonChanged ifTrue: [ 
 		self inputTimeWord.
-		self inputWordType: event_type parameter: RedButton. 
+		self inputWordType: eventType parameter: RedButton. 
 		^self ].
 	anEvent yellowButtonChanged ifTrue: [
 		self inputTimeWord.
-		self inputWordType: event_type parameter: YellowButton.
+		self inputWordType: eventType parameter: YellowButton.
 		^self ].
 	Error new signal: 'Unknown mouse button: ', anEvent whichButton printString.
 ]
@@ -329,6 +406,23 @@ ST80HardwareAbstractionLayer >> isInputEventDriven [
 	position at every cycle which is very time consuming and 
 	unnecessary as the event	driven approach works well in this HAL"
 	^ true
+]
+
+{ #category : #'event handling' }
+ST80HardwareAbstractionLayer >> keyScanCode: anEvent [
+	"Map native key scan code to ST80 keyboard parameters"
+
+	anEvent scanCode = SDLK_DELETE ifTrue: [ ^ DeleteKey ].
+	anEvent scanCode = SDLK_CAPSLOCK ifTrue: [ ^ AlphaLockKey ].
+	
+	"Note: ST80 doesn't differentiate Control left from Control right"
+	anEvent scanCode = SDLK_LCTRL ifTrue: [ ^ ControlKey ].
+	anEvent scanCode = SDLK_RCTRL ifTrue: [ ^ ControlKey ].
+
+	"All other meta keys are eitherunsupported by ST80 or are
+	directly processed as a decodecd keyboard by the HAL layer
+	(e.g. Shift)"
+	^ nil
 ]
 
 { #category : #'time management' }

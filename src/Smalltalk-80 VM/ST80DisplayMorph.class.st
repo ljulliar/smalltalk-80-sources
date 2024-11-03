@@ -33,6 +33,19 @@ ST80DisplayMorph >> announceDeleted [
 
 ]
 
+{ #category : #'event handling' }
+ST80DisplayMorph >> checkHandPosition [
+	"Direct keyboard focus to this morph if the active hand
+	is over it"
+	| hand_position |
+	hand_position := self currentWorld activeHand position - self position.
+	(hand_position >= (0@0) and: hand_position <= self extent)
+		 ifTrue: [
+			self currentWorld activeHand newKeyboardFocus: self
+		].
+	
+]
+
 { #category : #accessing }
 ST80DisplayMorph >> displayForm [
 
@@ -40,35 +53,49 @@ ST80DisplayMorph >> displayForm [
 ]
 
 { #category : #'event handling' }
-ST80DisplayMorph >> handlesKeyboard: anEvent [
-	"A key on the kayboard was clicked"
-	"Ignore input events till the ST80 VM 
+ST80DisplayMorph >> handlesKeyDown: anEvent [
+	"Accept keyboard events only when the ST80 VM 
 	input semaphore is set"
+	"^ false"
+	^ hal inputSemaphore notNil.
+]
+
+{ #category : #'event handling' }
+ST80DisplayMorph >> handlesKeyUp: anEvent [
+	"Accept keyboard events only when the ST80 VM 
+	input semaphore is set"
+	"^ false"
+	^ hal inputSemaphore notNil.
+	
+]
+
+{ #category : #'event handling' }
+ST80DisplayMorph >> handlesKeyboard: anEvent [
+	"Accept keyboard events only when the ST80 VM 
+	input semaphore is set"
+	"^ false"
 	^ hal inputSemaphore notNil.
 	
 ]
 
 { #category : #'event handling' }
 ST80DisplayMorph >> handlesMouseDown: anEvent [
-	"Accept Mouse Down event notifications"
-	"Ignore input events till the ST80 VM 
-	input semaphore is set"
+	"Accept mouseDown:, mouseMove:, mouseUp: event notifications"
+	"but only when the ST80 VM input event handling is ready"
 	^ hal inputSemaphore notNil.
 ]
 
-{ #category : #'events - processing' }
+{ #category : #'event handling' }
 ST80DisplayMorph >> handlesMouseMove: anEvent [
-	"Accept Mouse move event notifications"
-	"Ignore input events till the ST80 VM 
-	input semaphore is set"
+	"Accept mouseMove: event notifications"
+	"but only when the ST80 VM input event handling is ready"
 	^ hal inputSemaphore notNil.
 ]
 
 { #category : #'event handling' }
 ST80DisplayMorph >> handlesMouseOver: anEvent [
-	"Accept Mouse Enter/Leave event notifications"
-	"Ignore input events till the ST80 VM 
-	input semaphore is set"
+	"Accept mouseEnter: and mouseLeave: event notifications"
+	"but only when the ST80 VM input event handling is ready"
 	^ hal inputSemaphore notNil.
 ]
 
@@ -90,12 +117,27 @@ ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 { #category : #'event handling' }
 ST80DisplayMorph >> keyDown: anEvent [
 	"A key on the keyboard was clicked"
-	Transcript show: 'Key: '; nextPutAll: anEvent keyValue printString; 
+	Transcript show: 'Key down: '; nextPutAll: anEvent keyValue printString; 
 		nextPutAll:  anEvent anyModifierKeyPressed printString;
 		nextPutAll:  anEvent modifierString printString; 
+		nextPutAll:  anEvent scanCode printString; 
+		nextPutAll:  anEvent key name printString; 
 		cr; flush.
 		
-	hal handleKeyboardEvent: anEvent.
+	hal handleKeyboardEvent: anEvent way: #down.
+]
+
+{ #category : #'event handling' }
+ST80DisplayMorph >> keyUp: anEvent [
+	"A key on the keyboard was clicked"
+	Transcript show: 'Key up '; nextPutAll: anEvent keyValue printString; 
+		nextPutAll:  anEvent anyModifierKeyPressed printString;
+		nextPutAll:  anEvent modifierString printString; 
+		nextPutAll:  anEvent scanCode printString; 
+		nextPutAll:  anEvent key name printString; 
+		cr; flush.
+		
+	hal handleKeyboardEvent: anEvent way: #up.
 ]
 
 { #category : #'event handling' }
