@@ -9,15 +9,9 @@ Class {
 
 { #category : #initialization }
 ST80Logger class >> withFile: aFileReference [
-	"^ self basicNew
-		initializeWithFile: aFileReference;
-		yourself"
-	^ self on: aFileReference binaryWriteStream encoding: 'utf8'
-		
-	"binaryWriteStream"
-	"Answer a buffered binary write stream on the receiver"
 
-	"^ ZnBufferedWriteStream on: (filesystem binaryWriteStreamOn: self path)"
+	^ self on: aFileReference binaryWriteStream encoding: 'utf8'
+
 ]
 
 { #category : #accessing }
