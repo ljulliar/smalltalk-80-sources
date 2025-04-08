@@ -129,7 +129,7 @@ ST80DisplayMorph >> keyDown: anEvent [
 
 { #category : #'event handling' }
 ST80DisplayMorph >> keyUp: anEvent [
-	"A key on the keyboard was clicked"
+	"A key on the keyboard was released"
 	Transcript show: 'Key up '; nextPutAll: anEvent keyValue printString; 
 		nextPutAll:  anEvent anyModifierKeyPressed printString;
 		nextPutAll:  anEvent modifierString printString; 
