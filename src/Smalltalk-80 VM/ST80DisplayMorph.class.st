@@ -116,12 +116,16 @@ ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 
 { #category : #'event handling' }
 ST80DisplayMorph >> keyDown: anEvent [
-	"A key on the keyboard was clicked"
-	Transcript show: 'Key down: '; nextPutAll: anEvent keyValue printString; 
-		nextPutAll:  anEvent anyModifierKeyPressed printString;
-		nextPutAll:  anEvent modifierString printString; 
-		nextPutAll:  anEvent scanCode printString; 
-		nextPutAll:  anEvent key name printString; 
+	"A key on the keyboard was pressed"
+	Transcript show: '-----------------------------'; cr; show: 'Key down: '; cr;
+		show: ' keyValue: '; nextPutAll: anEvent keyValue printString; 
+		show: ' key: '; nextPutAll: anEvent key printString; cr;
+		show: ' scanCode: '; nextPutAll: anEvent scanCode printString;
+		show: ' key name: '; nextPutAll:  anEvent key name printString; cr;
+		show: ' char: '; nextPutAll: anEvent keyCharacter printString;
+		show: ' string: '; nextPutAll: anEvent keyString printString;
+		show: ' any modifier: '; nextPutAll:  anEvent anyModifierKeyPressed printString;
+		show: ' modifier: '; nextPutAll:  anEvent modifierString printString; 
 		cr; flush.
 		
 	hal handleKeyboardEvent: anEvent way: #down.
