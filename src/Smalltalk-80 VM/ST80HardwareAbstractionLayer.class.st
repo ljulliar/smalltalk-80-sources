@@ -173,7 +173,9 @@ ST80HardwareAbstractionLayer >> cursorLocation: aPoint [
 { #category : #'display access' }
 ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
-	| newDisplayMorph |
+	| newDisplayMorph			
+											
+											 |
 
 	"If same dimensions as current display do nothing and return"
 	(displayWidth = width and: displayHeight = height) ifTrue: [ ^ true ].
@@ -181,7 +183,7 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 	displayWidth := width.
 	displayHeight := height.
 	
-	"ST80 Screen display chenged. Create a new Display Morph on host"
+	"ST80 Screen display changed. Create a new Display Morph on host"
 	newDisplayMorph := ST80DisplayMorph extent: displayWidth@displayHeight vm: vm.
 	
 	window
@@ -196,9 +198,13 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 			"First time display is set, so create the host app window"
 			window := newDisplayMorph openInWindowLabeled: 'Smalltalk-80'.
 		 ].
+	
 	displayMorph := newDisplayMorph.
 	displayForm := displayMorph displayForm.
 	
+	"Give keyboard focus to app morph if mouse over it"
+	displayMorph checkHandPosition.
+
 	^ true.
 	
 	
@@ -207,9 +213,9 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 { #category : #'event handling' }
 ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
-	"Receives keyboard events from the Display morph and	turn it into a 
+	"Receives keyboard events from the Display morph and	 turns it into a 
 	keyboard input event well formatted for the ST80VM. Events here 
-	are received for a decoded keyboard meaning that all the 'mete' keys
+	are received for a decoded keyboard meaning that all the 'meta' keys
 	(Ctrl, Shift..) are reported as modifiers in addition to the key scan code
 	
 	Per BB p. 650:
@@ -252,8 +258,7 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 				anEvent shiftPressed ifTrue: [ 
 					parameter := (ShiftKeyMap at: (keyValue + 1)) asInteger
 					 ].
-					Transcript show: '>> keyboard down/up event type: ';
-						nextPutAll: eventType printString; 
+					Transcript show: '>> keyboard down+up ';
 						nextPutAll: ' param: ';
 						nextPutAll: parameter printString; cr; flush.
 				
