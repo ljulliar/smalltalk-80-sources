@@ -1,6 +1,6 @@
 # Smalltalk-80 by the Book
 
-This project is about delivering the promise of a book written in the eighties : run a complete Smalltalk environment using the Smalltalk language itself. Want to know more about the background and the objectives of this project? Read our bits of history
+This project is about delivering the promise of a book written in the eighties : run a complete Smalltalk environment using the Smalltalk language itself. Want to know more about the background and the objectives of this project? Read our [bits of history](History.md].
 
 ## Bits of history
 
@@ -18,7 +18,7 @@ With the publication of the Blue Book came a flurry of Smalltalk-80 implementati
 More recently to celebrate the 40th anniversary of the book, several open source projects reimplemented the Smalltalk-80 VM using various languages like Lua, C# or C++.
 But amazingly enough very few attempts were made, if any, to actually use the Smalltalk code provided in the Blue Book and run it in a modern Smalltalk evironment to answer the question: does this specification of the VM written in Smalltalk actually works ?
 
-## Smalltalk in Smalltalk
+## Objectives of the project.
 
 The answer to the question above is: yes it does! Or it does at 90% :-) The goal of this project is to provide the missing 10% and deliver a fully working Smalltalk implementation of Smalltalk.
-What are those 10% made of ?
+What are those 10% made of ? Read on more about the [implementation](Implementation.md]
