@@ -24,7 +24,8 @@ Class {
 		'debug',
 		'fs',
 		'hal',
-		'vmProcess'
+		'vmProcess',
+		'keyboard'
 	],
 	#category : #'Smalltalk-80 VM'
 }
@@ -69,6 +70,7 @@ ST80VirtualMachine >> initialize [
 	"Open snapshot stream"
 	hal := ST80HardwareAbstractionLayer withVM: self.
 	fs := ST80FileSystem new.
+	keyboard := 'FR'.
 	snapshot := vmImageFile asFileReference binaryReadStream.
 	interpreter := Interpreter withSnapshot: snapshot 
 						hal: hal fileSystem: fs
@@ -99,6 +101,11 @@ ST80VirtualMachine >> initializeRun [
 ST80VirtualMachine >> interpreter [
 
 	^ interpreter
+]
+
+{ #category : #accessing }
+ST80VirtualMachine >> keyboard [
+	^keyboard 
 ]
 
 { #category : #'debugging actions' }

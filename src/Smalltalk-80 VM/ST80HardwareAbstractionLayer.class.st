@@ -35,6 +35,7 @@ Class {
 	#classVars : [
 		'AbsoluteTime',
 		'AlphaLockKey',
+		'AltGrKeyMap',
 		'BackspaceKey',
 		'BlueButton',
 		'ControlKey',
@@ -43,6 +44,7 @@ Class {
 		'DeviceOff',
 		'DeviceOn',
 		'EscapeKey',
+		'KeyMap',
 		'LeftShiftKey',
 		'LineFeedKey',
 		'RedButton',
@@ -54,6 +56,7 @@ Class {
 		'SDLK_LCTRL',
 		'SDLK_LGUI',
 		'SDLK_LSHIFT',
+		'SDLK_RALT',
 		'SDLK_RCTRL',
 		'SDLK_RGUI',
 		'SDLK_RSHIFT',
@@ -99,22 +102,74 @@ ST80HardwareAbstractionLayer class >> initialize [
 	YellowButton := 129.
 	BlueButton   := 128.
 
-	"Map to shifted character ASCII code. Needed by
-	 undecoded keyboard events"
-	ShiftKeyMap :=
-	#( 0 1  2  3  4  5  6  7  8  9 10
-       11 12 13 14 15 16 17 18 19 20
-       21 22 23 24 25 26 27 28 29 30
-       31 32 $! $" $# $$ $% $& $" $(
-       $) $* $+ $< $_ $> $? $) $! $@
-       $# $$ $% $^ $& $* $( $: $: $<
-       $+ $> $? $@ $A $B $C $D $E $F
-       $G $H $I $J $K $L $M $N $O $P
-       $Q $R $S $T $U $V $W $X $Y $Z
-       ${ $| $} $^ $_ $~ $A $B $C $D
-       $E $F $G $H $I $J $K $L $M $N
-       $O $P $Q $R $S $T $U $V $W $X
-       $Y $Z ${ $| $} $~ 127).
+	"Morph keyboard 	events doesn't always provide the 
+	proper ASCII code for some keys. Fix this with the 
+	mapping below.
+	TODO: Add your own keyboard layout below if needed"
+
+	KeyMap := Dictionary newFrom: { 
+	'FR' -> (0 to: 127) asArray.
+	'FRmap' -> {
+		$0 -> $a. $1 -> $&. $2 -> $e. $3 -> $".
+		$4 -> $'. $5 -> $(. $6 -> $-. $7 -> $e.
+	   $8 ->$_. $9 -> $c. } asDictionary.
+	
+	'US' ->(0 to: 127) asArray.
+	'USmap' -> { } asDictionary.
+	}.
+	(KeyMap at: 'FRmap') keysAndValuesDo: [ :k :v | 
+		KeyMap at: 'FR' at: (k asInteger + 1) put: v ].
+	
+	
+
+	ShiftKeyMap := Dictionary newFrom: { 
+	'FR' -> (0 to: 127) asArray.
+	'FRmap' -> { 
+		$a -> $A. $b -> $B. $c -> $C. $d -> $D.
+		$e -> $E. $f -> $F. $g -> $G. $h -> $H.
+		$i -> $I. $j -> $J. $k -> $K. $l -> $L.
+		$m -> $M. $n -> $N. $o -> $O. $p -> $P.
+		$q -> $Q. $r -> $R. $s -> $S. $t -> $T.
+		$u -> $U. $v -> $V. $w -> $W. $x -> $X.
+		$y -> $Y. $z -> $Z.
+		$< -> $>. $, -> $?. $; -> $.. $: -> $/.
+		$= -> $+.
+		} asDictionary.
+		
+	'US' ->(0 to: 127) asArray.
+	'USmap' -> { 
+		$a -> $A. $b -> $B. $c -> $C. $d -> $D.
+		$e -> $E. $f -> $F. $g -> $G. $h -> $H.
+		$i -> $I. $j -> $J. $k -> $K. $l -> $L.
+		$m -> $M. $n -> $N. $o -> $O. $p -> $P.
+		$q -> $Q. $r -> $R. $s -> $S. $t -> $T.
+		$u -> $U. $v -> $V. $w -> $W. $x -> $X.
+		$y -> $Y. $z -> $Z.	
+		$` -> $~. $0 -> $!. $2 -> $@. $3 -> $#.
+		$4 -> $$. $5 -> $%. $6 -> $^. $7 -> $&.
+		$8 -> $*. $9 -> $(. $0 -> $). $- -> $_.
+		$= -> $+. } asDictionary.
+	}.
+	(ShiftKeyMap at: 'FRmap') keysAndValuesDo: [ :k :v | 
+		ShiftKeyMap at: 'FR' at: (k asInteger + 1) put: v ].
+	(ShiftKeyMap at: 'USmap') keysAndValuesDo: [ :k :v | 
+		ShiftKeyMap at: 'US' at: (k asInteger + 1) put: v ].
+
+
+	AltGrKeyMap := Dictionary newFrom: { 
+	'FR' -> (0 to: 127) asArray.
+	'US' ->(0 to: 127) asArray.
+	'FRmap' -> { 
+		$0 -> $@.	 $2 -> $~. $3 -> $#.
+		$4 -> ${. $5 -> $[. $6 -> $|. $7 -> $`.
+		$8 -> $\. $9 -> $^. $) -> $]. $= -> $}.
+		} asDictionary.
+	'USmap' -> { } asDictionary.
+	}.
+	(AltGrKeyMap at: 'FRmap') keysAndValuesDo: [ :k :v | 
+		AltGrKeyMap at: 'FR' at: (k asInteger + 1) put: v ].
+	(AltGrKeyMap at: 'USmap') keysAndValuesDo: [ :k :v | 
+		AltGrKeyMap at: 'US' at: (k asInteger + 1) put: v ].
 
 	"The SDL Constants used in the HAL.
 	Note: those constants are already defined in 
@@ -128,7 +183,7 @@ ST80HardwareAbstractionLayer class >> initialize [
 	SDLK_LGUI     := 227. "Left Windows, Command (Apple), Meta (linux)..."
 	SDLK_RCTRL    := 228. "Right Control"
 	SDLK_RSHIFT   := 229. "Right Shift"
-	SDLK_LALT     := 230. "Left Alt"
+	SDLK_RALT     := 230. "Right Alt"
 	SDLK_RGUI     := 231. "Right Windows, Command (Apple), Meta (linux)..."
 
 ]
@@ -214,9 +269,10 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 { #category : #'event handling' }
 ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 	"Receives keyboard events from the Display morph and	 turns it into a 
-	keyboard input event well formatted for the ST80VM. Events here 
-	are received for a decoded keyboard meaning that all the 'meta' keys
-	(Ctrl, Shift..) are reported as modifiers in addition to the key scan code
+	keyboard input event well formatted for the ST80 VM. Events received here 
+	comes from Pharo in the form of an undecoded keyboard meaning that any 
+	keyboard key is reported independently  incl the 'meta' keys
+	(Ctrl, Shift, Alt..). 
 	
 	Per BB p. 650:
 	An undecoded keyboard is made up of independent keys with independent down and up
@@ -231,47 +287,77 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 	ASCII for 'a'' and the key with '2' and '@' on it produces the ASCII
 	for '2'"
 	
-	"ljulliard: here we apply a mixed strategy when it come to keyboard
+	"ljulliard: here we apply a mixed strategy when it comes to keyboard
 	event handling:
-	  - Modifier states  (down and up) such as CTRL, Caps Lock are passed 
-	    to the ST80 VM as is or in other words undecoded
-     - All other ASCII chars including those shifted are passed already
-		 decoded in a single down transition. 
-		 The reason for that is because on the Alto keyboard
-		 shifted character are not standard e.g ~ is Shift-6
-	"
+	  - Modifier states and special keys (down and up) such as CTRL, Caps Lock,...
+	     are passed to the ST80 VM as is or in other words undecoded
+     - All other ASCII chars including those shifted are decoded and sent
+       as immediate device on/off input events."
 	
-	| eventType keyValue parameter |
+	| eventType keyValue parameter mappedChar |
 	
 	eventType := (way = #down) ifTrue: [ DeviceOn ] ifFalse: [ DeviceOff ].
 	keyValue := anEvent keyValue.
 	
-	(parameter := self keyScanCode: anEvent)
-		ifNil: [ 
-			(keyValue = 0 or: [keyValue > 127]) ifTrue: [ ^ self ]. "Ignore: no and ASCII code"
-			parameter := keyValue.
-			 ].
+	"Extract valid key scan code or value upfront. Ignore keystroke if
+	not valid for the ST-80 VM"
+	(parameter := self keyValueFrom: anEvent)
+		ifNil: [ ^ self ]. "Ignore if not a valid key"
+	"Transcript show: 'parameter'; nextPutAll:  parameter printString; cr."
 
 	parameter < 128
 		ifTrue: [
+			"For regular ASCII value we only process key down events (or DeviceOn in
+			ST-80 VM parlance) as we transmit	decoded key values to the ST-80 VM. Key
+			up events (or DeviceOff) are simply ignored."
 			(eventType = DeviceOn) ifTrue: [ 
+
+				"Shifted and AltGr'ed keys are treated as decoded keys right here 
+				either because they do not match the shifted keys of the original 
+				Alto keyboard (e.g. Shift-6 is ~ on the Alto keyboard or because
+				an improper key value is received from keyDown: Morph handler events"
 				anEvent shiftPressed ifTrue: [ 
-					parameter := (ShiftKeyMap at: (keyValue + 1)) asInteger
-					 ].
-					Transcript show: '>> keyboard down+up ';
-						nextPutAll: ' param: ';
-						nextPutAll: parameter printString; cr; flush.
+					mappedChar := ((ShiftKeyMap at: vm keyboard) at: (keyValue + 1)) asInteger.
+				].
+				anEvent altKeyPressed ifTrue: [ 
+					"Note: at this level we cannot distinguish between ALT_L and ALT_R
+					so treat both as if they were AltGr. Regular ALT didn't exist anyway
+					on the original Alto keyboard.
+					See https://www.flickr.com/photos/walkingsf/31415192416"
+					mappedChar  := ((AltGrKeyMap at: vm keyboard) at: (keyValue + 1)) asInteger.
+				].
+			
+				"If still nil then it is a regular key that was typed wwith no modifiers"
+				mappedChar ifNil: [ 
+					mappedChar := ((KeyMap at: vm keyboard) at: (keyValue + 1)) asInteger.
+				].
 				
+				"Transcript show: '>> keyboard down+up ';
+					nextPutAll: ' param: ';
+					nextPutAll: mappedChar printString; cr; flush."
 				self inputTimeWord.
-				self inputWordType: DeviceOn parameter: parameter.
-				self inputWordType: DeviceOff parameter: parameter.
+				self inputWordType: DeviceOn parameter: mappedChar.
+				self inputWordType: DeviceOff parameter: mappedChar.
 				 ]
 			]
+		
+		"Special undecoded key with value > 127 : Caps Lock, Ctrl,...
+		sent as is to the ST-80 VM which handles them directly"
+		
+		"FIXME: the Caps Lock input events transmitted to the ST800 VM
+		has no effect. The reason seems to be that on the original Alto
+		keyboard when you press the Caps Lock key down it stays down
+		and only a down input event is sent to the ST80 VM. Then when 
+		you later click on the Caps Lock key again, it would release it and
+		generate a single up event. On modern keyboard the Caps Lock 
+		is like any other key that generates an down+up transition 
+		at once therefore nullifying the effect of the key from the
+		point of view of the ST80-VM "
 		ifFalse: [ 
-			Transcript show: '>> keyboard event type: ';
+			"Transcript show: '>> Undecoded keyboard event type: ';
 				nextPutAll: eventType printString; 
 				nextPutAll: ' param: ';
-				nextPutAll: parameter printString; cr; flush.
+				nextPutAll: parameter printString; cr; flush."
 			self inputWordType: eventType parameter: parameter.
 			 ].
 	 
@@ -414,19 +500,29 @@ ST80HardwareAbstractionLayer >> isInputEventDriven [
 ]
 
 { #category : #'event handling' }
-ST80HardwareAbstractionLayer >> keyScanCode: anEvent [
-	"Map native key scan code to ST80 keyboard parameters"
-
+ST80HardwareAbstractionLayer >> keyValueFrom: anEvent [
+	"Map native key scan code to valid values for ST80 keyboard 
+	input parameters"
+	
+	| kv |
 	anEvent scanCode = SDLK_DELETE ifTrue: [ ^ DeleteKey ].
 	anEvent scanCode = SDLK_CAPSLOCK ifTrue: [ ^ AlphaLockKey ].
 	
 	"Note: ST80 doesn't differentiate Control left from Control right"
 	anEvent scanCode = SDLK_LCTRL ifTrue: [ ^ ControlKey ].
 	anEvent scanCode = SDLK_RCTRL ifTrue: [ ^ ControlKey ].
+	
+	"Note: Shift modifier is processed at the Pharo level. Not sent to ST-80 VM"
+	anEvent scanCode = SDLK_LSHIFT ifTrue: [ ^ nil ].
+	anEvent scanCode = SDLK_RSHIFT ifTrue: [ ^ nil ].
+	
+	"Note: ALT modifier is processed at the Pharo level. Not sent to ST-80 VM"
+	anEvent scanCode = SDLK_LALT  ifTrue: [ ^ nil ].
+	anEvent scanCode = SDLK_RALT  ifTrue: [ ^ nil ].
 
-	"All other meta keys are eitherunsupported by ST80 or are
-	directly processed as a decodecd keyboard by the HAL layer
-	(e.g. Shift)"
+	((kv := anEvent keyValue) between: 1 and: 127) ifTrue: [ ^ kv ] ifFalse: [ ^nil ].
+	
+	"Should not be reached but just in case..."
 	^ nil
 ]
 

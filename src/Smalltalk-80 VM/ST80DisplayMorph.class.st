@@ -70,15 +70,6 @@ ST80DisplayMorph >> handlesKeyUp: anEvent [
 ]
 
 { #category : #'event handling' }
-ST80DisplayMorph >> handlesKeyboard: anEvent [
-	"Accept keyboard events only when the ST80 VM 
-	input semaphore is set"
-	"^ false"
-	^ hal inputSemaphore notNil.
-	
-]
-
-{ #category : #'event handling' }
 ST80DisplayMorph >> handlesMouseDown: anEvent [
 	"Accept mouseDown:, mouseMove:, mouseUp: event notifications"
 	"but only when the ST80 VM input event handling is ready"
@@ -117,7 +108,43 @@ ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 { #category : #'event handling' }
 ST80DisplayMorph >> keyDown: anEvent [
 	"A key on the keyboard was pressed"
-	Transcript show: '-----------------------------'; cr; show: 'Key down: '; cr;
+	"Transcript show: '-----------------------------'; cr; show: 'Key down: '; cr;
+		show: ' keyValue: '; nextPutAll: anEvent keyValue printString; 
+		show: ' key: '; nextPutAll: anEvent key printString; cr;
+		show: ' scanCode: '; nextPutAll: anEvent scanCode printString;
+		show: ' key name: '; nextPutAll:  anEvent key name printString; cr;
+		show: ' char: '; nextPutAll: anEvent keyCharacter printString;
+		show: ' string: '; nextPutAll: anEvent keyString printString;
+		show: ' any modifier: '; nextPutAll:  anEvent anyModifierKeyPressed printString; cr;
+		show: ' shift pressed: '; nextPutAll:  anEvent shiftPressed printString; cr;
+		show: ' alt key pressed: '; nextPutAll:  anEvent altKeyPressed printString; cr;
+		show: ' AltGr : '; nextPutAll: (anEvent key name = #ALT_R) printString; cr;
+		show: ' modifier: '; nextPutAll:  anEvent modifierString printString; 
+		cr; flush."
+		
+	hal handleKeyboardEvent: anEvent way: #down.
+]
+
+{ #category : #'event handling' }
+ST80DisplayMorph >> keyStroke: anEvent [
+   "***WARNING ! This method is currently not used***"
+	"This method is invoked when the handlesKeyboard: method is implemented by the 
+	App Morph and returns true. 
+	As opposed to keyDown and keyDown handlers, keyStroke receives an event with a fully
+	decoded keyboard event, that is to say that if you clcki on SHIFT + a the keyStroke:
+	handler is invoked only once and the Event character (or stirng) attributes contain A
+	(a uppercase).
+	Unfortunately keyStroke has a number of deadly drawbacks for our ST80 VM :
+	  - No event is generated for keys like CapsLock, Delete or Backspace that we need
+	    to pass to the ST80 VM
+	  - Similarly no event is generated for any CTRL+key combination. That's a problem as
+	    this is potentially something the ST80 VM can receive and handle.
+	  - Events are only generated when the key(s) used on the keyboard generate a valid
+	    ASCII char. So on a French keyboard clicking on é or è or à doesn't generate any
+	    event. This limitation is not so much of a problem as the ST80 VM only handles
+	    ASCII chars anyway (it has no notion of ISO latin charsets, let alone UTF8.
+	    Remember we are in the early 80s here :-) "
+	Transcript show: 'KEYSTROKE -----------------------------'; cr; show: 'Key down: '; cr;
 		show: ' keyValue: '; nextPutAll: anEvent keyValue printString; 
 		show: ' key: '; nextPutAll: anEvent key printString; cr;
 		show: ' scanCode: '; nextPutAll: anEvent scanCode printString;
@@ -134,12 +161,12 @@ ST80DisplayMorph >> keyDown: anEvent [
 { #category : #'event handling' }
 ST80DisplayMorph >> keyUp: anEvent [
 	"A key on the keyboard was released"
-	Transcript show: 'Key up '; nextPutAll: anEvent keyValue printString; 
+	"Transcript show: 'Key up '; nextPutAll: anEvent keyValue printString; 
 		nextPutAll:  anEvent anyModifierKeyPressed printString;
 		nextPutAll:  anEvent modifierString printString; 
 		nextPutAll:  anEvent scanCode printString; 
 		nextPutAll:  anEvent key name printString; 
-		cr; flush.
+		cr; flush."
 		
 	hal handleKeyboardEvent: anEvent way: #up.
 ]
