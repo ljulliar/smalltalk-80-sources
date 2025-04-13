@@ -343,7 +343,7 @@ ST80BitBlt >> copyLoop [
 						ifTrue: [
 							prevWord := prevWord bitAnd: skewMask.
 							"ERROR: from dbanay need to check if out of range. use 0 if that is the case"
-							word <= sourceRaster & (sourceIndex >= 0) & (sourceIndex < (sourceBits size)) 
+							word <= sourceRaster & (sourceIndex >= 0) & (sourceIndex < (sourceBits wordLength)) 
 								ifTrue: [ thisWord := sourceBits at: sourceIndex + 1 ]
 								ifFalse: [ thisWord := 0 ].
 							"pick up next word"
