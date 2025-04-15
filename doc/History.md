@@ -15,6 +15,6 @@ More recently to celebrate the 40th anniversary of the book, several open source
 But amazingly enough very few attempts were made, if any, at using the Smalltalk code provided in the Blue Book and see if it actually runs in a modern Smalltalk environment.
 
 ## Objectives of the project.
-So are the specifications of the Smalltalk-80 VM written in Smalltalk good enough to reimplement the whole system? As shown in this project, The answer is answer is definitely yes, althouh there is still some additional work to do so that the [implementation](Implementation.md)  works for real.
+So are the specifications of the Smalltalk-80 VM written in Smalltalk good enough to reimplement the whole system? As shown in this project, the answer is definitely yes, although there is still some additional work to do so that the [implementation](Implementation.md) works for real.
 * One was to transcribe the Smalltalk code for the Blue Book and merge all the known errata published either by Xerox between 1983 and 1985 or later by those who reimplemented the VM in other languages. This archeology work took some time :-)
 * Second you have to write your own hardware abstraction layer (HAL) to serve as an interface between the ST-80 VM and its host. One of the benefit of hosting the VM on a Smalltalk environment (Pharo) is that I wrote the HAL also in Smalltalk which brings some further level of abstraction in the HAL as well.
