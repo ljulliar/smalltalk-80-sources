@@ -16,5 +16,4 @@ But amazingly enough very few attempts were made, if any, to actually use the Sm
 
 ## Objectives of the project.
 
-The answer to the question above is: yes it does! Or it does at 90% :-) The goal of this project is to provide the missing 10% and deliver a fully working Smalltalk implementation of Smalltalk.
-What are those 10% made of ? Read on more about this project [implementation](Implementation.md]
+The answer to the quetion of whether the speifiction of the Smalltalk-80 written in Smalltalk is good enough to reimplement the whole system is : yes it is. Still some work had to be done on 2 aspects to make this  [implementation](Implementation.md)  work for real.* One was to trsncribe the Smalltalk code for the Blue Book and merge all the know errata published either by Xerox in the 80s or later by those who reimplemented the VM in another language. This archeology work took some time :-)* Second you have to write your own hardware abstraction layer (HAL) to serve as an interface between the ST-80 VM and its host. One of the benefit of  hosting the VM on a Smalltalk environment (Pharo ) is that I wrote the HAL also in Smalttalk which bring some kind of high level view of it and hopefully can serve as a reference in the future.
