@@ -22,6 +22,6 @@ The Smalltalk-80 startup screen that you see here is exactly as presented in the
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
 * The [Pharo](https://www.pharo.org/) developers community for providing this remarkable Open Source Smalltalk environment
-* [Dan Banay's Smalltalk-80 VM] project that proved very helpful to fix the bugs in the Smalltak code originally published in the Blue Book
+* [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project that proved very helpful to fix the bugs in the Smalltak code originally published in the Blue Book
 * Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) dedicated to the Smalltalk-80 specifications.
-* And last but not the least, [Mario Wolczko ST-80 web page](http://www.wolczko.com/st80/) for putting together critical files that one absolutely needs to run the full Smalltalk environment, most notably the Virtual Machine image as published (on tapes !!) by Xerox Parc in 1983.
+* And last but not the least, [Mario Wolczko ST-80 web page](http://www.wolczko.com/st80/) for putting together critical files that one absolutely needs to run the full Smalltalk environment, most notably the Virtual Machine image as published (on tapes!!) by Xerox Parc in 1983.
