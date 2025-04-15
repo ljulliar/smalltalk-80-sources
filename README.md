@@ -17,7 +17,7 @@ Disclaimer: this project is still very much work in progress.  I welcome all con
 But does it actually work ? the answer is yes it does :-) As seeing is believing, here is a screenshot of the ST-80 VM running for real in my Smalltalk Pharo environment. 
 ![Screenshot of the ST-80 VM startup screen ) ](images/ST80-startup-screen.png)
 
-The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace, etc..
+The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book. Notice the date of the VM image in the System Transcript window. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace...
 
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
