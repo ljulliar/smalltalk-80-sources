@@ -1,6 +1,6 @@
 # Smalltalk-80 by the Book
 
-This project is about delivering the promise of the book "Smalltalk-80 The Language and its Implemenentation" (aka the "BLue Book") as published by Xerox Parc in 1983. That is implementing and running the complete Smalltalk-80 VM environment using only the Smalltalk language itself. Want to know more about the background of this project? Read our [bits of history](History.md).
+This project is about delivering the promise of the book "Smalltalk-80 The Language and its Implementation" (aka the "Blue Book") as published by Xerox Parc in 1983. That is implementing and running the complete Smalltalk-80 VM environment using only the Smalltalk language itself. Want to know more about the background of this project? Read our [bits of history](History.md).
 
 Disclaimer: this project is still very much work in progress.  I welcome all contributions be it bug reports, code fixes, improved documentation...
 
