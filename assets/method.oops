@@ -1,0 +1,4500 @@
+Copyright (c) 1983 Xerox Corp.  All rights reserved.
+8r144	16r64	<Collection class>with:with:with:with:
+8r150	16r68	<Collection class>with:
+8r152	16r6A	<Collection class>with:with:with:
+8r154	16r6C	<Collection class>with:with:
+8r176	16r7E	<ClassOrganizer class>new
+8r472	16r13A	<Object>nextInstance
+8r500	16r140	<Object>printString
+8r524	16r154	<Stream class>new
+8r572	16r17A	<Stream>nextPut:
+8r574	16r17C	<Stream>contents
+8r576	16r17E	<Stream>atEnd
+8r600	16r180	<Stream>next:
+8r724	16r1D4	<Collection>collect:
+8r726	16r1D6	<Collection>errorNotKeyed
+8r736	16r1DE	<Collection>maxPrint
+8r740	16r1E0	<Collection>growSize
+8r750	16r1E8	<Collection>maxSize
+8r754	16r1EC	<Collection>addAll:
+8r756	16r1EE	<Collection>errorNotFound
+8r762	16r1F2	<Collection>occurrencesOf:
+8r764	16r1F4	<Collection>detect:ifNone:
+8r766	16r1F6	<Collection>emptyCheck
+8r770	16r1F8	<Collection>remove:ifAbsent:
+8r772	16r1FA	<Collection>includes:
+8r774	16r1FC	<Collection>size
+8r776	16r1FE	<Collection>printOn:
+8r1012	16r20A	<Collection>reject:
+8r1014	16r20C	<Collection>removeAll:
+8r1016	16r20E	<Collection>errorEmptyCollection
+8r1022	16r212	<Collection>asSortedCollection
+8r1044	16r224	<SortedCollection class>sortBlock:
+8r1050	16r228	<SortedCollection class>new:
+8r1106	16r246	<SortedCollection>sort:to:
+8r1114	16r24C	<SortedCollection>sortBlock
+8r1116	16r24E	<SortedCollection>at:put:
+8r1122	16r252	<SortedCollection>copy
+8r1124	16r254	<SortedCollection>=
+8r1126	16r256	<SortedCollection>collect:
+8r1130	16r258	<SortedCollection>sortBlock:
+8r1134	16r25C	<SortedCollection>add:
+8r1142	16r262	<SortedCollection>addAll:
+8r1144	16r264	<SortedCollection>indexForInserting:
+8r1146	16r266	<SortedCollection>swap:with:
+8r1150	16r268	<SortedCollection>copyEmpty
+8r1152	16r26A	<SortedCollection>grow
+8r1154	16r26C	<SortedCollection>reSort
+8r1204	16r284	<RemoteString class>newString:onFileNumber:toFile:
+8r1210	16r288	<RemoteString class>newString:onFileNumber:
+8r1214	16r28C	<RemoteString class>newFileNumber:position:
+8r1240	16r2A0	<RemoteString>position
+8r1242	16r2A2	<RemoteString>string:onFileNumber:toFile:
+8r1246	16r2A6	<RemoteString>string:onFileNumber:
+8r1322	16r2D2	<ReadWriteStream>timeStamp
+8r1334	16r2DC	<ReadWriteStream>close
+8r1336	16r2DE	<ReadWriteStream>fileIn
+8r1472	16r33A	<DisplayObject>displayAt:
+8r1520	16r350	<DisplayScreen class>currentDisplay:
+8r1536	16r35E	<DisplayScreen class>boundingBox
+8r1540	16r360	<DisplayScreen class>displayHeight:
+8r1542	16r362	<DisplayScreen class>displayExtent:
+8r1576	16r37E	<ControlManager class>newScheduler:
+8r1604	16r384	<ControlManager class>new
+8r1666	16r3B6	<ControlManager>deactivate
+8r1670	16r3B8	<ControlManager>searchForActiveController
+8r1702	16r3C2	<ControlManager>scheduledControllers
+8r1704	16r3C4	<ControlManager>interruptName:
+8r1742	16r3E2	<View class>new
+8r1746	16r3E6	<View class>identityTransformation
+8r1772	16r3FA	<WindowingTransformation class>scale:translation:
+8r1776	16r3FE	<WindowingTransformation class>window:viewport:
+8r2010	16r408	<WindowingTransformation class>identity
+8r2050	16r428	<WindowingTransformation>align:with:
+8r2052	16r42A	<WindowingTransformation>scaleBy:
+8r2054	16r42C	<WindowingTransformation>translateBy:
+8r2056	16r42E	<WindowingTransformation>checkScale:
+8r2062	16r432	<WindowingTransformation>applyInverseTo:
+8r2070	16r438	<WindowingTransformation>applyTo:
+8r2072	16r43A	<WindowingTransformation>scale
+8r2076	16r43E	<WindowingTransformation>compose:
+8r2100	16r440	<WindowingTransformation>scrollBy:
+8r2102	16r442	<WindowingTransformation>translation
+8r2104	16r444	<WindowingTransformation>noScale
+8r2106	16r446	<WindowingTransformation>scaleOfOne
+8r2112	16r44A	<WindowingTransformation>printOn:
+8r2122	16r452	<WindowingTransformation>storeOn:
+8r2134	16r45C	<WindowingTransformation>setScale:translation:
+8r2222	16r492	<Set>fixCollisionsFrom:
+8r2224	16r494	<Set>atNewIndex:put:
+8r2226	16r496	<Set>noCheckAdd:
+8r2230	16r498	<Set>rehash
+8r2232	16r49A	<Set>find:ifAbsent:
+8r2234	16r49C	<Set>fullCheck
+8r2236	16r49E	<Set>findElementOrNil:
+8r2240	16r4A0	<Set>setTally
+8r2242	16r4A2	<Set>at:
+8r2244	16r4A4	<Set>at:put:
+8r2246	16r4A6	<Set>collect:
+8r2254	16r4AC	<Set>add:
+8r2256	16r4AE	<Set>occurrencesOf:
+8r2260	16r4B0	<Set>do:
+8r2264	16r4B4	<Set>remove:ifAbsent:
+8r2266	16r4B6	<Set>includes:
+8r2270	16r4B8	<Set>size
+8r2272	16r4BA	<Set>swap:with:
+8r2274	16r4BC	<Set>grow
+8r2324	16r4D4	<IdentitySet>findElementOrNil:
+8r2452	16r52A	<Dictionary>declare:from:
+8r2454	16r52C	<Dictionary>includesAssociation:
+8r2462	16r532	<Dictionary>errorValueNotFound
+8r2466	16r536	<Dictionary>removeAssociation:ifAbsent:
+8r2470	16r538	<Dictionary>removeAssociation:
+8r2472	16r53A	<Dictionary>findKey:ifAbsent:
+8r2474	16r53C	<Dictionary>errorKeyNotFound
+8r2500	16r540	<Dictionary>keysDo:
+8r2504	16r544	<Dictionary>associationAt:ifAbsent:
+8r2506	16r546	<Dictionary>keyAtValue:ifAbsent:
+8r2510	16r548	<Dictionary>keys
+8r2512	16r54A	<Dictionary>at:ifAbsent:
+8r2514	16r54C	<Dictionary>removeKey:ifAbsent:
+8r2516	16r54E	<Dictionary>associationsDo:
+8r2520	16r550	<Dictionary>values
+8r2536	16r55E	<Bag class>new
+8r2566	16r576	<Bag>at:
+8r2570	16r578	<Bag>at:put:
+8r2572	16r57A	<Bag>setDictionary
+8r2574	16r57C	<Bag>add:
+8r2576	16r57E	<Bag>occurrencesOf:
+8r2600	16r580	<Bag>do:
+8r2604	16r584	<Bag>sortedElements
+8r2606	16r586	<Bag>sortedCounts
+8r2616	16r58E	<Bag>remove:ifAbsent:
+8r2620	16r590	<Bag>size
+8r2622	16r592	<Bag>includes:
+8r2624	16r594	<Bag>add:withOccurrences:
+8r2646	16r5A6	<Dictionary>collect:
+8r2650	16r5A8	<Dictionary>associations
+8r2652	16r5AA	<Dictionary>associationAt:
+8r2654	16r5AC	<Dictionary>removeKey:
+8r2656	16r5AE	<Dictionary>includesKey:
+8r2660	16r5B0	<Dictionary>keyAtValue:
+8r2662	16r5B2	<Dictionary>at:
+8r2664	16r5B4	<Dictionary>occurrencesOf:
+8r2666	16r5B6	<Dictionary>at:put:
+8r2670	16r5B8	<Dictionary>rehash
+8r2672	16r5BA	<Dictionary>remove:ifAbsent:
+8r2674	16r5BC	<Dictionary>includes:
+8r2676	16r5BE	<Dictionary>printOn:
+8r2704	16r5C4	<Dictionary>asSortedCollection
+8r2706	16r5C6	<Dictionary>remove:
+8r2710	16r5C8	<Dictionary>inspect
+8r2736	16r5DE	<InspectorView class>open:
+8r2742	16r5E2	<InspectorView class>view:in:of:
+8r3252	16r6AA	<View>getController
+8r3254	16r6AC	<View>transform:
+8r3256	16r6AE	<View>getWindow
+8r3260	16r6B0	<View>clear:
+8r3264	16r6B4	<View>model:controller:
+8r3270	16r6B8	<View>isTopView
+8r3272	16r6BA	<View>subViewContaining:
+8r3276	16r6BE	<View>displayTransformation
+8r3300	16r6C0	<View>insertSubView:above:
+8r3310	16r6C8	<View>insertSubView:before:ifCyclic:
+8r3314	16r6CC	<View>displayBox
+8r3320	16r6D0	<View>deEmphasize
+8r3322	16r6D2	<View>scrollBy:
+8r3324	16r6D4	<View>clear
+8r3326	16r6D6	<View>insetWindow
+8r3332	16r6DA	<View>defaultControllerClass
+8r3350	16r6E8	<Controller class>new
+8r3420	16r710	<Controller>sensor:
+8r3422	16r712	<Controller>controlLoop
+8r3424	16r714	<Controller>isControlWanted
+8r3426	16r716	<Controller>controlInitialize
+8r3430	16r718	<Controller>view
+8r3432	16r71A	<Controller>controlTerminate
+8r3434	16r71C	<Controller>centerCursorInView
+8r3442	16r722	<Controller>view:
+8r3444	16r724	<Controller>sensor
+8r3446	16r726	<Controller>initialize
+8r3472	16r73A	<InputSensor class>install
+8r3510	16r748	<InputState class>initialize
+8r3620	16r790	<InputState>primCursorLocPut:
+8r3622	16r792	<InputState>primMousePt
+8r3624	16r794	<InputState>leftShiftDown
+8r3626	16r796	<InputState>nextEvent:with:
+8r3660	16r7B0	<Link class>nextLink:
+8r3702	16r7C2	<Link>nextLink:
+8r3704	16r7C4	<Link>nextLink
+8r3740	16r7E0	<Process class>forContext:priority:
+8r3776	16r7FE	<Process>suspendingList
+8r4000	16r800	<Process>offList
+8r4002	16r802	<Process>suspend
+8r4012	16r80A	<Process>suspendedContext:
+8r4014	16r80C	<Process>priority:
+8r4022	16r812	<Process>terminate
+8r4030	16r818	<Process>suspendedContext
+8r4032	16r81A	<Process>priority
+8r4034	16r81C	<Process>install:
+8r4040	16r820	<Process>printOn:
+8r4044	16r824	<Process>resume
+8r4046	16r826	<Process>popTo:
+8r4114	16r84C	<BlockContext>newProcess
+8r4122	16r852	<InputState>install
+8r4154	16r86C	<SharedQueue class>new
+8r4156	16r86E	<SharedQueue class>new:
+8r4204	16r884	<SharedQueue>makeRoomAtEnd
+8r4206	16r886	<SharedQueue>nextPut:
+8r4214	16r88C	<SharedQueue>init:
+8r4224	16r894	<SharedQueue>isEmpty
+8r4226	16r896	<SharedQueue>size
+8r4230	16r898	<SharedQueue>next
+8r4234	16r89C	<SharedQueue>release
+8r4236	16r89E	<SharedQueue>peek
+8r4304	16r8C4	<InputState>run
+8r4306	16r8C6	<InputState>keyAt:put:
+8r4326	16r8D6	<KeyboardEvent class>code:meta:
+8r4360	16r8F0	<KeyboardEvent>keyCharacter
+8r4362	16r8F2	<KeyboardEvent>metaState
+8r4364	16r8F4	<KeyboardEvent>hasCtrl
+8r4370	16r8F8	<KeyboardEvent>hasLock
+8r4372	16r8FA	<KeyboardEvent>hasShift
+8r4374	16r8FC	<KeyboardEvent>key:meta:
+8r4432	16r91A	<InputState>primCursorLocPutAgain:
+8r4434	16r91C	<InputState>primSampleInterval:
+8r4436	16r91E	<InputState>primInputWord
+8r4440	16r920	<InputState>cursorPoint:
+8r4442	16r922	<InputState>primInputSemaphore:
+8r4444	16r924	<InputState>initState
+8r4450	16r928	<InputState>mouseButtons
+8r4452	16r92A	<InputState>keyboardNext
+8r4454	16r92C	<InputState>currentTime
+8r4456	16r92E	<InputState>keyboardPeek
+8r4460	16r930	<InputState>mousePoint
+8r4544	16r964	<InputSensor class>new
+8r4552	16r96A	<InputSensor class>default
+8r4564	16r974	<InputSensor class>initialize
+8r5052	16rA2A	<InputSensor class>initSensor
+8r5144	16rA64	<InputSensor>primMousePt
+8r5146	16rA66	<InputSensor>leftShiftDown
+8r5150	16rA68	<InputSensor>cursorPoint:
+8r5176	16rA7E	<ArrayedCollection class>with:with:
+8r5200	16rA80	<ArrayedCollection class>with:with:with:with:
+8r5202	16rA82	<ArrayedCollection class>new
+8r5204	16rA84	<ArrayedCollection class>with:
+8r5206	16rA86	<ArrayedCollection class>new:withAll:
+8r5212	16rA8A	<ArrayedCollection class>with:with:with:
+8r5236	16rA9E	<ArrayedCollection>storeElementsFrom:to:on:
+8r5244	16rAA4	<ArrayedCollection>defaultElement
+8r5246	16rAA6	<ArrayedCollection>add:
+8r5250	16rAA8	<ArrayedCollection>size
+8r5256	16rAAE	<ArrayedCollection>storeOn:
+8r5314	16rACC	<Text class>fromUser
+8r5340	16rAE0	<StringHolder class>new
+8r5344	16rAE4	<StringHolder class>initialize
+8r5346	16rAE6	<StringHolder class>workspace
+8r5374	16rAFC	<StringHolder>lock
+8r5376	16rAFE	<StringHolder>initialize
+8r5400	16rB00	<StringHolder>contents
+8r5402	16rB02	<StringHolder>defaultContents
+8r5406	16rB06	<StringHolder>doItContext
+8r5410	16rB08	<StringHolder>doItReceiver
+8r5412	16rB0A	<StringHolder>contents:
+8r5414	16rB0C	<StringHolder>unlock
+8r5416	16rB0E	<StringHolder>isUnlocked
+8r5422	16rB12	<StringHolder>isLocked
+8r5606	16rB86	<ChangeList>selection
+8r5612	16rB8A	<ChangeList>removeCurrent
+8r5614	16rB8C	<ChangeList>scheduleMessageBrowser
+8r5654	16rBAC	<BrowserView class>openListBrowserOn:label:
+8r5656	16rBAE	<BrowserView class>openOn:
+8r5700	16rBC0	<Browser class>flushMenus
+8r5736	16rBDE	<PopUpMenu class>labels:lines:
+8r5762	16rBF2	<TextStyle class>default
+8r6110	16rC48	<StrikeFont>displayLine:at:
+8r6210	16rC88	<DisplayMedium>white
+8r6212	16rC8A	<DisplayMedium>reverse
+8r6214	16rC8C	<DisplayMedium>black
+8r6216	16rC8E	<DisplayMedium>fill:mask:
+8r6220	16rC90	<DisplayMedium>darkGray:
+8r6222	16rC92	<DisplayMedium>fill:
+8r6224	16rC94	<DisplayMedium>lightGray
+8r6226	16rC96	<DisplayMedium>copyBits:from:at:clippingBox:rule:mask:
+8r6234	16rC9C	<DisplayMedium>gray:
+8r6236	16rC9E	<DisplayMedium>border:widthRectangle:mask:clippingBox:
+8r6244	16rCA4	<DisplayMedium>white:
+8r6246	16rCA6	<DisplayMedium>black:
+8r6250	16rCA8	<DisplayMedium>border:width:mask:
+8r6304	16rCC4	<Rectangle class>originFromUser:grid:
+8r6312	16rCCA	<Rectangle class>originFromUser:
+8r6314	16rCCC	<Rectangle class>left:right:top:bottom:
+8r6316	16rCCE	<Rectangle class>fromUserAspectRatio:
+8r6332	16rCDA	<Rectangle class>origin:corner:
+8r6334	16rCDC	<Rectangle class>fromUser:
+8r6350	16rCE8	<Rectangle class>origin:extent:
+8r6352	16rCEA	<Rectangle class>fromUser
+8r6450	16rD28	<Rectangle>bottomCenter
+8r6452	16rD2A	<Rectangle>merge:
+8r6454	16rD2C	<Rectangle>leftCenter
+8r6456	16rD2E	<Rectangle>insetOriginBy:cornerBy:
+8r6460	16rD30	<Rectangle>left
+8r6462	16rD32	<Rectangle>bottomRight
+8r6464	16rD34	<Rectangle>top
+8r6466	16rD36	<Rectangle>align:with:
+8r6470	16rD38	<Rectangle>scaleBy:
+8r6472	16rD3A	<Rectangle>translateBy:
+8r6474	16rD3C	<Rectangle>bottom
+8r6476	16rD3E	<Rectangle>width:
+8r6500	16rD40	<Rectangle>storeOn:
+8r6506	16rD46	<Rectangle>top:
+8r6510	16rD48	<Rectangle>extent
+8r6512	16rD4A	<Rectangle>topLeft:
+8r6514	16rD4C	<Rectangle>center
+8r6516	16rD4E	<Rectangle>area
+8r6520	16rD50	<Rectangle>rightCenter
+8r6522	16rD52	<Rectangle>bottomRight:
+8r6524	16rD54	<Rectangle>contains:
+8r6526	16rD56	<Rectangle>intersects:
+8r6530	16rD58	<Rectangle>height:
+8r6532	16rD5A	<Rectangle>rounded
+8r6534	16rD5C	<Rectangle>width
+8r6536	16rD5E	<Rectangle>height
+8r6540	16rD60	<Rectangle>right
+8r6542	16rD62	<Rectangle>hashMappedBy:
+8r6544	16rD64	<Rectangle>topRight
+8r6546	16rD66	<Rectangle>bottom:
+8r6550	16rD68	<Rectangle>moveTo:
+8r6552	16rD6A	<Rectangle>containsPoint:
+8r6554	16rD6C	<Rectangle>areasOutside:
+8r6556	16rD6E	<Rectangle>intersect:
+8r6560	16rD70	<Rectangle>printOn:
+8r6564	16rD74	<Rectangle>origin:corner:
+8r6566	16rD76	<Rectangle>origin:extent:
+8r6570	16rD78	<Rectangle>bottomLeft
+8r6572	16rD7A	<Rectangle>topLeft
+8r6574	16rD7C	<Rectangle>extent:
+8r6576	16rD7E	<Rectangle>hash
+8r6602	16rD82	<Rectangle>expandBy:
+8r6604	16rD84	<Rectangle>origin
+8r6606	16rD86	<Rectangle>corner
+8r6610	16rD88	<Rectangle>copy
+8r6612	16rD8A	<Rectangle>insetBy:
+8r6614	16rD8C	<Rectangle>=
+8r6616	16rD8E	<Rectangle>origin:
+8r6620	16rD90	<Rectangle>corner:
+8r6622	16rD92	<Rectangle>right:
+8r6624	16rD94	<Rectangle>topCenter
+8r6626	16rD96	<Rectangle>amountToTranslateWithin:
+8r6630	16rD98	<Rectangle>left:
+8r6632	16rD9A	<Rectangle>moveBy:
+8r6650	16rDA8	<Quadrangle class>region:borderWidth:borderColor:insideColor:
+8r6654	16rDAC	<Quadrangle class>new
+8r6706	16rDC6	<Quadrangle>borderWidthLeft:right:top:bottom:
+8r6710	16rDC8	<Quadrangle>displayOn:align:with:clippingBox:
+8r6712	16rDCA	<Quadrangle>displayAlign:with:clippingBox:
+8r6714	16rDCC	<Quadrangle>borderColor
+8r6716	16rDCE	<Quadrangle>borderColor:
+8r6720	16rDD0	<Quadrangle>borderWidth
+8r6722	16rDD2	<Quadrangle>align:with:
+8r6730	16rDD8	<Quadrangle>scaleBy:
+8r6732	16rDDA	<Quadrangle>translateBy:
+8r6734	16rDDC	<Quadrangle>display
+8r6736	16rDDE	<Quadrangle>borderWidth:
+8r6740	16rDE0	<Quadrangle>insideColor:
+8r6742	16rDE2	<Quadrangle>insideColor
+8r6744	16rDE4	<Quadrangle>displayOn:transformation:clippingBox:
+8r6746	16rDE6	<Quadrangle>intersect:
+8r6750	16rDE8	<Quadrangle>region:borderWidth:borderColor:insideColor:
+8r6752	16rDEA	<Quadrangle>displayOn:
+8r6754	16rDEC	<Quadrangle>initialize
+8r6756	16rDEE	<Quadrangle>inside
+8r6760	16rDF0	<Quadrangle>region
+8r6762	16rDF2	<Quadrangle>region:
+8r7036	16rE1E	<CharacterBlock class>stringIndex:character:boundingRectangle:
+8r7042	16rE22	<CharacterBlock class>stringIndex:character:topLeft:extent:
+8r7076	16rE3E	<CharacterBlock>newStringIndex:Character:BoundingRectangle:
+8r7104	16rE44	<CharacterBlock>printOn:
+8r7114	16rE4C	<CharacterBlock>newStringIndex:Character:TopLeft:Extent:
+8r7116	16rE4E	<CharacterBlock><
+8r7120	16rE50	<CharacterBlock>character
+8r7122	16rE52	<CharacterBlock><=
+8r7124	16rE54	<CharacterBlock>>=
+8r7126	16rE56	<CharacterBlock>stringIndex
+8r7130	16rE58	<CharacterBlock>>
+8r7132	16rE5A	<CharacterBlock>=
+8r7134	16rE5C	<CharacterBlock>copy
+8r10254	16r10AC	<DisplayMedium>lightGray:
+8r10256	16r10AE	<DisplayMedium>border:width:
+8r10260	16r10B0	<DisplayMedium>veryLightGray:
+8r10262	16r10B2	<DisplayMedium>veryLightGray
+8r10264	16r10B4	<DisplayMedium>reverse:mask:
+8r10266	16r10B6	<DisplayMedium>gray
+8r10270	16r10B8	<DisplayMedium>border:widthRectangle:mask:
+8r10272	16r10BA	<DisplayMedium>fill:rule:mask:
+8r10274	16r10BC	<DisplayMedium>reverse:
+8r10276	16r10BE	<DisplayMedium>drawLine:from:to:clippingBox:rule:mask:
+8r10300	16r10C0	<DisplayMedium>darkGray
+8r10414	16r110C	<Form>reflect:
+8r10416	16r110E	<Form>rotateBy:
+8r10426	16r1116	<Form>storeOn:base:
+8r10444	16r1124	<Form>isAllWhite
+8r10450	16r1128	<Form>rotate2:
+8r10452	16r112A	<Form>offset:
+8r10454	16r112C	<Form>computeBoundingBox
+8r10456	16r112E	<Form>deepCopy
+8r10464	16r1134	<Form>storeOn:
+8r10476	16r113E	<Form>offset
+8r10500	16r1140	<Form>displayOn:transformation:clippingBox:align:with:rule:mask:
+8r10504	16r1144	<Form>displayOn:at:clippingBox:rule:mask:
+8r10506	16r1146	<Form>borderWidth:
+8r10510	16r1148	<Form>bits
+8r10512	16r114A	<Form>copyBits:from:at:clippingBox:rule:mask:
+8r10544	16r1164	<BitBlt class>exampleTwo
+8r10552	16r116A	<BitBlt class>exampleOne
+8r10572	16r117A	<Path class>new
+8r10600	16r1180	<Path class>example
+8r10606	16r1186	<Path class>new:
+8r10652	16r11AA	<Path>form:
+8r10654	16r11AC	<Path>displayOn:transformation:clippingBox:rule:mask:
+8r10656	16r11AE	<Path>last
+8r10660	16r11B0	<Path>initializeCollectionOfPoints:
+8r10662	16r11B2	<Path>computeBoundingBox
+8r10664	16r11B4	<Path>scaleBy:
+8r10666	16r11B6	<Path>translateBy:
+8r10670	16r11B8	<Path>at:
+8r10672	16r11BA	<Path>firstPoint
+8r10674	16r11BC	<Path>secondPoint
+8r10676	16r11BE	<Path>removeAllSuchThat:
+8r10700	16r11C0	<Path>first
+8r10702	16r11C2	<Path>collect:
+8r10704	16r11C4	<Path>firstPoint:
+8r10706	16r11C6	<Path>thirdPoint:
+8r10710	16r11C8	<Path>thirdPoint
+8r10712	16r11CA	<Path>secondPoint:
+8r10714	16r11CC	<Path>at:put:
+8r10716	16r11CE	<Path>offset
+8r10720	16r11D0	<Path>form
+8r10722	16r11D2	<Path>displayOn:at:clippingBox:rule:mask:
+8r10724	16r11D4	<Path>size
+8r10726	16r11D6	<Path>select:
+8r10730	16r11D8	<Path>isEmpty
+8r10732	16r11DA	<Path>add:
+8r10734	16r11DC	<Path>initializeCollectionOfPoints
+8r10750	16r11E8	<Spline class>example
+8r11002	16r1202	<Spline>displayOn:transformation:clippingBox:rule:mask:
+8r11004	16r1204	<Spline>computeCurve
+8r11012	16r120A	<Spline>displayOn:at:clippingBox:rule:mask:
+8r11032	16r121A	<Line class>new
+8r11036	16r121E	<Line class>from:to:withForm:
+8r11042	16r1222	<Line class>example
+8r11070	16r1238	<Line>displayOn:transformation:clippingBox:rule:mask:
+8r11072	16r123A	<Line>beginPoint:
+8r11074	16r123C	<Line>beginPoint
+8r11076	16r123E	<Line>endPoint:
+8r11100	16r1240	<Line>endPoint
+8r11102	16r1242	<Line>displayOn:at:clippingBox:rule:mask:
+8r11130	16r1258	<Spline>isCyclic
+8r11132	16r125A	<Spline>derivs:first:second:third:
+8r11150	16r1268	<Spline>derivativePointsAt:
+8r11202	16r1282	<LinearFit class>example
+8r11224	16r1294	<LinearFit>displayOn:transformation:clippingBox:rule:mask:
+8r11226	16r1296	<LinearFit>displayOn:at:clippingBox:rule:mask:
+8r11254	16r12AC	<Curve class>example
+8r11262	16r12B2	<Curve class>new
+8r11302	16r12C2	<Curve>displayOn:transformation:clippingBox:rule:mask:
+8r11304	16r12C4	<Curve>displayOn:at:clippingBox:rule:mask:
+8r11334	16r12DC	<Arc class>example
+8r11376	16r12FE	<Arc>center
+8r11400	16r1300	<Arc>radius:
+8r11402	16r1302	<Arc>displayOn:transformation:clippingBox:rule:mask:
+8r11404	16r1304	<Arc>center:
+8r11406	16r1306	<Arc>quadrant:
+8r11410	16r1308	<Arc>center:radius:quadrant:
+8r11412	16r130A	<Arc>quadrant
+8r11414	16r130C	<Arc>radius
+8r11416	16r130E	<Arc>center:radius:
+8r11420	16r1310	<Arc>displayOn:at:clippingBox:rule:mask:
+8r11456	16r132E	<Circle class>exampleOne
+8r11464	16r1334	<Circle class>exampleTwo
+8r11502	16r1342	<Circle>displayOn:transformation:clippingBox:rule:mask:
+8r11504	16r1344	<Circle>displayOn:at:clippingBox:rule:mask:
+8r11506	16r1346	<Circle>computeBoundingBox
+8r11570	16r1378	<BitBlt class>exampleAt:rule:mask:
+8r11572	16r137A	<BitBlt class>toReverse:
+8r11574	16r137C	<BitBlt class>destForm:sourceForm:halftoneForm:combinationRule:destOrigin:sourceOrigin:extent:clipRect:
+8r11670	16r13B8	<BitBlt>clipRect
+8r11672	16r13BA	<BitBlt>destForm:
+8r11674	16r13BC	<BitBlt>copyBitsAgain
+8r11676	16r13BE	<BitBlt>sourceOrigin:
+8r11700	16r13C0	<BitBlt>destRect:
+8r11702	16r13C2	<BitBlt>sourceRect:
+8r11704	16r13C4	<BitBlt>combinationRule:
+8r11706	16r13C6	<BitBlt>destX:
+8r11710	16r13C8	<BitBlt>destY:
+8r11712	16r13CA	<BitBlt>clipX:
+8r11714	16r13CC	<BitBlt>width:
+8r11716	16r13CE	<BitBlt>clipRect:
+8r11720	16r13D0	<BitBlt>clipWidth:
+8r11722	16r13D2	<BitBlt>paintBits
+8r11730	16r13D8	<BitBlt>clipHeight:
+8r11732	16r13DA	<BitBlt>mask:
+8r11734	16r13DC	<BitBlt>sourceX:
+8r11736	16r13DE	<BitBlt>sourceY:
+8r11740	16r13E0	<BitBlt>clipY:
+8r11742	16r13E2	<BitBlt>drawLoopX:Y:
+8r11746	16r13E6	<BitBlt>sourceForm:
+8r11750	16r13E8	<BitBlt>drawFrom:to:
+8r11752	16r13EA	<BitBlt>height:
+8r11754	16r13EC	<BitBlt>copyBits
+8r11756	16r13EE	<BitBlt>destOrigin:
+8r11760	16r13F0	<BitBlt>setDestForm:sourceForm:halftoneForm:combinationRule:destOrigin:sourceOrigin:extent:clipRect:
+8r12022	16r1412	<CharacterScanner>doesDisplaying
+8r12024	16r1414	<CharacterScanner>initializeFromParagraph:clippedBy:
+8r12040	16r1420	<CharacterScanner>setStopConditions
+8r12054	16r142C	<CharacterScanner>scanCharactersFrom:to:in:rightX:stopConditions:displaying:
+8r12062	16r1432	<CharacterScanner>characterNotInFont
+8r12124	16r1454	<CompositionScanner>space
+8r12126	16r1456	<CompositionScanner>rightX
+8r12130	16r1458	<CompositionScanner>resetFont
+8r12134	16r145C	<CompositionScanner>composeLine:fromCharacterIndex:inParagraph:
+8r12172	16r147A	<Interval class>from:to:
+8r12176	16r147E	<Interval class>new
+8r12204	16r1484	<Interval class>from:to:by:
+8r12226	16r1496	<Interval>reverseDo:
+8r12230	16r1498	<Interval>remove:
+8r12234	16r149C	<Interval>last
+8r12236	16r149E	<Interval>hash
+8r12240	16r14A0	<Interval>increment
+8r12242	16r14A2	<Interval>at:
+8r12244	16r14A4	<Interval>at:put:
+8r12250	16r14A8	<Interval>copy
+8r12252	16r14AA	<Interval>first
+8r12254	16r14AC	<Interval>=
+8r12256	16r14AE	<Interval>collect:
+8r12260	16r14B0	<Interval>hashMappedBy:
+8r12262	16r14B2	<Interval>add:
+8r12264	16r14B4	<Interval>species
+8r12266	16r14B6	<Interval>do:
+8r12270	16r14B8	<Interval>size
+8r12272	16r14BA	<Interval>printOn:
+8r12300	16r14C0	<Interval>storeOn:
+8r12302	16r14C2	<Interval>setFrom:to:by:
+8r12340	16r14E0	<TextLineInterval class>start:stop:internalSpaces:paddingWidth:
+8r12402	16r1502	<TextLineInterval>slide:
+8r12404	16r1504	<TextLineInterval>internalSpaces:paddingWidth:
+8r12406	16r1506	<TextLineInterval>deepCopy
+8r12410	16r1508	<TextLineInterval>internalSpaces
+8r12412	16r150A	<TextLineInterval>justifiedTabDeltaFor:
+8r12414	16r150C	<TextLineInterval>stop:
+8r12416	16r150E	<TextLineInterval>paddingWidth:
+8r12420	16r1510	<TextLineInterval>internalSpaces:
+8r12422	16r1512	<TextLineInterval>justifiedPadFor:
+8r12424	16r1514	<TextLineInterval>=
+8r12426	16r1516	<TextLineInterval>paddingWidth
+8r12460	16r1530	<CompositionScanner>in:
+8r12464	16r1534	<CompositionScanner>setStopConditions
+8r12466	16r1536	<CompositionScanner>cr
+8r12470	16r1538	<CompositionScanner>tab
+8r12474	16r153C	<CompositionScanner>endOfRun
+8r12476	16r153E	<CompositionScanner>crossedX
+8r12500	16r1540	<CompositionScanner>onePixelSpace
+8r12502	16r1542	<CompositionScanner>onePixelBackspace
+8r12566	16r1576	<DisplayScanner>doesDisplaying
+8r12570	16r1578	<DisplayScanner>initializeFromParagraph:clippedBy:
+8r12574	16r157C	<DisplayScanner>setStopConditions
+8r12602	16r1582	<DisplayScanner>cr
+8r12604	16r1584	<DisplayScanner>tab
+8r12610	16r1588	<DisplayScanner>endOfRun
+8r12612	16r158A	<DisplayScanner>crossedX
+8r12614	16r158C	<DisplayScanner>onePixelSpace
+8r12616	16r158E	<DisplayScanner>onePixelBackspace
+8r12620	16r1590	<DisplayScanner>checkEmphasis
+8r12626	16r1596	<DisplayScanner>displayLines:in:clippedBy:
+8r12642	16r15A2	<DisplayScanner>paddedSpace
+8r12644	16r15A4	<DisplayScanner>fontAscentDelta
+8r12726	16r15D6	<CharacterBlockScanner>setStopConditions
+8r12734	16r15DC	<CharacterBlockScanner>buildCharacterBlockIn:
+8r12744	16r15E4	<CharacterBlockScanner>characterNotInFont
+8r12746	16r15E6	<CharacterBlockScanner>characterBlockForIndex:in:
+8r12752	16r15EA	<CharacterBlockScanner>characterBlockAtPoint:in:
+8r12754	16r15EC	<CharacterBlockScanner>cr
+8r12764	16r15F4	<CharacterBlockScanner>tab
+8r12766	16r15F6	<CharacterBlockScanner>endOfRun
+8r12770	16r15F8	<CharacterBlockScanner>crossedX
+8r12772	16r15FA	<CharacterBlockScanner>onePixelSpace
+8r12774	16r15FC	<CharacterBlockScanner>onePixelBackspace
+8r12776	16r15FE	<CharacterBlockScanner>paddedSpace
+8r13112	16r164A	<Pen class>example
+8r13126	16r1656	<Pen class>new
+8r13212	16r168A	<Pen>dragon:
+8r13214	16r168C	<Pen>filberts:side:
+8r13216	16r168E	<Pen>frame
+8r13220	16r1690	<Pen>up
+8r13222	16r1692	<Pen>white
+8r13224	16r1694	<Pen>black
+8r13226	16r1696	<Pen>width:
+8r13232	16r169A	<Pen>sourceForm:
+8r13234	16r169C	<Pen>defaultNib:
+8r13240	16r16A0	<Pen>go:
+8r13244	16r16A4	<Pen>turn:
+8r13246	16r16A6	<Pen>frame:
+8r13250	16r16A8	<Pen>down
+8r13252	16r16AA	<Pen>home
+8r13254	16r16AC	<Pen>north
+8r13260	16r16B0	<Pen>mandala:diameter:
+8r13264	16r16B4	<Pen>place:
+8r13266	16r16B6	<Pen>direction
+8r13270	16r16B8	<Pen>location
+8r13272	16r16BA	<Pen>goto:
+8r13274	16r16BC	<Pen>color:
+8r13276	16r16BE	<Pen>hilberts:
+8r13300	16r16C0	<Pen>spiral:angle:
+8r13302	16r16C2	<Pen>hilbert:side:
+8r13304	16r16C4	<Pen>fillIn:
+8r13414	16r170C	<Form>extent:offset:bits:
+8r13416	16r170E	<Form>fill:rule:mask:
+8r13420	16r1710	<Form>drawLine:from:to:clippingBox:rule:mask:
+8r13422	16r1712	<Form>size
+8r13424	16r1714	<Form>extent:
+8r13426	16r1716	<Form>wrapAround:
+8r13430	16r1718	<Form>bitEdit
+8r13506	16r1746	<MouseMenuController>yellowButtonActivity
+8r13516	16r174E	<MouseMenuController>redButtonActivity
+8r13522	16r1752	<MouseMenuController>redButtonMenu:redButtonMessages:
+8r13524	16r1754	<MouseMenuController>blueButtonMenu:blueButtonMessages:
+8r13526	16r1756	<MouseMenuController>blueButtonActivity
+8r13532	16r175A	<MouseMenuController>yellowButtonMenu:yellowButtonMessages:
+8r13534	16r175C	<MouseMenuController>menuMessageReceiver
+8r13536	16r175E	<MouseMenuController>reset
+8r13540	16r1760	<MouseMenuController>release
+8r13542	16r1762	<MouseMenuController>isControlActive
+8r13544	16r1764	<MouseMenuController>controlActivity
+8r13564	16r1774	<StandardSystemController class>ScheduledBlueButtonMenu
+8r13626	16r1796	<PopUpMenu>markerOff
+8r13630	16r1798	<PopUpMenu>buttonPressed:
+8r13640	16r17A0	<PopUpMenu>manageMarker
+8r13642	16r17A2	<PopUpMenu>topLeft
+8r13644	16r17A4	<PopUpMenu>startUp:withHeading:
+8r13646	16r17A6	<PopUpMenu>rescan
+8r13650	16r17A8	<PopUpMenu>startUpAndWaitForSelectionAt:
+8r13654	16r17AC	<PopUpMenu>borderWidth
+8r13656	16r17AE	<PopUpMenu>startUpRedButton
+8r13660	16r17B0	<PopUpMenu>markerTop:
+8r13662	16r17B2	<PopUpMenu>markerOn:
+8r13666	16r17B6	<PopUpMenu>displayAt:during:
+8r13670	16r17B8	<PopUpMenu>startUpBlueButton
+8r13672	16r17BA	<PopUpMenu>startUp:
+8r13674	16r17BC	<PopUpMenu>startUpYellowButton
+8r13676	16r17BE	<PopUpMenu>center
+8r13700	16r17C0	<PopUpMenu>labels:font:lines:
+8r13734	16r17DC	<DisplayText class>text:
+8r13740	16r17E0	<DisplayText class>text:textStyle:offset:
+8r13742	16r17E2	<DisplayText class>text:textStyle:
+8r13744	16r17E4	<DisplayText class>example
+8r13776	16r17FE	<DisplayText>offset:
+8r14000	16r1800	<DisplayText>boundingBox
+8r14002	16r1802	<DisplayText>computeBoundingBox
+8r14012	16r180A	<DisplayText>text
+8r14014	16r180C	<DisplayText>text:
+8r14016	16r180E	<DisplayText>textStyle
+8r14020	16r1810	<DisplayText>lineGrid
+8r14022	16r1812	<DisplayText>string
+8r14024	16r1814	<DisplayText>setText:textStyle:offset:
+8r14026	16r1816	<DisplayText>numberOfLines
+8r14030	16r1818	<DisplayText>form
+8r14032	16r181A	<DisplayText>offset
+8r14034	16r181C	<DisplayText>displayOn:transformation:clippingBox:align:with:rule:mask:
+8r14042	16r1822	<DisplayText>displayOn:at:clippingBox:rule:mask:
+8r14044	16r1824	<DisplayText>textStyle:
+8r14046	16r1826	<DisplayText>composeForm
+8r14052	16r182A	<DisplayText>asParagraph
+8r14116	16r184E	<Paragraph class>withText:style:
+8r14136	16r185E	<Paragraph class>withText:
+8r14140	16r1860	<Paragraph class>withText:style:compositionRectangle:clippingRectangle:
+8r14146	16r1866	<Paragraph class>new
+8r14154	16r186C	<Paragraph class>initialize
+8r14156	16r186E	<Paragraph class>example
+8r14336	16r18DE	<Paragraph>displayAt:
+8r14340	16r18E0	<Paragraph>boundingBox
+8r14342	16r18E2	<Paragraph>computeBoundingBox
+8r14344	16r18E4	<Paragraph>destinationForm
+8r14346	16r18E6	<Paragraph>outputMedium
+8r14350	16r18E8	<Paragraph>mask
+8r14352	16r18EA	<Paragraph>rule
+8r14354	16r18EC	<Paragraph>scrollBy:
+8r14356	16r18EE	<Paragraph>asForm
+8r14360	16r18F0	<Paragraph>displayOn:
+8r14362	16r18F2	<Paragraph>displayOn:transformation:clippingBox:align:with:rule:mask:
+8r14364	16r18F4	<Paragraph>clippingRectangle
+8r14366	16r18F6	<Paragraph>height
+8r14370	16r18F8	<Paragraph>displayOn:at:clippingBox:rule:mask:
+8r14372	16r18FA	<Paragraph>flash
+8r14374	16r18FC	<Paragraph>compositionRectangle:text:style:offset:outputMedium:fitWidth:
+8r14376	16r18FE	<Paragraph>leftMarginForCompositionForLine:
+8r14402	16r1902	<Paragraph>rightMarginForComposition
+8r14406	16r1906	<Paragraph>clippingRectangle:
+8r14410	16r1908	<Paragraph>asText
+8r14412	16r190A	<Paragraph>characterBlockForIndex:
+8r14414	16r190C	<Paragraph>recomposeIn:clippingBox:
+8r14416	16r190E	<Paragraph>toggleAlignment
+8r14420	16r1910	<Paragraph>clearVisibleRectangle
+8r14422	16r1912	<Paragraph>outline
+8r14424	16r1914	<Paragraph>reverseFrom:to:
+8r14426	16r1916	<Paragraph>displayCaretAt:
+8r14430	16r1918	<Paragraph>fit
+8r14432	16r191A	<Paragraph>updateCompositionHeight
+8r14434	16r191C	<Paragraph>visibleRectangle
+8r14436	16r191E	<Paragraph>repositionAt:clippingBox:
+8r14440	16r1920	<Paragraph>displayCaretForBlock:
+8r14442	16r1922	<Paragraph>dyForPoint:
+8r14444	16r1924	<Paragraph>deltaMarginTabsLevel:
+8r14446	16r1926	<Paragraph>reverseRectangle:
+8r14450	16r1928	<Paragraph>characterBlockAtPoint:
+8r14452	16r192A	<Paragraph>leftFlush
+8r14454	16r192C	<Paragraph>compositionRectangle:
+8r14456	16r192E	<Paragraph>displayLines:
+8r14462	16r1932	<Paragraph>composeAll
+8r14464	16r1934	<Paragraph>destinationForm:
+8r14466	16r1936	<Paragraph>marginTabsLevel
+8r14470	16r1938	<Paragraph>mask:
+8r14472	16r193A	<Paragraph>rightMarginForDisplay
+8r14474	16r193C	<Paragraph>marginTabsLevel:
+8r14500	16r1940	<Paragraph>leftMarginForDisplayForLine:
+8r14504	16r1944	<Paragraph>topAtLineIndex:
+8r14506	16r1946	<Paragraph>lineAt:
+8r14510	16r1948	<Paragraph>outputMedium:
+8r14512	16r194A	<Paragraph>textAt:
+8r14514	16r194C	<Paragraph>lines
+8r14516	16r194E	<Paragraph>baseline
+8r14520	16r1950	<Paragraph>rule:
+8r14522	16r1952	<Paragraph>centered
+8r14524	16r1954	<Paragraph>lines:
+8r14530	16r1958	<Paragraph>copyLines:
+8r14532	16r195A	<Paragraph>justified
+8r14534	16r195C	<Paragraph>selectWord:
+8r14546	16r1966	<Paragraph>rightFlush
+8r14550	16r1968	<Paragraph>scrollBy:grid:
+8r14552	16r196A	<Paragraph>compositionRectangleDelta
+8r14554	16r196C	<Paragraph>removeFirstChars:
+8r14560	16r1970	<Paragraph>lineAt:put:
+8r14562	16r1972	<Paragraph>gridWithLead:
+8r14564	16r1974	<Paragraph>text:
+8r14566	16r1976	<Paragraph>trimLinesTo:
+8r14570	16r1978	<Paragraph>mouseSelect:to:
+8r14632	16r199A	<Delay class>untilMilliseconds:
+8r14636	16r199E	<Delay class>forSeconds:
+8r14642	16r19A2	<Delay class>postSnapshot
+8r14754	16r19EC	<Delay class>preSnapshot
+8r14756	16r19EE	<Delay class>testRelativeDelayOf:for:label:
+8r15002	16r1A02	<TextCollector class>example
+8r15010	16r1A08	<TextCollector class>newTranscript:
+8r15044	16r1A24	<TextCollector>space
+8r15046	16r1A26	<TextCollector>endEntry
+8r15050	16r1A28	<TextCollector>print:
+8r15052	16r1A2A	<TextCollector>beginEntry
+8r15054	16r1A2C	<TextCollector>appendEntry
+8r15056	16r1A2E	<TextCollector>characterLimit
+8r15060	16r1A30	<TextCollector>refresh
+8r15062	16r1A32	<TextCollector>nextEntry
+8r15064	16r1A34	<TextCollector>cr
+8r15066	16r1A36	<TextCollector>crtab:
+8r15070	16r1A38	<TextCollector>clear
+8r15076	16r1A3E	<TextCollector>nextPut:
+8r15100	16r1A40	<TextCollector>crtab
+8r15102	16r1A42	<TextCollector>tab
+8r15104	16r1A44	<TextCollector>store:
+8r15106	16r1A46	<TextCollector>nextPutAll:
+8r15110	16r1A48	<TextCollector>show:
+8r15112	16r1A4A	<TextCollector>next:put:
+8r15114	16r1A4C	<TextCollector>initialize
+8r15170	16r1A78	<RunArray class>readFrom:
+8r15174	16r1A7C	<RunArray class>runs:values:
+8r15200	16r1A80	<RunArray class>new
+8r15202	16r1A82	<RunArray class>new:withAll:
+8r15232	16r1A9A	<RunArray>copyFrom:to:
+8r15240	16r1AA0	<RunArray>addFirst:
+8r15242	16r1AA2	<RunArray>copyReplaceFrom:to:with:
+8r15244	16r1AA4	<RunArray>runs
+8r15246	16r1AA6	<RunArray>at:
+8r15250	16r1AA8	<RunArray>runLengthAt:
+8r15252	16r1AAA	<RunArray>,
+8r15254	16r1AAC	<RunArray>at:setRunOffsetAndValue:
+8r15260	16r1AB0	<RunArray>values
+8r15262	16r1AB2	<RunArray>addLast:
+8r15266	16r1AB6	<RunArray>writeOn:
+8r15272	16r1ABA	<RunArray>size
+8r15274	16r1ABC	<RunArray>storeOn:
+8r15302	16r1AC2	<RunArray>setRuns:setValues:
+8r15336	16r1ADE	<AltoFileAddressArray>at:
+8r15346	16r1AE6	<AltoFileAddressArray>shortenTo:
+8r15352	16r1AEA	<AltoFileAddressArray>directory:
+8r15354	16r1AEC	<AltoFileAddressArray>addLast:
+8r15430	16r1B18	<Delay class>testAbsoluteDelayOf:for:label:
+8r15432	16r1B1A	<Delay class>howToUse
+8r15434	16r1B1C	<Delay class>millisecondClockValue
+8r15474	16r1B3C	<Time class>millisecondClockValue
+8r15502	16r1B42	<Time class>dateAndTimeNow
+8r15506	16r1B46	<Time class>timeWords
+8r15562	16r1B72	<ByteArray>asString
+8r15566	16r1B76	<ByteArray>defaultElement
+8r15570	16r1B78	<ByteArray>wordAt:
+8r15572	16r1B7A	<ByteArray>wordAt:put:
+8r15574	16r1B7C	<ByteArray>doubleWordAt:
+8r15576	16r1B7E	<ByteArray>primReplaceFrom:to:with:startingAt:
+8r15600	16r1B80	<ByteArray>replaceFrom:to:withString:startingAt:
+8r15602	16r1B82	<ByteArray>replaceFrom:to:with:startingAt:
+8r15604	16r1B84	<ByteArray>packBits:into:
+8r15606	16r1B86	<ByteArray>unpackBits:into:
+8r15610	16r1B88	<ByteArray>packBits:startBit:into:
+8r15612	16r1B8A	<ByteArray>doubleWordAt:put:
+8r15634	16r1B9C	<Time class>fromSeconds:
+8r15640	16r1BA0	<Time class>totalSeconds
+8r15644	16r1BA4	<Time class>millisecondsToRun:
+8r15646	16r1BA6	<Time class>secondClockInto:
+8r15652	16r1BAA	<Time class>currentTime:
+8r15724	16r1BD4	<Date class>daysInYear:
+8r15726	16r1BD6	<Date class>newDay:month:year:
+8r15750	16r1BE8	<Date class>nameOfDay:
+8r15776	16r1BFE	<Date class>today
+8r16000	16r1C00	<Date class>nameOfMonth:
+8r16040	16r1C20	<Date class>leapYear:
+8r16042	16r1C22	<Date class>newDay:year:
+8r16044	16r1C24	<Date class>daysInMonth:forYear:
+8r16050	16r1C28	<Date class>indexOfMonth:
+8r16060	16r1C30	<Date class>dateAndTimeNow
+8r16062	16r1C32	<Date class>fromDays:
+8r16070	16r1C38	<Date class>readFrom:
+8r16110	16r1C48	<Number class>readFrom:
+8r16242	16r1CA2	<Number>raisedTo:
+8r16244	16r1CA4	<Number>floorLog:
+8r16246	16r1CA6	<Number>sin
+8r16250	16r1CA8	<Number>rounded
+8r16252	16r1CAA	<Number>cos
+8r16254	16r1CAC	<Number>asInteger
+8r16256	16r1CAE	<Number>asPoint
+8r16260	16r1CB0	<Number>negated
+8r16262	16r1CB2	<Number>rem:
+8r16264	16r1CB4	<Number>quo:
+8r16266	16r1CB6	<Number>truncated
+8r16270	16r1CB8	<Number>to:
+8r16274	16r1CBC	<Number>abs
+8r16276	16r1CBE	<Number>radiansToDegrees
+8r16300	16r1CC0	<Number>arcSin
+8r16302	16r1CC2	<Number>sqrt
+8r16304	16r1CC4	<Number>arcTan
+8r16306	16r1CC6	<Number>strictlyPositive
+8r16310	16r1CC8	<Number>exp
+8r16312	16r1CCA	<Number>arcCos
+8r16314	16r1CCC	<Number>log:
+8r16316	16r1CCE	<Number>tan
+8r16320	16r1CD0	<Number>squared
+8r16322	16r1CD2	<Number>ln
+8r16324	16r1CD4	<Number>raisedToInteger:
+8r16330	16r1CD8	<Number>*
+8r16332	16r1CDA	<Number>\\
+8r16334	16r1CDC	<Number>/
+8r16336	16r1CDE	<Number>roundTo:
+8r16340	16r1CE0	<Number>//
+8r16342	16r1CE2	<Number>+
+8r16344	16r1CE4	<Number>floor
+8r16346	16r1CE6	<Number>ceiling
+8r16352	16r1CEA	<Number>@
+8r16360	16r1CF0	<Number>to:by:
+8r16362	16r1CF2	<Number>truncateTo:
+8r16364	16r1CF4	<Number>to:by:do:
+8r16366	16r1CF6	<Number>negative
+8r16370	16r1CF8	<Number>odd
+8r16372	16r1CFA	<Number>positive
+8r16374	16r1CFC	<Number>generality
+8r16376	16r1CFE	<Number>reciprocal
+8r16402	16r1D02	<Number>coerce:
+8r16404	16r1D04	<Number>retry:coercing:
+8r16410	16r1D08	<Number>even
+8r16412	16r1D0A	<Number>degreesToRadians
+8r16414	16r1D0C	<Number>-
+8r16416	16r1D0E	<Number>to:do:
+8r16420	16r1D10	<Number>sign
+8r16422	16r1D12	<Number>storeOn:
+8r16440	16r1D20	<Fraction class>numerator:denominator:
+8r16470	16r1D38	<Fraction>asFloat
+8r16472	16r1D3A	<Fraction>truncated
+8r16474	16r1D3C	<Fraction>+
+8r16504	16r1D44	<Fraction>hash
+8r16506	16r1D46	<Fraction>generality
+8r16510	16r1D48	<Fraction>reciprocal
+8r16514	16r1D4C	<Fraction>coerce:
+8r16516	16r1D4E	<Fraction>=
+8r16520	16r1D50	<Fraction>-
+8r16522	16r1D52	<Fraction>setNumerator:denominator:
+8r16526	16r1D56	<Fraction>asFraction
+8r16530	16r1D58	<Fraction>reduced
+8r16534	16r1D5C	<Fraction>denominator
+8r16536	16r1D5E	<Fraction>numerator
+8r16540	16r1D60	<Fraction><
+8r16542	16r1D62	<Fraction>printOn:
+8r16546	16r1D66	<Fraction>*
+8r16550	16r1D68	<Fraction>negated
+8r16552	16r1D6A	<Fraction>/
+8r16630	16r1D98	<Integer class>readFrom:
+8r16632	16r1D9A	<Integer class>new:neg:
+8r16650	16r1DA8	<LargeNegativeInteger class>initialize
+8r16712	16r1DCA	<LargeNegativeInteger>digitAt:put:
+8r16714	16r1DCC	<LargeNegativeInteger>asObject
+8r16720	16r1DD0	<LargeNegativeInteger>highBit
+8r16724	16r1DD4	<LargeNegativeInteger>digitLength
+8r16726	16r1DD6	<LargeNegativeInteger>truncated
+8r16734	16r1DDC	<LargeNegativeInteger>digitAt:
+8r16736	16r1DDE	<LargeNegativeInteger>negative
+8r16740	16r1DE0	<LargeNegativeInteger>positive
+8r16742	16r1DE2	<LargeNegativeInteger>abs
+8r16744	16r1DE4	<LargeNegativeInteger>printOn:base:
+8r16746	16r1DE6	<LargeNegativeInteger>negated
+8r16772	16r1DFA	<Integer class>readFrom:radix:
+8r17060	16r1E30	<Integer>asFloat
+8r17066	16r1E36	<Integer>digitLogic:op:length:
+8r17070	16r1E38	<Integer>digitLshift:bytes:lookfirst:
+8r17072	16r1E3A	<Integer>lastDigit
+8r17074	16r1E3C	<Integer>allMask:
+8r17076	16r1E3E	<Integer>noMask:
+8r17100	16r1E40	<Integer>storeStringRadix:
+8r17106	16r1E46	<Integer>bitAnd:
+8r17110	16r1E48	<Integer>bitOr:
+8r17112	16r1E4A	<Integer>bitShift:
+8r17114	16r1E4C	<Integer>rounded
+8r17116	16r1E4E	<Integer>digitRshift:bytes:lookfirst:
+8r17120	16r1E50	<Integer>lastDigitGet:
+8r17122	16r1E52	<Integer>printOn:base:
+8r17126	16r1E56	<Integer>growto:
+8r17130	16r1E58	<Integer>isLiteral
+8r17132	16r1E5A	<Integer>asInteger
+8r17134	16r1E5C	<Integer>bitInvert
+8r17136	16r1E5E	<Integer>digitCompare:
+8r17140	16r1E60	<Integer>digitAdd:
+8r17142	16r1E62	<Integer>asFraction
+8r17144	16r1E64	<Integer><
+8r17146	16r1E66	<Integer>denominator
+8r17150	16r1E68	<Integer>numerator
+8r17152	16r1E6A	<Integer><=
+8r17154	16r1E6C	<Integer>>=
+8r17156	16r1E6E	<Integer>>
+8r17160	16r1E70	<Integer>quo:
+8r17162	16r1E72	<Integer>digitSubtract:
+8r17164	16r1E74	<Integer>digitMultiply:neg:
+8r17166	16r1E76	<Integer>truncated
+8r17170	16r1E78	<Integer>lcm:
+8r17172	16r1E7A	<Integer>digitDiv:neg:
+8r17174	16r1E7C	<Integer>factorial
+8r17200	16r1E80	<Integer>gcd:
+8r17202	16r1E82	<Integer>*
+8r17204	16r1E84	<Integer>\\
+8r17206	16r1E86	<Integer>/
+8r17210	16r1E88	<Integer>bitXor:
+8r17212	16r1E8A	<Integer>timesRepeat:
+8r17214	16r1E8C	<Integer>//
+8r17220	16r1E90	<Integer>+
+8r17222	16r1E92	<Integer>floor
+8r17224	16r1E94	<Integer>ceiling
+8r17226	16r1E96	<Integer>generality
+8r17230	16r1E98	<Integer>coerce:
+8r17232	16r1E9A	<Integer>even
+8r17234	16r1E9C	<Integer>-
+8r17236	16r1E9E	<Integer>bitAt:
+8r17240	16r1EA0	<Integer>printOn:
+8r17242	16r1EA2	<Integer>~=
+8r17244	16r1EA4	<Integer>highBit
+8r17246	16r1EA6	<Integer>hash
+8r17250	16r1EA8	<Integer>growby:
+8r17252	16r1EAA	<Integer>anyBitTo:
+8r17256	16r1EAE	<Integer>=
+8r17260	16r1EB0	<Integer>copyto:
+8r17262	16r1EB2	<Integer>isInteger
+8r17264	16r1EB4	<Integer>anyMask:
+8r17266	16r1EB6	<Integer>asCharacter
+8r17316	16r1ECE	<Date class>initialize
+8r17336	16r1EDE	<Date class>dayOfWeek:
+8r17426	16r1F16	<Date>firstDayOfMonth
+8r17430	16r1F18	<Date>daysInYear
+8r17432	16r1F1A	<Date>daysLeftInYear
+8r17434	16r1F1C	<Date>weekday
+8r17436	16r1F1E	<Date>addDays:
+8r17440	16r1F20	<Date>day
+8r17442	16r1F22	<Date>previous:
+8r17444	16r1F24	<Date>year
+8r17446	16r1F26	<Date>leap
+8r17450	16r1F28	<Date>printOn:format:
+8r17452	16r1F2A	<Date>monthIndex
+8r17456	16r1F2E	<Date>daysInMonth
+8r17460	16r1F30	<Date><
+8r17462	16r1F32	<Date>printOn:
+8r17466	16r1F36	<Date>hash
+8r17470	16r1F38	<Date>=
+8r17472	16r1F3A	<Date>day:year:
+8r17474	16r1F3C	<Date>subtractDate:
+8r17476	16r1F3E	<Date>subtractDays:
+8r17500	16r1F40	<Date>dayOfMonth
+8r17502	16r1F42	<Date>monthName
+8r17504	16r1F44	<Date>weekdayIndex
+8r17506	16r1F46	<Date>asSeconds
+8r17510	16r1F48	<Date>printFormat:
+8r17512	16r1F4A	<Date>storeOn:
+8r17520	16r1F50	<Date>firstDayOfMonthIndex:
+8r17554	16r1F6C	<Time class>now
+8r17556	16r1F6E	<Time class>millisecondClockInto:
+8r17562	16r1F72	<Time class>readFrom:
+8r17622	16r1F92	<Time>minutes
+8r17624	16r1F94	<Time>addTime:
+8r17626	16r1F96	<Time>subtractTime:
+8r17630	16r1F98	<Time>hash
+8r17632	16r1F9A	<Time>=
+8r17634	16r1F9C	<Time>hours:minutes:seconds:
+8r17636	16r1F9E	<Time>seconds
+8r17640	16r1FA0	<Time>hours:
+8r17642	16r1FA2	<Time>hours
+8r17644	16r1FA4	<Time><
+8r17646	16r1FA6	<Time>asSeconds
+8r17650	16r1FA8	<Time>printOn:
+8r17662	16r1FB2	<Time>storeOn:
+8r17714	16r1FCC	<Delay class>initializeTimingProcess
+8r17716	16r1FCE	<Delay class>initialize
+8r17720	16r1FD0	<Delay class>forMilliseconds:
+8r17746	16r1FE6	<Delay>postSnapshot
+8r17752	16r1FEA	<Delay>preSnapshot
+8r17760	16r1FF0	<Delay>delayInProgress:
+8r17762	16r1FF2	<Delay>activate
+8r17770	16r1FF8	<Delay>resumptionTime
+8r17772	16r1FFA	<Delay>wait
+8r17774	16r1FFC	<Delay>resumption:
+8r17776	16r1FFE	<Delay>delay:
+8r20000	16r2000	<Delay>disable
+8r20004	16r2004	<Delay>setResumption
+8r20012	16r200A	<Delay>reactivate
+8r20014	16r200C	<Delay>resume
+8r20046	16r2026	<Paragraph>lineGrid
+8r20050	16r2028	<Paragraph>restIndent
+8r20052	16r202A	<Paragraph>compositionRectangle
+8r20054	16r202C	<Paragraph>numberOfLines
+8r20056	16r202E	<Paragraph>lineIndexOfTop:
+8r20060	16r2030	<Paragraph>clearIndents
+8r20062	16r2032	<Paragraph>firstIndent:
+8r20064	16r2034	<Paragraph>lineIndexOfCharacterIndex:
+8r20066	16r2036	<Paragraph>restIndent:
+8r20070	16r2038	<Paragraph>rightIndent:
+8r20072	16r203A	<Paragraph>rightIndent
+8r20074	16r203C	<Paragraph>firstIndent
+8r20076	16r203E	<Paragraph>form
+8r20100	16r2040	<Paragraph>asString
+8r20102	16r2042	<Paragraph>replaceFrom:to:with:displaying:
+8r20120	16r2050	<TextList class>initialize
+8r20206	16r2086	<TextList class>onList:
+8r20226	16r2096	<TextList>textAt:
+8r20230	16r2098	<TextList>compositionRectangle:list:style:offset:outputMedium:
+8r20236	16r209E	<TextList>lineAt:
+8r20350	16r20E8	<PopUpMenu>selection
+8r20352	16r20EA	<PopUpMenu>width
+8r20354	16r20EC	<PopUpMenu>height
+8r20356	16r20EE	<PopUpMenu>startUp
+8r20360	16r20F0	<PopUpMenu>reset
+8r20362	16r20F2	<PopUpMenu>displayAt:withHeading:during:
+8r20474	16r213C	<StandardSystemController class>initialize
+8r20520	16r2150	<StandardSystemController class>ScheduledBlueButtonMessages
+8r20554	16r216C	<StandardSystemController>controlInitialize
+8r20562	16r2172	<StandardSystemController>move
+8r20566	16r2176	<StandardSystemController>controlTerminate
+8r20574	16r217C	<StandardSystemController>expand
+8r20600	16r2180	<StandardSystemController>collapse
+8r20602	16r2182	<StandardSystemController>close
+8r20604	16r2184	<StandardSystemController>closeAndUnschedule
+8r20606	16r2186	<StandardSystemController>closeAndUnscheduleNoErase
+8r20610	16r2188	<StandardSystemController>open
+8r20612	16r218A	<StandardSystemController>openDisplayAt:
+8r20614	16r218C	<StandardSystemController>under
+8r20616	16r218E	<StandardSystemController>initializeBlueButtonMenu
+8r20620	16r2190	<StandardSystemController>openNoTerminate
+8r20622	16r2192	<StandardSystemController>openNoTerminateDisplayAt:
+8r20626	16r2196	<StandardSystemController>menuMessageReceiver
+8r20630	16r2198	<StandardSystemController>initialize
+8r20636	16r219E	<StandardSystemController>isControlActive
+8r20652	16r21AA	<NotifierController class>initialize
+8r20752	16r21EA	<NotifierController>model:
+8r20772	16r21FA	<NotifierController>initializeYellowButtonMenu
+8r20774	16r21FC	<NotifierController>correct
+8r21000	16r2200	<NotifierController>proceed
+8r21002	16r2202	<NotifierController>debug
+8r21026	16r2216	<Debugger class>interruptProcess:
+8r21032	16r221A	<Debugger class>context:
+8r21034	16r221C	<Debugger class>openFullViewOn:label:
+8r21074	16r223C	<TextView class>on:aspect:change:menu:
+8r21124	16r2254	<TextView>newText:
+8r21134	16r225C	<TextView>getText
+8r21136	16r225E	<TextView>accept:from:
+8r21142	16r2262	<TextView>yellowButtonMenu
+8r21144	16r2264	<TextView>display
+8r21156	16r226E	<TextView>displayView
+8r21160	16r2270	<TextView>update:
+8r21162	16r2272	<TextView>updateRequest
+8r21170	16r2278	<TextView>defaultControllerClass
+8r21276	16r22BE	<ScrollController>controlInitialize
+8r21304	16r22C4	<ScrollController>controlTerminate
+8r21306	16r22C6	<ScrollController>markerDelta
+8r21310	16r22C8	<ScrollController>computeMarkerRegion
+8r21312	16r22CA	<ScrollController>viewDelta
+8r21314	16r22CC	<ScrollController>scrollView:
+8r21316	16r22CE	<ScrollController>canScroll
+8r21320	16r22D0	<ScrollController>scrollBarContainsCursor
+8r21322	16r22D2	<ScrollController>markerContainsCursor
+8r21324	16r22D4	<ScrollController>changeCursor:
+8r21326	16r22D6	<ScrollController>scrollDown
+8r21330	16r22D8	<ScrollController>scrollAbsolute
+8r21334	16r22DC	<ScrollController>scroll
+8r21336	16r22DE	<ScrollController>markerRegion:
+8r21340	16r22E0	<ScrollController>moveMarker
+8r21342	16r22E2	<ScrollController>scrollViewDown
+8r21344	16r22E4	<ScrollController>scrollViewUp
+8r21346	16r22E6	<ScrollController>scrollUp
+8r21350	16r22E8	<ScrollController>scrollView
+8r21352	16r22EA	<ScrollController>moveMarker:
+8r21354	16r22EC	<ScrollController>scrollAmount
+8r21356	16r22EE	<ScrollController>isControlWanted
+8r21360	16r22F0	<ScrollController>initialize
+8r21362	16r22F2	<ScrollController>isControlActive
+8r21364	16r22F4	<ScrollController>controlActivity
+8r21534	16r235C	<ParagraphEditor>controlActivity
+8r21536	16r235E	<ParagraphEditor>selectFrom:to:
+8r21540	16r2360	<ParagraphEditor>controlInitialize
+8r21546	16r2366	<ParagraphEditor>changeParagraph:
+8r21550	16r2368	<ParagraphEditor>controlTerminate
+8r21552	16r236A	<ParagraphEditor>align
+8r21554	16r236C	<ParagraphEditor>normalCharacter:
+8r21556	16r236E	<ParagraphEditor>enclose:
+8r21566	16r2376	<ParagraphEditor>backspace:
+8r21570	16r2378	<ParagraphEditor>displayIfTrue:
+8r21574	16r237C	<ParagraphEditor>displayIfFalse:
+8r21600	16r2380	<ParagraphEditor>paste:
+8r21602	16r2382	<ParagraphEditor>changeEmphasis:
+8r21612	16r238A	<ParagraphEditor>backWord:
+8r21614	16r238C	<ParagraphEditor>leaveBrackets:
+8r21620	16r2390	<ParagraphEditor>selectCurrentTypeIn:
+8r21640	16r23A0	<ParagraphEditor>cut:
+8r21642	16r23A2	<ParagraphEditor>displayDate:
+8r21644	16r23A4	<ParagraphEditor>findAndSelect:
+8r21650	16r23A8	<ParagraphEditor>selectAndScrollFrom:to:
+8r21652	16r23AA	<ParagraphEditor>selection
+8r21654	16r23AC	<ParagraphEditor>againOnce
+8r21674	16r23BC	<ParagraphEditor>processRedButton
+8r21676	16r23BE	<ParagraphEditor>processYellowButton
+8r21700	16r23C0	<ParagraphEditor>deselect
+8r21702	16r23C2	<ParagraphEditor>processBlueButton
+8r21704	16r23C4	<ParagraphEditor>selectAndScroll
+8r21706	16r23C6	<ParagraphEditor>emphasisDefault:keyedTo:
+8r21720	16r23D0	<ParagraphEditor>scrollRectangleHeight
+8r21722	16r23D2	<ParagraphEditor>flash
+8r21724	16r23D4	<ParagraphEditor>processMouseButtons
+8r21726	16r23D6	<ParagraphEditor>selectionAsStream
+8r21746	16r23E6	<ReadStream class>on:from:to:
+8r22004	16r2404	<PositionableStream>upTo:
+8r22006	16r2406	<PositionableStream>reset
+8r22010	16r2408	<PositionableStream>nextChunk
+8r22014	16r240C	<PositionableStream>position
+8r22016	16r240E	<PositionableStream>position:
+8r22020	16r2410	<PositionableStream>on:
+8r22022	16r2412	<PositionableStream>peekFor:
+8r22024	16r2414	<PositionableStream>isEmpty
+8r22026	16r2416	<PositionableStream>skip:
+8r22030	16r2418	<PositionableStream>contents
+8r22032	16r241A	<PositionableStream>atEnd
+8r22040	16r2420	<PositionableStream>next:
+8r22042	16r2422	<PositionableStream>skipTo:
+8r22044	16r2424	<PositionableStream>skipSeparators
+8r22050	16r2428	<PositionableStream>setToEnd
+8r22052	16r242A	<PositionableStream>positionError
+8r22056	16r242E	<PositionableStream>through:
+8r22062	16r2432	<PositionableStream>peek
+8r22120	16r2450	<ReadStream>nextPut:
+8r22122	16r2452	<ReadStream>on:from:to:
+8r22124	16r2454	<ReadStream>next
+8r22142	16r2462	<ParagraphEditor>readKeyboard
+8r22152	16r246A	<ParagraphEditor>closeTypeIn
+8r22154	16r246C	<ParagraphEditor>updateMarker
+8r22156	16r246E	<ParagraphEditor>processKeyboard
+8r22160	16r2470	<ParagraphEditor>processKeyset
+8r22164	16r2474	<ParagraphEditor>scrollBy:
+8r22166	16r2476	<ParagraphEditor>setEmphasisHere
+8r22170	16r2478	<ParagraphEditor>selectAt:
+8r22172	16r247A	<ParagraphEditor>displayAt:clippingBox:rule:mask:
+8r22174	16r247C	<ParagraphEditor>select
+8r22176	16r247E	<ParagraphEditor>initializeSelection
+8r22200	16r2480	<ParagraphEditor>recomputeSelection
+8r22202	16r2482	<ParagraphEditor>reverseSelection
+8r22204	16r2484	<ParagraphEditor>replaceSelectionWith:
+8r22206	16r2486	<ParagraphEditor>scrollToTop
+8r22210	16r2488	<ParagraphEditor>resetState
+8r22212	16r248A	<ParagraphEditor>display
+8r22214	16r248C	<ParagraphEditor>again
+8r22216	16r248E	<ParagraphEditor>undo
+8r22220	16r2490	<ParagraphEditor>copySelection
+8r22222	16r2492	<ParagraphEditor>cut
+8r22224	16r2494	<ParagraphEditor>paste
+8r22226	16r2496	<ParagraphEditor>accept
+8r22230	16r2498	<ParagraphEditor>cancel
+8r22232	16r249A	<ParagraphEditor>initialize
+8r22234	16r249C	<ParagraphEditor>text
+8r22236	16r249E	<ParagraphEditor>fit
+8r22240	16r24A0	<ParagraphEditor>markerDelta
+8r22242	16r24A2	<ParagraphEditor>computeMarkerRegion
+8r22244	16r24A4	<ParagraphEditor>viewDelta
+8r22246	16r24A6	<ParagraphEditor>scrollView:
+8r22250	16r24A8	<ParagraphEditor>canScroll
+8r22252	16r24AA	<ParagraphEditor>scroll
+8r22254	16r24AC	<ParagraphEditor>scrollAmount
+8r22256	16r24AE	<ParagraphEditor>copy
+8r22260	16r24B0	<ParagraphEditor>initializeYellowButtonMenu
+8r22332	16r24DA	<ParagraphEditor>copySelection:
+8r22334	16r24DC	<ParagraphEditor>isControlActive
+8r22350	16r24E8	<StringHolderController class>initialize
+8r22470	16r2538	<StringHolderController>replaceSelectionWith:
+8r22476	16r253E	<StringHolderController>doIt
+8r22510	16r2548	<StringHolderController>printIt
+8r22512	16r254A	<StringHolderController>accept
+8r22514	16r254C	<StringHolderController>cancel
+8r22516	16r254E	<StringHolderController>model:
+8r22522	16r2552	<StringHolderController>initializeYellowButtonMenu
+8r22524	16r2554	<StringHolderController>turnLockingOn
+8r22526	16r2556	<StringHolderController>turnLockingOff
+8r22530	16r2558	<StringHolderController>isLockingOn
+8r22532	16r255A	<StringHolderController>isLockingOff
+8r22534	16r255C	<StringHolderController>lockModel
+8r22536	16r255E	<StringHolderController>insertAndSelect:at:
+8r22542	16r2562	<StringHolderController>unlockModel
+8r22544	16r2564	<StringHolderController>afterSelectionInsertAndSelect:
+8r22546	16r2566	<StringHolderController>initialize
+8r22562	16r2572	<ProjectController class>initialize
+8r22700	16r25C0	<ProjectController>enter
+8r22702	16r25C2	<ProjectController>initializeYellowButtonMenu
+8r22756	16r25EE	<TextCollectorController>selectWithoutComp:
+8r22760	16r25F0	<TextCollectorController>changeText:
+8r22762	16r25F2	<TextCollectorController>viewToTop
+8r22764	16r25F4	<TextCollectorController>appendEntry
+8r23026	16r2616	<ChangeController>accept
+8r23072	16r263A	<FillInTheBlankController>accept
+8r23102	16r2642	<FillInTheBlankController>controlTerminate
+8r23110	16r2648	<FillInTheBlankController>resetState
+8r23112	16r264A	<FillInTheBlankController>isControlActive
+8r23114	16r264C	<FillInTheBlankController>isControlWanted
+8r23146	16r2666	<CRFillInTheBlankController>cr:
+8r23150	16r2668	<CRFillInTheBlankController>controlInitialize
+8r23152	16r266A	<CRFillInTheBlankController>controlTerminate
+8r23160	16r2670	<CRFillInTheBlankController>readKeyboard
+8r23324	16r26D4	<ListController>scrollView:
+8r23332	16r26DA	<ListController>isControlActive
+8r23340	16r26E0	<ListController>redButtonActivity
+8r23346	16r26E6	<ListController>scrollViewDown
+8r23350	16r26E8	<ListController>scrollViewUp
+8r23352	16r26EA	<ListController>changeModelSelection:
+8r23354	16r26EC	<ListController>markerDelta
+8r23356	16r26EE	<ListController>computeMarkerRegion
+8r23360	16r26F0	<ListController>scrollAmount
+8r23362	16r26F2	<ListController>viewDelta
+8r23364	16r26F4	<ListController>canScroll
+8r23414	16r270C	<SelectionInListController>yellowButtonActivity
+8r23424	16r2714	<SelectionInListController>redButtonActivity
+8r23426	16r2716	<SelectionInListController>isControlWanted
+8r23472	16r273A	<LockedListController>feedbackResponseTest
+8r23474	16r273C	<LockedListController>normalResponseTest
+8r23476	16r273E	<LockedListController>controlActivity
+8r23516	16r274E	<ChangeListController class>initialize
+8r23636	16r279E	<ChangeListController>doThis
+8r23640	16r27A0	<ChangeListController>removeItem
+8r23642	16r27A2	<ChangeListController>browse
+8r23644	16r27A4	<ChangeListController>restoreItem
+8r23646	16r27A6	<ChangeListController>check
+8r23650	16r27A8	<ChangeListController>checkWithSystem
+8r23652	16r27AA	<ChangeListController>copyView
+8r23672	16r27BA	<ChangeListView class>open
+8r23700	16r27C0	<ChangeListView class>openSwitches:topView:at:model:
+8r23772	16r27FA	<SwitchView>display
+8r23774	16r27FC	<SwitchView>update:
+8r23776	16r27FE	<SwitchView>defaultControllerClass
+8r24034	16r281C	<SwitchController>isControlWanted
+8r24036	16r281E	<SwitchController>controlInitialize
+8r24040	16r2820	<SwitchController>controlTerminate
+8r24042	16r2822	<SwitchController>cursor:
+8r24044	16r2824	<SwitchController>addArgument:
+8r24046	16r2826	<SwitchController>sendMessage
+8r24050	16r2828	<SwitchController>selector:
+8r24052	16r282A	<SwitchController>arguments:
+8r24054	16r282C	<SwitchController>arguments
+8r24056	16r282E	<SwitchController>selector
+8r24060	16r2830	<SwitchController>initialize
+8r24066	16r2836	<SwitchController>isControlActive
+8r24070	16r2838	<SwitchController>controlActivity
+8r24120	16r2850	<LockedSwitchController>isControlWanted
+8r24164	16r2874	<IndicatorOnSwitchController>sendMessage
+8r24226	16r2896	<SwitchView>defaultWindow
+8r24230	16r2898	<SwitchView>window:
+8r24232	16r289A	<SwitchView>deEmphasizeView
+8r24234	16r289C	<SwitchView>displayView
+8r24236	16r289E	<SwitchView>centerLabel
+8r24240	16r28A0	<SwitchView>displayNormal
+8r24242	16r28A2	<SwitchView>displayComplemented
+8r24244	16r28A4	<SwitchView>key:
+8r24246	16r28A6	<SwitchView>indicatorReverse
+8r24250	16r28A8	<SwitchView>label:
+8r24252	16r28AA	<SwitchView>label
+8r24254	16r28AC	<SwitchView>release
+8r24256	16r28AE	<SwitchView>selector:
+8r24260	16r28B0	<SwitchView>arguments:
+8r24262	16r28B2	<SwitchView>indicatorOnDuring:
+8r24264	16r28B4	<SwitchView>arguments
+8r24266	16r28B6	<SwitchView>displaySpecialComplemented
+8r24270	16r28B8	<SwitchView>selector
+8r24272	16r28BA	<SwitchView>displaySpecial
+8r24274	16r28BC	<SwitchView>highlightForm:
+8r24276	16r28BE	<SwitchView>initialize
+8r24304	16r28C4	<SwitchView>containsKey:
+8r24306	16r28C6	<SwitchView>interrogateModel
+8r24324	16r28D4	<BooleanView class>on:aspect:label:change:value:
+8r24344	16r28E4	<BooleanView>update:
+8r24352	16r28EA	<BooleanView>interrogateModel
+8r24432	16r291A	<ChangeListView class>recover
+8r24434	16r291C	<ChangeListView class>openOn:
+8r24476	16r293E	<StandardSystemView>resizeMinimumCenteredAt:
+8r24500	16r2940	<StandardSystemView>defaultControllerClass
+8r24502	16r2942	<StandardSystemView>minimumSize:
+8r24504	16r2944	<StandardSystemView>deEmphasizeLabel
+8r24506	16r2946	<StandardSystemView>labelFrame
+8r24510	16r2948	<StandardSystemView>minimumSize
+8r24512	16r294A	<StandardSystemView>getFrame
+8r24514	16r294C	<StandardSystemView>labelFrame:
+8r24516	16r294E	<StandardSystemView>maximumSize:
+8r24520	16r2950	<StandardSystemView>reverseLabel
+8r24522	16r2952	<StandardSystemView>clippingBox
+8r24524	16r2954	<StandardSystemView>maximumSize
+8r24526	16r2956	<StandardSystemView>emphasizeLabel
+8r24530	16r2958	<StandardSystemView>deEmphasizeView
+8r24532	16r295A	<StandardSystemView>expand
+8r24534	16r295C	<StandardSystemView>collapse
+8r24540	16r2960	<StandardSystemView>erase
+8r24542	16r2962	<StandardSystemView>displayView
+8r24544	16r2964	<StandardSystemView>release
+8r24546	16r2966	<StandardSystemView>label:
+8r24550	16r2968	<StandardSystemView>label
+8r24554	16r296C	<StandardSystemView>containsPoint:
+8r24556	16r296E	<StandardSystemView>displayEmphasized
+8r24560	16r2970	<StandardSystemView>isCollapsed
+8r24562	16r2972	<StandardSystemView>labelDisplayBox
+8r24564	16r2974	<StandardSystemView>initialize
+8r24566	16r2976	<StandardSystemView>resize
+8r24756	16r29EE	<StringHolderView class>open
+8r24766	16r29F6	<StringHolderView class>open:label:
+8r24770	16r29F8	<StringHolderView class>container
+8r24772	16r29FA	<StringHolderView class>openSystemWorkspace
+8r24776	16r29FE	<StringHolderView class>open:
+8r25002	16r2A02	<StringHolderView class>container:
+8r25034	16r2A1C	<StringHolderView>editString:
+8r25036	16r2A1E	<StringHolderView>displayContents
+8r25040	16r2A20	<StringHolderView>display
+8r25042	16r2A22	<StringHolderView>updateDisplayContents
+8r25044	16r2A24	<StringHolderView>positionDisplayContents
+8r25046	16r2A26	<StringHolderView>displayView
+8r25050	16r2A28	<StringHolderView>getContents
+8r25052	16r2A2A	<StringHolderView>paragraphInset
+8r25054	16r2A2C	<StringHolderView>update:
+8r25056	16r2A2E	<StringHolderView>model:
+8r25060	16r2A30	<StringHolderView>defaultControllerClass
+8r25062	16r2A32	<StringHolderView>updateRequest
+8r25066	16r2A36	<StringHolderView>defaultController
+8r25072	16r2A3A	<StringHolderView>deEmphasizeView
+8r25074	16r2A3C	<StringHolderView>initialize
+8r25112	16r2A4A	<TextCollectorView class>open
+8r25116	16r2A4E	<TextCollectorView class>open:label:
+8r25136	16r2A5E	<TextCollectorView>update:
+8r25142	16r2A62	<TextCollectorView>defaultControllerClass
+8r25144	16r2A64	<TextCollectorView>DoIt
+8r25206	16r2A86	<FillInTheBlankView class>on:message:displayAt:centered:
+8r25210	16r2A88	<FillInTheBlankView class>buildAnswerView:frameWidth:
+8r25212	16r2A8A	<FillInTheBlankView class>buildMessageView:
+8r25240	16r2AA0	<DisplayTextView class>example4
+8r25244	16r2AA4	<DisplayTextView class>example2
+8r25302	16r2AC2	<NoController>startUp
+8r25304	16r2AC4	<NoController>isControlActive
+8r25306	16r2AC6	<NoController>isControlWanted
+8r25324	16r2AD4	<DisplayTextView class>example1
+8r25332	16r2ADA	<DisplayTextView class>example3
+8r25364	16r2AF4	<DisplayTextView>display
+8r25366	16r2AF6	<DisplayTextView>displayView
+8r25370	16r2AF8	<DisplayTextView>paragraphInset
+8r25372	16r2AFA	<DisplayTextView>mask
+8r25374	16r2AFC	<DisplayTextView>rule
+8r25376	16r2AFE	<DisplayTextView>model:
+8r25400	16r2B00	<DisplayTextView>defaultControllerClass
+8r25402	16r2B02	<DisplayTextView>defaultWindow
+8r25404	16r2B04	<DisplayTextView>window:
+8r25406	16r2B06	<DisplayTextView>mask:
+8r25410	16r2B08	<DisplayTextView>defaultController
+8r25412	16r2B0A	<DisplayTextView>isCentered
+8r25414	16r2B0C	<DisplayTextView>rule:
+8r25416	16r2B0E	<DisplayTextView>centered
+8r25420	16r2B10	<DisplayTextView>positionText
+8r25422	16r2B12	<DisplayTextView>centerText
+8r25424	16r2B14	<DisplayTextView>defaultRule
+8r25426	16r2B16	<DisplayTextView>initialize
+8r25430	16r2B18	<DisplayTextView>defaultMask
+8r25432	16r2B1A	<DisplayTextView>deEmphasizeView
+8r25460	16r2B30	<FillInTheBlankView class>on:message:displayAt:centered:useCRController:
+8r25516	16r2B4E	<BinaryChoiceController>startUp
+8r25522	16r2B52	<BinaryChoiceController>centerCursorInView
+8r25524	16r2B54	<BinaryChoiceController>isControlActive
+8r25542	16r2B62	<FillInTheBlankView class>openOn:message:displayAt:centered:
+8r25562	16r2B72	<FillInTheBlankView>defaultControllerClass
+8r25610	16r2B88	<ProjectView class>open
+8r25630	16r2B98	<Project class>current
+8r25656	16r2BAE	<ChangeSet class>superclassOrder:
+8r25662	16r2BB2	<ChangeSet class>new
+8r25760	16r2BF0	<ChangeSet>addDoIt:
+8r25762	16r2BF2	<ChangeSet>fileOutOn:
+8r26036	16r2C1E	<SystemOrganizer>superclassOrder:
+8r26044	16r2C24	<SystemOrganizer>fileOutCategory:on:
+8r26054	16r2C2C	<SystemOrganizer>fileOutCategory:
+8r26114	16r2C4C	<FileDirectory class>addExternalReference:
+8r26124	16r2C54	<FileDirectory class>directory:directoryName:
+8r26130	16r2C58	<FileDirectory class>releaseExternalReferences
+8r26134	16r2C5C	<FileDirectory class>directoryFromName:setFileName:
+8r26136	16r2C5E	<FileDirectory class>removeExternalReference:
+8r26140	16r2C60	<FileDirectory class>documentation
+8r26142	16r2C62	<FileDirectory class>initialize
+8r26144	16r2C64	<FileDirectory class>initializeExternalReferences
+8r26270	16r2CB8	<FileDirectory>removeKey:
+8r26274	16r2CBC	<FileDirectory>includesKey:
+8r26276	16r2CBE	<FileDirectory>newPage
+8r26304	16r2CC4	<FileDirectory>file:
+8r26310	16r2CC8	<FileDirectory>reset
+8r26312	16r2CCA	<FileDirectory>setDirectory:directoryName:
+8r26314	16r2CCC	<FileDirectory>store:
+8r26316	16r2CCE	<FileDirectory>add:
+8r26330	16r2CD8	<FileDirectory>do:
+8r26332	16r2CDA	<FileDirectory>initFileName:
+8r26336	16r2CDE	<FileDirectory>listFilesOn:
+8r26340	16r2CE0	<FileDirectory>checkNameOfFile:fixErrors:
+8r26342	16r2CE2	<FileDirectory>retrieveFrom:copyTo:
+8r26346	16r2CE6	<FileDirectory>directoryName
+8r26350	16r2CE8	<FileDirectory>storeFrom:copyTo:
+8r26352	16r2CEA	<FileDirectory>newFile:
+8r26354	16r2CEC	<FileDirectory>initFile:
+8r26356	16r2CEE	<FileDirectory>rename:newName:
+8r26360	16r2CF0	<FileDirectory>findOrAdd:
+8r26362	16r2CF2	<FileDirectory>allocate:after:
+8r26364	16r2CF4	<FileDirectory>flush
+8r26366	16r2CF6	<FileDirectory>deallocate:
+8r26370	16r2CF8	<FileDirectory>versionNumbers
+8r26372	16r2CFA	<FileDirectory>findKey:
+8r26376	16r2CFE	<FileDirectory>checkNameOfFile:
+8r26400	16r2D00	<FileDirectory>retrieve:
+8r26402	16r2D02	<FileDirectory>addNew:
+8r26404	16r2D04	<FileDirectory>removeOld:
+8r26406	16r2D06	<FileDirectory>filesMatching:
+8r26410	16r2D08	<FileDirectory>allocateSN:
+8r26412	16r2D0A	<FileDirectory>freePages
+8r26414	16r2D0C	<FileDirectory>fileClass
+8r26416	16r2D0E	<FileDirectory>find:ifAbsentDo:
+8r26422	16r2D12	<FileDirectory>remove:ifAbsentDo:
+8r26424	16r2D14	<FileDirectory>fullName
+8r26430	16r2D18	<FileDirectory>isLegalOldFileName:
+8r26432	16r2D1A	<FileDirectory>oldFile:
+8r26434	16r2D1C	<FileDirectory>closed
+8r26436	16r2D1E	<FileDirectory>next
+8r26440	16r2D20	<FileDirectory>find:
+8r26442	16r2D22	<FileDirectory>checkName:fixErrors:
+8r26450	16r2D28	<FileDirectory>includes:
+8r26452	16r2D2A	<FileDirectory>isLegalFileName:
+8r26454	16r2D2C	<FileDirectory>printOn:
+8r26464	16r2D34	<FileDirectory>addKey:
+8r26466	16r2D36	<FileDirectory>findOrAddKey:
+8r26470	16r2D38	<FileDirectory>remove:
+8r26474	16r2D3C	<FileDirectory>close
+8r26476	16r2D3E	<FileDirectory>release
+8r26500	16r2D40	<FileDirectory>open
+8r26570	16r2D78	<AltoFileDirectory class>directory:directoryName:
+8r26574	16r2D7C	<AltoFileDirectory class>new
+8r26634	16r2D9C	<AltoFileDirectory>rename:newName:
+8r26652	16r2DAA	<AltoFileDirectory>diskID
+8r26660	16r2DB0	<AltoFileDirectory>configure:
+8r26662	16r2DB2	<AltoFileDirectory>deleteEntry:
+8r26666	16r2DB6	<AltoFileDirectory>diskNumber
+8r26670	16r2DB8	<AltoFileDirectory>addEntry:
+8r26674	16r2DBC	<AltoFileDirectory>fileSize:
+8r26676	16r2DBE	<AltoFileDirectory>findFileOrHole:
+8r26700	16r2DC0	<AltoFileDirectory>nextFile:
+8r26706	16r2DC6	<AltoFileDirectory>allocate:after:
+8r26736	16r2DDE	<AltoFileDirectory>flush
+8r26740	16r2DE0	<AltoFileDirectory>deallocate:
+8r26746	16r2DE6	<AltoFileDirectory>checkNameOfFile:
+8r26750	16r2DE8	<AltoFileDirectory>addNew:
+8r26764	16r2DF4	<AltoFileDirectory>removeOld:
+8r26770	16r2DF8	<AltoFileDirectory>filesMatching:
+8r27000	16r2E00	<AltoFileDirectory>allocateSN:
+8r27002	16r2E02	<AltoFileDirectory>freePages
+8r27004	16r2E04	<AltoFileDirectory>fileClass
+8r27024	16r2E14	<File class>initialize
+8r27032	16r2E1A	<File class>documentation
+8r27130	16r2E58	<File>text
+8r27132	16r2E5A	<File>error:
+8r27146	16r2E66	<File>fileName
+8r27150	16r2E68	<File>readWrite:
+8r27152	16r2E6A	<File>readOrAdd:
+8r27160	16r2E70	<File>read:
+8r27162	16r2E72	<File>findLastPageNumber
+8r27164	16r2E74	<File>doCommand:page:error:
+8r27166	16r2E76	<File>errorString:
+8r27170	16r2E78	<File>serialNumber
+8r27172	16r2E7A	<File>readWrite
+8r27174	16r2E7C	<File>size
+8r27176	16r2E7E	<File>printOn:
+8r27200	16r2E80	<File>error
+8r27202	16r2E82	<File>pageClass
+8r27204	16r2E84	<File>readOrAddPageNumber:
+8r27206	16r2E86	<File>initPageNumber:
+8r27212	16r2E8A	<File>readPageNumber:
+8r27214	16r2E8C	<File>beSnapshotFile
+8r27216	16r2E8E	<File>directory
+8r27220	16r2E90	<File>sameAsStoredFile
+8r27222	16r2E92	<File>initPage:
+8r27224	16r2E94	<File>reopen
+8r27226	16r2E96	<File>isBinary
+8r27230	16r2E98	<File>isText
+8r27232	16r2E9A	<File>fileName:
+8r27234	16r2E9C	<File>characterSize
+8r27236	16r2E9E	<File>pageNumberFrom:
+8r27240	16r2EA0	<File>lastPageNumber
+8r27242	16r2EA2	<File>release
+8r27244	16r2EA4	<File>directory:
+8r27246	16r2EA6	<File>reinitialize
+8r27252	16r2EAA	<File>asFileStream
+8r27260	16r2EB0	<File>write:
+8r27262	16r2EB2	<File>match:
+8r27264	16r2EB4	<File>close
+8r27266	16r2EB6	<File>fullName
+8r27270	16r2EB8	<File>rename:
+8r27272	16r2EBA	<File>size:
+8r27274	16r2EBC	<File>serialNumber:
+8r27276	16r2EBE	<File>binary
+8r27300	16r2EC0	<File>open
+8r27302	16r2EC2	<File>endFile:
+8r27362	16r2EF2	<AltoFile class>initialize
+8r27534	16r2F5C	<AltoFile>sameAsStoredFile
+8r27602	16r2F82	<ExternalStream>nextStringPut:
+8r27604	16r2F84	<ExternalStream>padTo:
+8r27606	16r2F86	<ExternalStream>nextString
+8r27610	16r2F88	<ExternalStream>skipWords:
+8r27612	16r2F8A	<ExternalStream>nextNumber:put:
+8r27616	16r2F8E	<ExternalStream>nextNumber:
+8r27620	16r2F90	<ExternalStream>next:
+8r27622	16r2F92	<ExternalStream>padToNextWord
+8r27624	16r2F94	<ExternalStream>wordPosition
+8r27626	16r2F96	<ExternalStream>padToNextWordPut:
+8r27630	16r2F98	<ExternalStream>padTo:put:
+8r27632	16r2F9A	<ExternalStream>resetContents
+8r27634	16r2F9C	<ExternalStream>nextWordPut:
+8r27636	16r2F9E	<ExternalStream>nextWord
+8r27640	16r2FA0	<ExternalStream>wordPosition:
+8r27642	16r2FA2	<ExternalStream>nextSignedInteger
+8r27666	16r2FB6	<AltoFile>readFromDirectory:
+8r27670	16r2FB8	<AltoFile>close
+8r27672	16r2FBA	<AltoFile>write:
+8r27704	16r2FC4	<AltoFile>leader
+8r27706	16r2FC6	<AltoFile>beSnapshotSerialNumber:leaderVirtualDiskAddr:
+8r27710	16r2FC8	<AltoFile>pageAddresses:
+8r27712	16r2FCA	<AltoFile>dskprim:address:command:page:semaphore:
+8r27714	16r2FCC	<AltoFile>release
+8r27716	16r2FCE	<AltoFile>reinitialize
+8r27720	16r2FD0	<AltoFile>open
+8r27722	16r2FD2	<AltoFile>readOrAdd:
+8r27724	16r2FD4	<AltoFile>read:
+8r27732	16r2FDA	<AltoFile>findLastPageNumber
+8r27736	16r2FDE	<AltoFile>doCommand:page:error:
+8r27744	16r2FE4	<AltoFile>errorString:
+8r30000	16r3000	<AltoFile>leader:
+8r30002	16r3002	<AltoFile>updateLeader:
+8r30006	16r3006	<AltoFile>pageClass
+8r30026	16r3016	<FilePage class>documentation
+8r30104	16r3044	<FilePage>fromFileStream:
+8r30106	16r3046	<FilePage>at:
+8r30110	16r3048	<FilePage>at:put:
+8r30112	16r304A	<FilePage>write
+8r30114	16r304C	<FilePage>dataString
+8r30116	16r304E	<FilePage>pageSize
+8r30120	16r3050	<FilePage>pageWordAt:put:
+8r30122	16r3052	<FilePage>pageWordAt:
+8r30124	16r3054	<FilePage>trailerSize
+8r30126	16r3056	<FilePage>dataIndex:size:
+8r30132	16r305A	<FilePage>page:
+8r30134	16r305C	<FilePage>headerSize
+8r30136	16r305E	<FilePage>endFile
+8r30140	16r3060	<FilePage>dataBeginning
+8r30142	16r3062	<FilePage>dataEnd:
+8r30144	16r3064	<FilePage>dataEnd
+8r30146	16r3066	<FilePage>dataMaxEnd
+8r30150	16r3068	<FilePage>allocatePage
+8r30152	16r306A	<FilePage>serialNumber
+8r30154	16r306C	<FilePage>readOrAddPageNumber:
+8r30156	16r306E	<FilePage>readPageNumber:
+8r30160	16r3070	<FilePage>reopen
+8r30162	16r3072	<FilePage>isBinary
+8r30164	16r3074	<FilePage>file:
+8r30166	16r3076	<FilePage>isText
+8r30170	16r3078	<FilePage>binary
+8r30172	16r307A	<FilePage>wordAt:
+8r30174	16r307C	<FilePage>wordAt:put:
+8r30176	16r307E	<FilePage>asFileStream:
+8r30200	16r3080	<FilePage>lastPage
+8r30202	16r3082	<FilePage>pageNumber
+8r30204	16r3084	<FilePage>pageNumber:
+8r30206	16r3086	<FilePage>text
+8r30210	16r3088	<FilePage>file:page:
+8r30212	16r308A	<FilePage>file
+8r30214	16r308C	<FilePage>size
+8r30216	16r308E	<FilePage>headerWordAt:put:
+8r30220	16r3090	<FilePage>isFull
+8r30222	16r3092	<FilePage>isEmpty
+8r30224	16r3094	<FilePage>address:
+8r30226	16r3096	<FilePage>doCommand:error:
+8r30230	16r3098	<FilePage>headerWordAt:
+8r30232	16r309A	<FilePage>reinitialize
+8r30234	16r309C	<FilePage>page
+8r30236	16r309E	<FilePage>address
+8r30240	16r30A0	<FilePage>serialNumber:
+8r30242	16r30A2	<FilePage>size:
+8r30244	16r30A4	<FilePage>dataSize
+8r30324	16r30D4	<AltoFilePage>freePage
+8r30326	16r30D6	<AltoFilePage>address:
+8r30330	16r30D8	<AltoFilePage>reinitialize
+8r30334	16r30DC	<AltoFilePage>lastPage
+8r30336	16r30DE	<AltoFilePage>address
+8r30340	16r30E0	<AltoFilePage>label
+8r30342	16r30E2	<AltoFilePage>serialNumber:
+8r30344	16r30E4	<AltoFilePage>pageNumber
+8r30346	16r30E6	<AltoFilePage>pageNumber:
+8r30350	16r30E8	<AltoFilePage>size:
+8r30352	16r30EA	<AltoFilePage>serialNumber
+8r30354	16r30EC	<AltoFilePage>headerSize
+8r30356	16r30EE	<AltoFilePage>size
+8r30402	16r3102	<AltoFile>endFile:
+8r30406	16r3106	<AltoFile>writeTime
+8r30410	16r3108	<AltoFile>beSnapshotFile
+8r30412	16r310A	<AltoFile>storeOnDirectory:
+8r30442	16r3122	<AltoFileDirectory>find:ifAbsentDo:
+8r30446	16r3126	<AltoFileDirectory>remove:ifAbsentDo:
+8r30450	16r3128	<AltoFileDirectory>checkName:fixErrors:
+8r30464	16r3134	<AltoFileDirectory>checkName:
+8r30466	16r3136	<AltoFileDirectory>reset
+8r30470	16r3138	<AltoFileDirectory>close
+8r30472	16r313A	<AltoFileDirectory>release
+8r30474	16r313C	<AltoFileDirectory>virtualToReal:
+8r30530	16r3158	<AltoFileDirectory>open
+8r30534	16r315C	<AltoFileDirectory>realToVirtual:
+8r30536	16r315E	<AltoFileDirectory>next
+8r30652	16r31AA	<SystemOrganizer>printOutCategory:
+8r30654	16r31AC	<SystemOrganizer>changeFromString:
+8r31346	16r32E6	<ChangeSet>asSortedCollection
+8r31364	16r32F4	<ChangeSet>addSelector:class:
+8r31370	16r32F8	<ChangeSet>changeSelector:class:
+8r31374	16r32FC	<ChangeSet>changeClass:
+8r31376	16r32FE	<ChangeSet>removeSelector:class:
+8r31402	16r3302	<ChangeSet>fileOutChangesFor:on:
+8r31416	16r330E	<ChangeSet>commentClass:
+8r31422	16r3312	<ChangeSet>changedClasses
+8r31424	16r3314	<ChangeSet>fileOutClassChanges:on:
+8r31444	16r3324	<ChangeSet>removeClassChanges:
+8r31446	16r3326	<ChangeSet>removeClass:
+8r31450	16r3328	<ChangeSet>classNamed:
+8r31454	16r332C	<ChangeSet>atSelector:class:put:
+8r31472	16r333A	<IdentityDictionary>noCheckAdd:
+8r31474	16r333C	<IdentityDictionary>setTally
+8r31476	16r333E	<IdentityDictionary>associationAt:ifAbsent:
+8r31500	16r3340	<IdentityDictionary>keyAtValue:ifAbsent:
+8r31502	16r3342	<IdentityDictionary>at:put:
+8r31504	16r3344	<IdentityDictionary>at:ifAbsent:
+8r31506	16r3346	<IdentityDictionary>removeKey:ifAbsent:
+8r31510	16r3348	<IdentityDictionary>associationsDo:
+8r31512	16r334A	<IdentityDictionary>copy
+8r31514	16r334C	<IdentityDictionary>add:
+8r31516	16r334E	<IdentityDictionary>do:
+8r31520	16r3350	<IdentityDictionary>noCheckAdd:with:
+8r31522	16r3352	<IdentityDictionary>removeDangerouslyKey:ifAbsent:
+8r31524	16r3354	<IdentityDictionary>swap:with:
+8r31526	16r3356	<IdentityDictionary>findKeyOrNil:
+8r31554	16r336C	<ChangeSet>atSelector:class:
+8r31560	16r3370	<ChangeSet>removeSelectorChanges:class:
+8r31562	16r3372	<ChangeSet>oldNameFor:
+8r31604	16r3384	<Scanner class>isLiteralSymbol:
+8r31660	16r33B0	<Scanner class>new
+8r31666	16r33B6	<Scanner class>initialize
+8r31752	16r33EA	<Scanner>on:
+8r31754	16r33EC	<Scanner>xBinary
+8r31762	16r33F2	<Scanner>xDelimiter
+8r31764	16r33F4	<Scanner>xDoubleQuote
+8r31770	16r33F8	<Scanner>xLitQuote
+8r32004	16r3404	<Scanner>xDollar
+8r32010	16r3408	<Scanner>xSingleQuote
+8r32014	16r340C	<Scanner>scanLitWord
+8r32016	16r340E	<Scanner>scan:
+8r32020	16r3410	<Scanner>xDigit
+8r32022	16r3412	<Scanner>scanLitVec
+8r32024	16r3414	<Scanner>scanFieldNames:
+8r32026	16r3416	<Scanner>xLetter
+8r32030	16r3418	<Scanner>scanToken
+8r32034	16r341C	<Scanner>step
+8r32036	16r341E	<Scanner>offEnd:
+8r32040	16r3420	<Scanner>notify:
+8r32042	16r3422	<Scanner>initScanner
+8r32044	16r3424	<Scanner>scanTokens:
+8r32176	16r347E	<Parser>notify:
+8r32200	16r3480	<Parser>match:
+8r32202	16r3482	<Parser>blockExpression
+8r32212	16r348A	<Parser>pattern:inContext:
+8r32226	16r3496	<Parser>addComment
+8r32232	16r349A	<Parser>notify:at:
+8r32236	16r349E	<Parser>method:context:
+8r32266	16r34B6	<ParseNode class>initialize
+8r32572	16r357A	<ParseNode>comment
+8r32574	16r357C	<ParseNode>comment:
+8r32576	16r357E	<ParseNode>printOn:
+8r32604	16r3584	<ParseNode>emitForReturn:on:
+8r32610	16r3588	<ParseNode>isReturningIf
+8r32612	16r358A	<ParseNode>printCommentOn:indent:
+8r32614	16r358C	<ParseNode>nextWordFrom:setCharacter:
+8r32616	16r358E	<ParseNode>printSingleComment:on:indent:
+8r32624	16r3594	<ParseNode>asReturnNode
+8r32666	16r35B6	<ReturnNode>emitForReturn:on:
+8r32670	16r35B8	<ReturnNode>emitForValue:on:
+8r32672	16r35BA	<ReturnNode>asReturnNode
+8r32674	16r35BC	<ReturnNode>printOn:indent:
+8r32676	16r35BE	<ReturnNode>expr:
+8r32700	16r35C0	<ReturnNode>isReturnSelf
+8r32756	16r35EE	<LeafNode>key
+8r32760	16r35F0	<LeafNode>sizeForEffect:
+8r32762	16r35F2	<LeafNode>key:code:
+8r32764	16r35F4	<LeafNode>reserve:
+8r32770	16r35F8	<LeafNode>emitLong:on:
+8r32774	16r35FC	<LeafNode>emitForEffect:on:
+8r32776	16r35FE	<LeafNode>name:key:code:
+8r33000	16r3600	<LeafNode>code:type:
+8r33002	16r3602	<LeafNode>name:key:index:type:
+8r33004	16r3604	<LeafNode>size:
+8r33006	16r3606	<LeafNode>key:index:type:
+8r33010	16r3608	<LeafNode>sizeForValue:
+8r33012	16r360A	<LeafNode>code
+8r33042	16r3622	<LiteralNode>printOn:indent:
+8r33044	16r3624	<LiteralNode>emitForValue:on:
+8r33120	16r3650	<SelectorNode>printOn:indent:
+8r33122	16r3652	<SelectorNode>size:args:super:
+8r33124	16r3654	<SelectorNode>emit:args:on:
+8r33126	16r3656	<SelectorNode>emit:args:on:super:
+8r33176	16r367E	<VariableNode class>initialize
+8r33314	16r36CC	<Encoder>autoBind:
+8r33324	16r36D4	<Encoder>encodeVariable:
+8r33326	16r36D6	<Encoder>lookupInPools:ifFound:
+8r33334	16r36DC	<Encoder>literals:nArgs:
+8r33336	16r36DE	<Encoder>name:key:class:type:set:
+8r33340	16r36E0	<Encoder>encodeLiteral:
+8r33344	16r36E4	<Encoder>init:context:notifying:
+8r33372	16r36FA	<MessageNode class>initialize
+8r33542	16r3762	<MessageNode>emitForValue:on:
+8r33554	16r376C	<MessageNode>transform:
+8r33556	16r376E	<MessageNode>transformIfTrue:
+8r33644	16r37A4	<BlockNode>isJust:
+8r33646	16r37A6	<BlockNode>sizeForEvaluatedEffect:
+8r33650	16r37A8	<BlockNode>sizeForEvaluatedValue:
+8r33652	16r37AA	<BlockNode>returns
+8r33654	16r37AC	<BlockNode>isQuick
+8r33656	16r37AE	<BlockNode>arguments:statements:returns:from:sourceEnd:
+8r33670	16r37B8	<BlockNode>emitForEvaluatedValue:on:
+8r33672	16r37BA	<BlockNode>emitForEvaluatedEffect:on:
+8r33674	16r37BC	<BlockNode>emitExceptLast:on:
+8r33676	16r37BE	<BlockNode>emitForValue:on:
+8r33730	16r37D8	<ParseStack>init
+8r33732	16r37DA	<ParseStack>position
+8r33734	16r37DC	<ParseStack>max:
+8r33736	16r37DE	<ParseStack>push:
+8r33740	16r37E0	<ParseStack>size
+8r33742	16r37E2	<ParseStack>pop:
+8r33774	16r37FC	<BlockNode>sizeExceptLast:
+8r33776	16r37FE	<BlockNode>printArgumentsOn:indent:
+8r34002	16r3802	<BlockNode>printStatementsOn:indent:
+8r34004	16r3804	<BlockNode>isComplex
+8r34006	16r3806	<BlockNode>numberOfArguments
+8r34010	16r3808	<BlockNode>returnSelfIfNoOther
+8r34012	16r380A	<BlockNode>returnLast
+8r34014	16r380C	<BlockNode>default
+8r34016	16r380E	<BlockNode>pc
+8r34020	16r3810	<BlockNode>sizeForValue:
+8r34026	16r3816	<BlockNode>code
+8r34030	16r3818	<BlockNode>printOn:indent:
+8r34032	16r381A	<BlockNode>arguments:
+8r34034	16r381C	<BlockNode>statements:returns:
+8r34036	16r381E	<BlockNode>canBeSpecialArgument
+8r34076	16r383E	<MessageNode>transformIfFalse:
+8r34100	16r3840	<MessageNode>transformIfTrueIfFalse:
+8r34106	16r3846	<MessageNode>transformIfFalseIfTrue:
+8r34114	16r384C	<MessageNode>transformAnd:
+8r34126	16r3856	<MessageNode>transformOr:
+8r34140	16r3860	<MessageNode>transformWhile:
+8r34144	16r3864	<MessageNode>pc
+8r34146	16r3866	<MessageNode>emitIf:on:value:
+8r34150	16r3868	<MessageNode>sizeForValue:
+8r34152	16r386A	<MessageNode>emitWhile:on:value:
+8r34154	16r386C	<MessageNode>sizeIf:value:
+8r34156	16r386E	<MessageNode>sizeWhile:value:
+8r34160	16r3870	<MessageNode>isReturningIf
+8r34162	16r3872	<MessageNode>cascadeReceiver
+8r34164	16r3874	<MessageNode>checkBlock:as:from:
+8r34176	16r387E	<MessageNode>receiver:selector:arguments:precedence:from:sourceRange:
+8r34200	16r3880	<MessageNode>isTemp
+8r34202	16r3882	<MessageNode>printKeywords:arguments:on:indent:
+8r34206	16r3886	<MessageNode>printIfOn:indent:
+8r34210	16r3888	<MessageNode>precedence
+8r34212	16r388A	<MessageNode>receiver:arguments:precedence:
+8r34214	16r388C	<MessageNode>transformBoolean:
+8r34220	16r3890	<MessageNode>store:from:
+8r34230	16r3898	<MessageNode>receiver:selector:arguments:precedence:
+8r34232	16r389A	<MessageNode>printOn:indent:
+8r34234	16r389C	<MessageNode>sizeForEffect:
+8r34236	16r389E	<MessageNode>canCascade
+8r34240	16r38A0	<MessageNode>emitForEffect:on:
+8r34242	16r38A2	<MessageNode>printOn:indent:precedence:
+8r34250	16r38A8	<MessageNode>receiver:selector:arguments:precedence:from:
+8r34322	16r38D2	<Encoder>undeclared:
+8r34350	16r38E8	<Encoder>sourceMap:
+8r34352	16r38EA	<Encoder>noteSourceRange:forNode:
+8r34354	16r38EC	<Encoder>reallyBindTemp:
+8r34356	16r38EE	<Encoder>associationForClass
+8r34360	16r38F0	<Encoder>declareClassVar:
+8r34372	16r38FA	<Encoder>declareCorrect:
+8r34406	16r3906	<Encoder>declareTemp:
+8r34410	16r3908	<Encoder>tempNames
+8r34412	16r390A	<Encoder>declareFailed:
+8r34414	16r390C	<Encoder>declareUndeclared:
+8r34430	16r3918	<Encoder>supered
+8r34432	16r391A	<Encoder>declareGlobal:
+8r34436	16r391E	<Encoder>notify:
+8r34440	16r3920	<Encoder>maxTemp
+8r34442	16r3922	<Encoder>noteSuper
+8r34444	16r3924	<Encoder>newTemp:
+8r34446	16r3926	<Encoder>associationFor:
+8r34450	16r3928	<Encoder>nTemps:literals:class:
+8r34452	16r392A	<Encoder>cantStoreInto:
+8r34504	16r3944	<Encoder>fillDict:with:mapping:to:
+8r34506	16r3946	<Encoder>abort
+8r34510	16r3948	<Encoder>global:name:
+8r34512	16r394A	<Encoder>initScopeAndLiteralTables
+8r34546	16r3966	<LiteralDictionary>findKeyOrNil:
+8r35024	16r3A14	<Encoder>encodeSelector:
+8r35026	16r3A16	<Encoder>release
+8r35030	16r3A18	<Encoder>bindTemp:
+8r35034	16r3A1C	<Encoder>litIndex:
+8r35140	16r3A60	<VariableNode class>initialize2:
+8r35202	16r3A82	<VariableNode>emitForReturn:on:
+8r35204	16r3A84	<VariableNode>emitForValue:on:
+8r35206	16r3A86	<VariableNode>printOn:indent:
+8r35210	16r3A88	<VariableNode>isTemp
+8r35212	16r3A8A	<VariableNode>sizeForStorePop:
+8r35214	16r3A8C	<VariableNode>isArg:
+8r35216	16r3A8E	<VariableNode>name:key:code:
+8r35220	16r3A90	<VariableNode>isVariableReference
+8r35222	16r3A92	<VariableNode>name:index:type:
+8r35224	16r3A94	<VariableNode>name:key:index:type:
+8r35226	16r3A96	<VariableNode>canBeSpecialArgument
+8r35230	16r3A98	<VariableNode>isArg
+8r35232	16r3A9A	<VariableNode>sizeForReturn:
+8r35234	16r3A9C	<VariableNode>emitStorePop:on:
+8r35236	16r3A9E	<VariableNode>emitStore:on:
+8r35240	16r3AA0	<VariableNode>sizeForStore:
+8r35264	16r3AB4	<ReturnNode>isVariableReference
+8r35266	16r3AB6	<ReturnNode>pc
+8r35270	16r3AB8	<ReturnNode>expr:encoder:sourceRange:
+8r35272	16r3ABA	<ReturnNode>sizeForValue:
+8r35274	16r3ABC	<ReturnNode>code
+8r35276	16r3ABE	<ReturnNode>sizeForReturn:
+8r35320	16r3AD0	<ParseNode>printOn:indent:
+8r35324	16r3AD4	<ParseNode>emitTrueBranch:pop:on:
+8r35326	16r3AD6	<ParseNode>encodeSelector:
+8r35330	16r3AD8	<ParseNode>sizeForEffect:
+8r35332	16r3ADA	<ParseNode>emitBranch:pop:on:
+8r35334	16r3ADC	<ParseNode>emitJump:on:
+8r35336	16r3ADE	<ParseNode>emitShortOrLong:code:on:
+8r35340	16r3AE0	<ParseNode>sizeShortOrLong:
+8r35342	16r3AE2	<ParseNode>isReturnSelf
+8r35344	16r3AE4	<ParseNode>canCascade
+8r35346	16r3AE6	<ParseNode>emitForEffect:on:
+8r35350	16r3AE8	<ParseNode>emitLongJump:on:
+8r35352	16r3AEA	<ParseNode>isVariableReference
+8r35354	16r3AEC	<ParseNode>sizeJump:
+8r35356	16r3AEE	<ParseNode>printOn:indent:precedence:
+8r35360	16r3AF0	<ParseNode>sizeBranch:
+8r35362	16r3AF2	<ParseNode>emitLong:code:on:
+8r35366	16r3AF6	<ParseNode>canBeSpecialArgument
+8r35370	16r3AF8	<ParseNode>isArg
+8r35372	16r3AFA	<ParseNode>sizeForReturn:
+8r35426	16r3B16	<AssignmentNode>emitForEffect:on:
+8r35430	16r3B18	<AssignmentNode>emitForValue:on:
+8r35432	16r3B1A	<AssignmentNode>printOn:indent:precedence:
+8r35440	16r3B20	<AssignmentNode>variable:value:
+8r35442	16r3B22	<AssignmentNode>sizeForValue:
+8r35444	16r3B24	<AssignmentNode>printOn:indent:
+8r35450	16r3B28	<AssignmentNode>variable:value:from:
+8r35452	16r3B2A	<AssignmentNode>sizeForEffect:
+8r35524	16r3B54	<CascadeNode>sizeForValue:
+8r35526	16r3B56	<CascadeNode>printOn:indent:
+8r35530	16r3B58	<CascadeNode>receiver:messages:
+8r35532	16r3B5A	<CascadeNode>emitForValue:on:
+8r35646	16r3BA6	<DecompilerConstructor>codeThisContext
+8r35650	16r3BA8	<DecompilerConstructor>codeSelector:code:
+8r35652	16r3BAA	<DecompilerConstructor>codeAnyLiteral:
+8r35654	16r3BAC	<DecompilerConstructor>codeInst:
+8r35656	16r3BAE	<DecompilerConstructor>codeAnyLitInd:
+8r35660	16r3BB0	<DecompilerConstructor>codeSuper
+8r35662	16r3BB2	<DecompilerConstructor>codeAnySelector:
+8r35664	16r3BB4	<DecompilerConstructor>codeMethod:block:tempVars:primitive:class:
+8r35676	16r3BBE	<DecompilerConstructor>codeAssignTo:value:
+8r35702	16r3BC2	<DecompilerConstructor>codeArguments:block:
+8r35704	16r3BC4	<DecompilerConstructor>codeBlock:returns:
+8r35706	16r3BC6	<DecompilerConstructor>method:class:literals:
+8r35710	16r3BC8	<DecompilerConstructor>codeConstants
+8r35712	16r3BCA	<DecompilerConstructor>codeTemp:
+8r35716	16r3BCE	<DecompilerConstructor>codeMessage:selector:arguments:
+8r35720	16r3BD0	<DecompilerConstructor>codeCascadedMessage:arguments:
+8r35722	16r3BD2	<DecompilerConstructor>codeCascade:messages:
+8r35726	16r3BD6	<DecompilerConstructor>codeEmptyBlock
+8r36032	16r3C1A	<MethodNode>generateNoQuick
+8r36036	16r3C1E	<MethodNode>generate:
+8r36066	16r3C36	<MethodNode>sourceMap
+8r36074	16r3C3C	<MethodNode>decompileString
+8r36076	16r3C3E	<MethodNode>generateIfQuick:
+8r36104	16r3C44	<MethodNode>printOn:
+8r36114	16r3C4C	<MethodNode>selector:arguments:precedence:temporaries:block:encoder:primitive:
+8r36116	16r3C4E	<MethodNode>tempNames
+8r36120	16r3C50	<MethodNode>selector
+8r36160	16r3C70	<Parser>parse:class:noPattern:context:notifying:ifFail:
+8r36164	16r3C74	<Parser>startOfNextToken
+8r36166	16r3C76	<Parser>abort
+8r36170	16r3C78	<Parser>init:notifying:failBlock:
+8r36172	16r3C7A	<Parser>expected:
+8r36176	16r3C7E	<Parser>argumentName
+8r36202	16r3C82	<Parser>matchToken:
+8r36204	16r3C84	<Parser>parseArgsAndTemps:notifying:
+8r36210	16r3C88	<Parser>statements:innerBlock:
+8r36222	16r3C92	<Parser>endOfLastToken
+8r36224	16r3C94	<Parser>primitive
+8r36234	16r3C9C	<Parser>pasteTemp:
+8r36244	16r3CA4	<Parser>replaceEditSelectionWith:
+8r36246	16r3CA6	<Parser>selectVariable:
+8r36250	16r3CA8	<Parser>bareEndOfLastToken
+8r36252	16r3CAA	<Parser>makeNewSymbol:startingAt:
+8r36300	16r3CC0	<Parser>editor
+8r36302	16r3CC2	<Parser>parseSelector:
+8r36304	16r3CC4	<Parser>temporaries
+8r36312	16r3CCA	<Parser>bindTemp:
+8r36314	16r3CCC	<Parser>assignment
+8r36324	16r3CD4	<Parser>expression
+8r36326	16r3CD6	<Parser>advance
+8r36330	16r3CD8	<Parser>offEnd:
+8r36332	16r3CDA	<Parser>parseMethodComment:setPattern:
+8r36334	16r3CDC	<Parser>primaryExpression
+8r36342	16r3CE2	<Parser>initPattern:notifying:return:
+8r36344	16r3CE4	<Parser>cascade
+8r36354	16r3CEC	<Parser>messagePart:repeat:
+8r36440	16r3D20	<ChangeScanner class>new
+8r36506	16r3D46	<ChangeScanner>nextChunkStream
+8r36510	16r3D48	<ChangeScanner>initChangeScanner
+8r36512	16r3D4A	<ChangeScanner>scanClassExpression:do:
+8r36536	16r3D5E	<Change class>file:position:
+8r36570	16r3D78	<Change>className
+8r36574	16r3D7C	<Change>text
+8r36576	16r3D7E	<Change>fileIn
+8r36626	16r3D96	<Compiler class>evaluate:logged:
+8r36630	16r3D98	<Compiler class>evaluate:
+8r36632	16r3D9A	<Compiler class>evaluate:for:logged:
+8r36634	16r3D9C	<Compiler class>evaluate:for:notifying:logged:
+8r36636	16r3D9E	<Compiler class>evaluate:notifying:logged:
+8r36640	16r3DA0	<Compiler class>preferredParserClass
+8r36674	16r3DBC	<Compiler>evaluate:in:to:notifying:ifFail:
+8r36710	16r3DC8	<Compiler>notify:at:
+8r36726	16r3DD6	<SyntaxError class>errorInClass:withCode:errorString:
+8r36746	16r3DE6	<ProcessHandle class>on:at:interrupted:
+8r37004	16r3E04	<ProcessHandle>resumeProcess
+8r37012	16r3E0A	<ProcessHandle>proceedValue:
+8r37014	16r3E0C	<ProcessHandle>process:controller:interrupted:resumeContext:
+8r37016	16r3E0E	<ProcessHandle>terminate
+8r37020	16r3E10	<ProcessHandle>proceed
+8r37022	16r3E12	<ProcessHandle>topContext
+8r37024	16r3E14	<ProcessHandle>topContext:
+8r37026	16r3E16	<ProcessHandle>interrupted:
+8r37030	16r3E18	<ProcessHandle>release
+8r37032	16r3E1A	<ProcessHandle>proceedValue
+8r37034	16r3E1C	<ProcessHandle>interrupted
+8r37074	16r3E3C	<SyntaxError class>flushMenus
+8r37160	16r3E70	<SyntaxError>text
+8r37162	16r3E72	<SyntaxError>doItValue:
+8r37164	16r3E74	<SyntaxError>proceed
+8r37166	16r3E76	<SyntaxError>doItContext
+8r37170	16r3E78	<SyntaxError>doItReceiver
+8r37172	16r3E7A	<SyntaxError>removeDependent:
+8r37174	16r3E7C	<SyntaxError>setClass:code:processHandle:
+8r37176	16r3E7E	<SyntaxError>acceptText:from:
+8r37204	16r3E84	<SyntaxError>textMenu
+8r37240	16r3EA0	<Compiler>editor
+8r37242	16r3EA2	<Compiler>compile:in:notifying:ifFail:
+8r37244	16r3EA4	<Compiler>format:noPattern:ifFail:
+8r37250	16r3EA8	<Compiler>from:class:context:notifying:
+8r37252	16r3EAA	<Compiler>translate:noPattern:ifFail:
+8r37254	16r3EAC	<Compiler>format:in:notifying:
+8r37256	16r3EAE	<Compiler>parse:in:notifying:
+8r37306	16r3EC6	<Change>text:
+8r37310	16r3EC8	<Change>name
+8r37312	16r3ECA	<Change>file:position:
+8r37314	16r3ECC	<Change>values
+8r37316	16r3ECE	<Change>fileName
+8r37322	16r3ED2	<Change>category
+8r37326	16r3ED6	<Change>classObject
+8r37330	16r3ED8	<Change>parameters
+8r37332	16r3EDA	<Change>fileOutOn:previous:next:
+8r37334	16r3EDC	<Change>defaultName:
+8r37340	16r3EE0	<Change>file
+8r37342	16r3EE2	<Change>fileOutOn:
+8r37344	16r3EE4	<Change>checkWith:
+8r37346	16r3EE6	<Change>selector
+8r37366	16r3EF6	<ClassRelatedChange>parameters
+8r37370	16r3EF8	<ClassRelatedChange>className:
+8r37372	16r3EFA	<ClassRelatedChange>className
+8r37374	16r3EFC	<ClassRelatedChange>getSource
+8r37376	16r3EFE	<ClassRelatedChange>classObject
+8r37462	16r3F32	<ClassDefinitionChange>checkWith:
+8r37464	16r3F34	<ClassDefinitionChange>text
+8r37470	16r3F38	<ClassDefinitionChange>name
+8r37474	16r3F3C	<ClassDefinitionChange>superclassName:classType:otherParameters:
+8r37550	16r3F68	<ClassOtherChange>checkWith:
+8r37554	16r3F6C	<ClassOtherChange>type:
+8r37556	16r3F6E	<ClassOtherChange>type
+8r37560	16r3F70	<ClassOtherChange>name
+8r37600	16r3F80	<ClassCommentChange class>new
+8r37620	16r3F90	<ClassCommentChange>text
+8r37626	16r3F96	<ClassCommentChange>checkWith:
+8r37706	16r3FC6	<MethodChange>parameters
+8r37710	16r3FC8	<MethodChange>category:
+8r37712	16r3FCA	<MethodChange>selector
+8r37714	16r3FCC	<MethodChange>selector:
+8r37716	16r3FCE	<MethodChange>category
+8r37756	16r3FEE	<MethodDefinitionChange>text
+8r37770	16r3FF8	<MethodDefinitionChange>fileIn
+8r40004	16r4004	<MethodDefinitionChange>name
+8r40010	16r4008	<MethodDefinitionChange>fileName
+8r40014	16r400C	<MethodDefinitionChange>sourceFileAndPosition:
+8r40022	16r4012	<MethodDefinitionChange>isInSystem
+8r40024	16r4014	<MethodDefinitionChange>fileOutHeaderOn:
+8r40030	16r4018	<MethodDefinitionChange>accept:notifying:
+8r40034	16r401C	<MethodDefinitionChange>fileOutOn:previous:next:
+8r40036	16r401E	<MethodDefinitionChange>getSource
+8r40040	16r4020	<MethodDefinitionChange>checkWith:
+8r40042	16r4022	<MethodDefinitionChange>fileOutOn:
+8r40142	16r4062	<OtherChange>parameters
+8r40144	16r4064	<OtherChange>checkWith:
+8r40154	16r406C	<OtherChange>text:
+8r40156	16r406E	<OtherChange>text
+8r40162	16r4072	<OtherChange>name
+8r40274	16r40BC	<MethodOtherChange>checkWith:
+8r40276	16r40BE	<MethodOtherChange>type:
+8r40300	16r40C0	<MethodOtherChange>type
+8r40302	16r40C2	<MethodOtherChange>name
+8r40360	16r40F0	<ChangeScanner>nextSelector
+8r40362	16r40F2	<ChangeScanner>scanChangedMessages:do:
+8r40372	16r40FA	<ChangeScanner>scanSpecialDo:
+8r40376	16r40FE	<ChangeScanner>nextClass
+8r40404	16r4104	<ChangeScanner>scanClassDefinition:className:do:
+8r40420	16r4110	<ChangeScanner>scanMethodsClass:category:do:
+8r40422	16r4112	<ChangeScanner>scanExpression:do:
+8r40424	16r4114	<ChangeScanner>scanFile:do:
+8r40516	16r414E	<ChangeSet>reorganizeClass:
+8r40520	16r4150	<ChangeSet>renameClass:as:
+8r40526	16r4156	<ChangeSet>addClass:
+8r40530	16r4158	<ChangeSet>changedMessageList
+8r40536	16r415E	<ChangeSet>atClass:add:
+8r40540	16r4160	<ChangeSet>atClass:includes:
+8r40542	16r4162	<ChangeSet>isNew:
+8r40546	16r4166	<ChangeSet>reorganizeSystem
+8r40550	16r4168	<ChangeSet>isEmpty
+8r40552	16r416A	<ChangeSet>initialize
+8r40666	16r41B6	<Project class>new
+8r40674	16r41BC	<Project class>initialize
+8r40722	16r41D2	<Project>setProjectHolder:
+8r40726	16r41D6	<Project>initialProject
+8r40730	16r41D8	<Project>noChanges
+8r40734	16r41DC	<Project>enter
+8r40736	16r41DE	<Project>exit
+8r40740	16r41E0	<Project>removeDependent:
+8r40742	16r41E2	<Project>release
+8r40744	16r41E4	<Project>isUnlocked
+8r40746	16r41E6	<Project>isLocked
+8r40776	16r41FE	<ProjectView class>open:
+8r41020	16r4210	<ProjectView>defaultControllerClass
+8r41024	16r4214	<ProjectView>release
+8r41060	16r4230	<ChangeListView class>example
+8r41110	16r4248	<ChangeListView>model:
+8r41114	16r424C	<ChangeListView>defaultControllerClass
+8r41120	16r4250	<ChangeListView>selectionIndex:
+8r41124	16r4254	<ChangeListView>selectionInterval
+8r41126	16r4256	<ChangeListView>selectionBoxOffset:
+8r41130	16r4258	<ChangeListView>deselect
+8r41132	16r425A	<ChangeListView>displaySelectionBox
+8r41134	16r425C	<ChangeListView>release
+8r41136	16r425E	<ChangeListView>reverseRemoved
+8r41140	16r4260	<ChangeListView>selectionBox:
+8r41154	16r426C	<ChangeListController>checkWithSystem:
+8r41160	16r4270	<ChangeListController>initialize
+8r41162	16r4272	<ChangeListController>getFile:withPrompt:do:
+8r41170	16r4278	<ChangeListController>changeLabel
+8r41172	16r427A	<ChangeListController>doFrom:
+8r41174	16r427C	<ChangeListController>scrollView:
+8r41176	16r427E	<ChangeListController>fileIn
+8r41202	16r4282	<ChangeListController>changeModelSelection:
+8r41204	16r4284	<ChangeListController>initializeYellowButtonMenu
+8r41206	16r4286	<ChangeListController>removeAll
+8r41210	16r4288	<ChangeListController>fileOut
+8r41214	16r428C	<ChangeListController>recover
+8r41216	16r428E	<ChangeListController>getChanges
+8r41220	16r4290	<ChangeListController>doAll
+8r41222	16r4292	<ChangeListController>restoreAll
+8r41224	16r4294	<ChangeListController>forget
+8r41316	16r42CE	<ParagraphEditor class>new
+8r41322	16r42D2	<ParagraphEditor class>initialize
+8r41336	16r42DE	<ParagraphEditor class>newParagraph:
+8r41374	16r42FC	<TextController>wrappingBox:clippingBox:
+8r41376	16r42FE	<TextController>textHasChanged
+8r41400	16r4300	<TextController>insertAndSelect:at:
+8r41404	16r4304	<TextController>paragraph
+8r41406	16r4306	<TextController>accept
+8r41410	16r4308	<TextController>yellowButtonActivity
+8r41412	16r430A	<TextController>localMenuItem:
+8r41452	16r432A	<CodeController>miniFormat
+8r41456	16r432E	<CodeController>format
+8r41466	16r4336	<CodeController>explain
+8r41506	16r4346	<Explainer class>initialize
+8r41562	16r4372	<Explainer>explainInst:
+8r41600	16r4380	<Explainer>explainTemp:
+8r41614	16r438C	<Explainer>explainNumber:
+8r41626	16r4396	<Explainer>explainMySel:
+8r41652	16r43AA	<Explainer>explainClass:
+8r41702	16r43C2	<Explainer>explainDelimitor:
+8r41722	16r43D2	<Explainer>explainAnySel:
+8r41736	16r43DE	<Explainer>explainCtxt:
+8r42002	16r4402	<Explainer>explainScan:
+8r42004	16r4404	<Explainer>explainChar:
+8r42056	16r442E	<Explainer>explainPartSel:
+8r42106	16r4446	<Explainer>explainGlobal:
+8r42420	16r4510	<Behavior>compiledMethodAt:
+8r42422	16r4512	<Behavior>includesSelector:
+8r42424	16r4514	<Behavior>new:
+8r42426	16r4516	<Behavior>whichSelectorsAccess:
+8r42436	16r451E	<Behavior>recompile:from:
+8r42442	16r4522	<Behavior>sourceCodeForMethod:at:
+8r42446	16r4526	<Behavior>allSubclasses
+8r42450	16r4528	<Behavior>sourceCodeAt:
+8r42452	16r452A	<Behavior>sourceCodeTemplate
+8r42456	16r452E	<Behavior>printHierarchy
+8r42462	16r4532	<Behavior>showVariableMenu:collect:
+8r42464	16r4534	<Behavior>allAccessesTo:
+8r42470	16r4538	<Behavior>allCallsOn:
+8r42476	16r453E	<Behavior>browseAllCallsOn:
+8r42506	16r4546	<Behavior>subclasses
+8r42510	16r4548	<Behavior>instSize
+8r42512	16r454A	<Behavior>subclassDefinerClass
+8r42514	16r454C	<Behavior>compileAllFrom:
+8r42516	16r454E	<Behavior>new
+8r42520	16r4550	<Behavior>browseAllAccessesTo:
+8r42522	16r4552	<Behavior>checkSuperAddSelector:
+8r42530	16r4558	<Behavior>hasMultipleSuperclasses
+8r42532	16r455A	<Behavior>updateInheritanceTables:
+8r42564	16r4574	<Behavior>insertClass:selector:in:
+8r42566	16r4576	<Behavior>allDynamicSuperclasses
+8r42570	16r4578	<Behavior>whichSelectorsReferTo:special:byte:
+8r42600	16r4580	<Behavior>compoundSelectorsMatching:
+8r42606	16r4586	<Behavior>dynamicMethodDescriptionAt:
+8r42630	16r4598	<MethodDescription class>makeConflictingMethods
+8r42636	16r459E	<MethodDescription class>makeMethodNotImplemented
+8r42642	16r45A2	<MethodDescription class>whichClass:selector:
+8r42674	16r45BC	<MethodDescription>selector
+8r42676	16r45BE	<MethodDescription>setWhichClass:setSelector:
+8r42700	16r45C0	<MethodDescription>method
+8r42702	16r45C2	<MethodDescription>sourceCode
+8r42704	16r45C4	<MethodDescription>isBad
+8r42706	16r45C6	<MethodDescription>whichClass
+8r42710	16r45C8	<MethodDescription>isConflictingMethods
+8r42712	16r45CA	<MethodDescription>isMethodNotImplemented
+8r42714	16r45CC	<MethodDescription>setStatus:
+8r42716	16r45CE	<MethodDescription>=
+8r42720	16r45D0	<MethodDescription>printOn:
+8r42752	16r45EA	<Behavior>dynamicSuperclass
+8r42754	16r45EC	<Behavior>superMethodDescriptionAt:
+8r42756	16r45EE	<Behavior>removeFromInheritanceTables
+8r42760	16r45F0	<Behavior>methodDescriptionAt:
+8r42762	16r45F2	<Behavior>tryCopyingCodeFor:
+8r43000	16r4600	<Behavior>compileUnchecked:
+8r43004	16r4604	<Behavior>isVariable
+8r43006	16r4606	<Behavior>checkChangeSelector:
+8r43014	16r460C	<Behavior>checkMethodFor:
+8r43020	16r4610	<Behavior>compileBroadcastCodeFor:
+8r43030	16r4618	<Behavior>poolHas:ifTrue:
+8r43032	16r461A	<Behavior>copyMethods
+8r43036	16r461E	<Behavior>recompile:
+8r43040	16r4620	<Behavior>allSelectors
+8r43042	16r4622	<Behavior>parserClass
+8r43044	16r4624	<Behavior>format:variable:words:pointers:
+8r43046	16r4626	<Behavior>allClassVarNames
+8r43050	16r4628	<Behavior>basicNew:
+8r43052	16r462A	<Behavior>allSharedPools
+8r43054	16r462C	<Behavior>crossReference
+8r43056	16r462E	<Behavior>superclass:
+8r43062	16r4632	<Behavior>kindOfSubclass
+8r43074	16r463C	<Behavior>someInstance
+8r43076	16r463E	<Behavior>printOn:
+8r43102	16r4642	<Behavior>canUnderstand:
+8r43104	16r4644	<Behavior>printMethodChunk:on:moveSource:toFile:
+8r43110	16r4648	<Behavior>methodDictionary:
+8r43112	16r464A	<Behavior>decompile:
+8r43116	16r464E	<Behavior>hasMethods
+8r43120	16r4650	<Behavior>compile:notifying:trailer:
+8r43122	16r4652	<Behavior>allSuperclasses
+8r43124	16r4654	<Behavior>isFixed
+8r43126	16r4656	<Behavior>compile:notifying:trailer:ifFail:
+8r43130	16r4658	<Behavior>allInstances
+8r43132	16r465A	<Behavior>isPointers
+8r43134	16r465C	<Behavior>decompilerClass
+8r43152	16r466A	<InstructionStream class>initialize
+8r43162	16r4672	<InstructionStream class>on:
+8r43230	16r4698	<InstructionStream>addFieldIndexTo:
+8r43232	16r469A	<InstructionStream>willReturn
+8r43234	16r469C	<InstructionStream>nextByte
+8r43236	16r469E	<InstructionStream>interpretNextInstructionFor:
+8r43302	16r46C2	<InstructionStream>willStorePop
+8r43304	16r46C4	<InstructionStream>willSend
+8r43306	16r46C6	<InstructionStream>followingByte
+8r43310	16r46C8	<InstructionStream>method
+8r43312	16r46CA	<InstructionStream>interpretJump
+8r43314	16r46CC	<InstructionStream>interpretExtension:in:for:
+8r43340	16r46E0	<InstructionStream>addSelectorTo:
+8r43342	16r46E2	<InstructionStream>pc
+8r43344	16r46E4	<InstructionStream>method:pc:
+8r43346	16r46E6	<InstructionStream>scanFor:
+8r43400	16r4700	<ContextPart class>trace:
+8r43406	16r4706	<ContextPart class>initPrimitives
+8r43422	16r4712	<Object>tryPrimitive0
+8r43426	16r4716	<Object>tryPrimitive1:
+8r43430	16r4718	<Object>tryPrimitive2:with:
+8r43432	16r471A	<Object>tryPrimitive3:with:with:
+8r43434	16r471C	<Object>tryPrimitive4:with:with:with:
+8r43436	16r471E	<ContextPart class>tallyMethods:
+8r43440	16r4720	<ContextPart class>tallyInstructions:
+8r43442	16r4722	<ContextPart class>runSimulated:
+8r43516	16r474E	<ContextPart>runSimulated:contextAtEachStep:
+8r43526	16r4756	<ContextPart>depthBelow:
+8r43530	16r4758	<ContextPart>top
+8r43532	16r475A	<ContextPart>method
+8r43534	16r475C	<ContextPart>blockCopy:
+8r43544	16r4764	<ContextPart>sender
+8r43546	16r4766	<ContextPart>push:
+8r43550	16r4768	<ContextPart>releaseTo:
+8r43552	16r476A	<ContextPart>tryPrimitiveFor:receiver:args:
+8r43562	16r4772	<ContextPart>swapSender:
+8r43564	16r4774	<ContextPart>activateMethod:withArgs:receiver:class:
+8r43572	16r477A	<ContextPart>send:to:with:super:
+8r43600	16r4780	<ContextPart>return:to:
+8r43602	16r4782	<ContextPart>singleRelease
+8r43604	16r4784	<ContextPart>shortStack
+8r43606	16r4786	<ContextPart>pop
+8r43610	16r4788	<ContextPart>hasSender:
+8r43612	16r478A	<ContextPart>doPrimitive:receiver:args:
+8r43616	16r478E	<ContextPart>stack
+8r43620	16r4790	<ContextPart>stackOfSize:
+8r43622	16r4792	<ContextPart>mclass
+8r43624	16r4794	<ContextPart>completeCallee:
+8r43626	16r4796	<ContextPart>stepToSendOrReturn
+8r43630	16r4798	<ContextPart>home
+8r43632	16r479A	<ContextPart>tempAt:
+8r43634	16r479C	<ContextPart>tempAt:put:
+8r43636	16r479E	<ContextPart>pushReceiverVariable:
+8r43640	16r47A0	<ContextPart>pushTemporaryVariable:
+8r43642	16r47A2	<ContextPart>pushConstant:
+8r43644	16r47A4	<ContextPart>pushLiteralVariable:
+8r43646	16r47A6	<ContextPart>popIntoTemporaryVariable:
+8r43650	16r47A8	<ContextPart>pc
+8r43652	16r47AA	<ContextPart>tempNames
+8r43656	16r47AE	<ContextPart>sourceCode
+8r43660	16r47B0	<ContextPart>popIntoReceiverVariable:
+8r43662	16r47B2	<ContextPart>pushReceiver
+8r43664	16r47B4	<ContextPart>methodReturnReceiver
+8r43666	16r47B6	<ContextPart>printOn:
+8r43700	16r47C0	<ContextPart>methodReturnConstant:
+8r43702	16r47C2	<ContextPart>methodReturnTop
+8r43704	16r47C4	<ContextPart>send:super:numArgs:
+8r43710	16r47C8	<ContextPart>receiver
+8r43712	16r47CA	<ContextPart>jump:
+8r43714	16r47CC	<ContextPart>jump:if:
+8r43720	16r47D0	<ContextPart>storeIntoReceiverVariable:
+8r43722	16r47D2	<ContextPart>storeIntoTemporaryVariable:
+8r43724	16r47D4	<ContextPart>storeIntoLiteralVariable:
+8r43726	16r47D6	<ContextPart>popIntoLiteralVariable:
+8r43730	16r47D8	<ContextPart>doPop
+8r43732	16r47DA	<ContextPart>doDup
+8r43734	16r47DC	<ContextPart>pushActiveContext
+8r43736	16r47DE	<ContextPart>release
+8r43740	16r47E0	<ContextPart>step
+8r43742	16r47E2	<ContextPart>selector
+8r44022	16r4812	<InstructionPrinter>storeIntoReceiverVariable:
+8r44026	16r4816	<InstructionPrinter>storeIntoTemporaryVariable:
+8r44032	16r481A	<InstructionPrinter>print:
+8r44034	16r481C	<InstructionPrinter>storeIntoLiteralVariable:
+8r44040	16r4820	<InstructionPrinter>popIntoLiteralVariable:
+8r44044	16r4824	<InstructionPrinter>doPop
+8r44050	16r4828	<InstructionPrinter>doDup
+8r44054	16r482C	<InstructionPrinter>pushActiveContext
+8r44060	16r4830	<InstructionPrinter>printInstructionsOn:
+8r44064	16r4834	<InstructionPrinter>pushReceiverVariable:
+8r44070	16r4838	<InstructionPrinter>pushTemporaryVariable:
+8r44074	16r483C	<InstructionPrinter>pushConstant:
+8r44100	16r4840	<InstructionPrinter>pushLiteralVariable:
+8r44104	16r4844	<InstructionPrinter>popIntoTemporaryVariable:
+8r44110	16r4848	<InstructionPrinter>popIntoReceiverVariable:
+8r44114	16r484C	<InstructionPrinter>pushReceiver
+8r44120	16r4850	<InstructionPrinter>methodReturnReceiver
+8r44124	16r4854	<InstructionPrinter>methodReturnConstant:
+8r44130	16r4858	<InstructionPrinter>methodReturnTop
+8r44134	16r485C	<InstructionPrinter>blockReturnTop
+8r44140	16r4860	<InstructionPrinter>jump:
+8r44144	16r4864	<InstructionPrinter>jump:if:
+8r44152	16r486A	<InstructionPrinter>send:super:numArgs:
+8r44230	16r4898	<Decompiler class>initialize
+8r44304	16r48C4	<Decompiler>decompile:in:method:
+8r44306	16r48C6	<Decompiler>decompile:in:
+8r44310	16r48C8	<Decompiler>pushReceiverVariable:
+8r44312	16r48CA	<Decompiler>pushTemporaryVariable:
+8r44314	16r48CC	<Decompiler>pushConstant:
+8r44316	16r48CE	<Decompiler>pushLiteralVariable:
+8r44320	16r48D0	<Decompiler>popIntoTemporaryVariable:
+8r44322	16r48D2	<Decompiler>popIntoReceiverVariable:
+8r44324	16r48D4	<Decompiler>pushReceiver
+8r44326	16r48D6	<Decompiler>methodReturnReceiver
+8r44330	16r48D8	<Decompiler>methodReturnConstant:
+8r44332	16r48DA	<Decompiler>blockTo:
+8r44334	16r48DC	<Decompiler>initSymbols:
+8r44340	16r48E0	<Decompiler>quickMethod
+8r44350	16r48E8	<Decompiler>decompile:in:method:using:
+8r44356	16r48EE	<Decompiler>doStore:
+8r44360	16r48F0	<Decompiler>checkForBlock:
+8r44362	16r48F2	<Decompiler>statementsTo:
+8r44364	16r48F4	<Decompiler>methodReturnTop
+8r44366	16r48F6	<Decompiler>blockReturnTop
+8r44370	16r48F8	<Decompiler>jump:
+8r44372	16r48FA	<Decompiler>jump:if:
+8r44374	16r48FC	<Decompiler>send:super:numArgs:
+8r44376	16r48FE	<Decompiler>storeIntoReceiverVariable:
+8r44400	16r4900	<Decompiler>storeIntoTemporaryVariable:
+8r44402	16r4902	<Decompiler>storeIntoLiteralVariable:
+8r44404	16r4904	<Decompiler>popIntoLiteralVariable:
+8r44406	16r4906	<Decompiler>doPop
+8r44410	16r4908	<Decompiler>doDup
+8r44412	16r490A	<Decompiler>pushActiveContext
+8r44414	16r490C	<Decompiler>popTo:
+8r44466	16r4936	<Behavior>compileAllSubclasses
+8r44470	16r4938	<Behavior>subclassInstVarNames
+8r44472	16r493A	<Behavior>copy
+8r44474	16r493C	<Behavior>instanceCount
+8r44476	16r493E	<Behavior>scopeHas:ifTrue:
+8r44500	16r4940	<Behavior>allInstancesDo:
+8r44502	16r4942	<Behavior>addSelectorUnchecked:withMethod:
+8r44504	16r4944	<Behavior>whichSelectorsReferTo:
+8r44506	16r4946	<Behavior>compileAll
+8r44510	16r4948	<Behavior>allSubInstancesDo:
+8r44512	16r494A	<Behavior>allInstVarNames
+8r44514	16r494C	<Behavior>flushCache
+8r44516	16r494E	<Behavior>inheritsFrom:
+8r44520	16r4950	<Behavior>isBytes
+8r44522	16r4952	<Behavior>isBits
+8r44524	16r4954	<Behavior>selectors
+8r44526	16r4956	<Behavior>selectorAtMethod:setClass:
+8r44530	16r4958	<Behavior>removeSelectorUnchecked:
+8r44532	16r495A	<Behavior>sourceTextAt:
+8r44534	16r495C	<Behavior>defaultSelectorForMethod:
+8r44542	16r4962	<Behavior>obsolete
+8r44546	16r4966	<Behavior>allVarNamesSelect:
+8r44550	16r4968	<Behavior>allSubclassesDo:
+8r44552	16r496A	<Behavior>removeSelector:
+8r44554	16r496C	<Behavior>removeSubclass:
+8r44556	16r496E	<Behavior>addSubclass:
+8r44562	16r4972	<Behavior>whichClassIncludesSelector:
+8r44564	16r4974	<Behavior>allSuperclassesInto:
+8r44566	16r4976	<Behavior>sourceMethodAt:
+8r44570	16r4978	<Behavior>superclasses
+8r44576	16r497E	<Behavior>conflictCodeFor:
+8r44602	16r4982	<Behavior>printSubclassesOn:callingSuperclass:level:
+8r44610	16r4988	<Behavior>removeFromInheritanceTable:
+8r44612	16r498A	<Behavior>unmovedVarsFrom:
+8r44614	16r498C	<Behavior>updateInheritanceTable:oldSelf:
+8r44616	16r498E	<Behavior>compileConflictCodeFor:
+8r44622	16r4992	<Behavior>accumulateInstVarNames:traversedClasses:
+8r44624	16r4994	<Behavior>removeClass:selector:in:
+8r44626	16r4996	<Behavior>isWords
+8r44630	16r4998	<Behavior>format
+8r44632	16r499A	<Behavior>compilerClass
+8r44634	16r499C	<Behavior>evaluatorClass
+8r44636	16r499E	<Behavior>withAllSuperclasses
+8r44640	16r49A0	<Behavior>instVarNames
+8r44646	16r49A6	<Behavior>basicNew
+8r44650	16r49A8	<Behavior>classVarNames
+8r44652	16r49AA	<Behavior>superclass
+8r44654	16r49AC	<Behavior>sharedPools
+8r44656	16r49AE	<Behavior>addSelector:withMethod:
+8r44660	16r49B0	<Behavior>removeSelectorSimply:
+8r44662	16r49B2	<Behavior>withAllSubclasses
+8r44766	16r49F6	<ClassDescription>subclassOf:oldClass:instanceVariableNames:variable:words:pointers:ifBad:
+8r44776	16r49FE	<ClassDescription>fileOutChangedMessages:on:
+8r45000	16r4A00	<ClassDescription>comment
+8r45006	16r4A06	<ClassDescription>fileOutCategory:
+8r45014	16r4A0C	<ClassDescription>printOutCategory:
+8r45016	16r4A0E	<ClassDescription>definition
+8r45040	16r4A20	<ClassDescription>organization
+8r45042	16r4A22	<ClassDescription>fileOutOrganizationOn:
+8r45046	16r4A26	<ClassDescription>reorganize
+8r45050	16r4A28	<ClassDescription>fileOutOn:moveSource:toFile:
+8r45054	16r4A2C	<ClassDescription>fileOutOn:
+8r45056	16r4A2E	<ClassDescription>isMeta
+8r45060	16r4A30	<ClassDescription>removeSelector:
+8r45066	16r4A36	<ClassDescription>instVarNames
+8r45072	16r4A3A	<ClassDescription>compile:classified:notifying:
+8r45102	16r4A42	<ClassDescription>comment:
+8r45110	16r4A48	<ClassDescription>category
+8r45112	16r4A4A	<ClassDescription>kindOfSubclass
+8r45124	16r4A54	<ClassDescription>printMethodChunk:on:moveSource:toFile:
+8r45126	16r4A56	<ClassDescription>printOn:
+8r45130	16r4A58	<ClassDescription>commentTemplate
+8r45134	16r4A5C	<ClassDescription>validateFrom:in:instanceVariableNames:methods:
+8r45150	16r4A68	<ClassDescription>methodsFor:
+8r45166	16r4A76	<ClassCategoryReader class>class:category:
+8r45210	16r4A88	<ClassCategoryReader>setClass:category:
+8r45212	16r4A8A	<ClassCategoryReader>scanFrom:
+8r45240	16r4AA0	<ClassDescription>copyCategory:from:
+8r45242	16r4AA2	<ClassDescription>copyAll:from:classified:
+8r45244	16r4AA4	<ClassDescription>copyAll:from:
+8r45246	16r4AA6	<ClassDescription>fileOutCategory:on:moveSource:toFile:
+8r45252	16r4AAA	<ClassDescription>addInstVarName:
+8r45254	16r4AAC	<ClassDescription>removeInstVarName:
+8r45256	16r4AAE	<ClassDescription>copyAllCategoriesFrom:
+8r45260	16r4AB0	<ClassDescription>copyCategory:from:classified:
+8r45262	16r4AB2	<ClassDescription>updateInstancesFrom:
+8r45264	16r4AB4	<ClassDescription>copy:from:
+8r45266	16r4AB6	<ClassDescription>superclassesString
+8r45270	16r4AB8	<ClassDescription>fileOutMessage:on:moveSource:toFile:
+8r45276	16r4ABE	<ClassDescription>fileOutMessage:fileName:
+8r45300	16r4AC0	<ClassDescription>fileOutMessage:
+8r45306	16r4AC6	<ClassDescription>printOutMessage:
+8r45310	16r4AC8	<ClassDescription>moveChangesTo:
+8r45314	16r4ACC	<ClassDescription>copy:from:classified:
+8r45322	16r4AD2	<ClassDescription>fileOutChangedMessages:on:moveSource:toFile:
+8r45330	16r4AD8	<ClassDescription>printCategoryChunk:on:
+8r45336	16r4ADE	<ClassDescription>errorCategoryName
+8r45342	16r4AE2	<ClassDescription>classVariablesString
+8r45344	16r4AE4	<ClassDescription>instanceVariablesString
+8r45346	16r4AE6	<ClassDescription>name
+8r45350	16r4AE8	<ClassDescription>category:
+8r45352	16r4AEA	<ClassDescription>removeCategory:
+8r45356	16r4AEE	<ClassDescription>compile:notifying:trailer:ifFail:
+8r45360	16r4AF0	<ClassDescription>whichCategoryIncludesSelector:
+8r45362	16r4AF2	<ClassDescription>obsolete
+8r45364	16r4AF4	<ClassDescription>logOrganizationChange
+8r45370	16r4AF8	<ClassDescription>compile:classified:
+8r45372	16r4AFA	<ClassDescription>storeOn:
+8r45374	16r4AFC	<ClassDescription>sharedPoolsString
+8r45502	16r4B42	<Explainer>explain:for:
+8r45512	16r4B4A	<Explainer>class:selector:instance:context:methodText:
+8r45554	16r4B6C	<CodeController>doIt
+8r45556	16r4B6E	<CodeController>printIt
+8r45560	16r4B70	<CodeController>localMenuItem:
+8r45566	16r4B76	<CodeController>DoIt
+8r45616	16r4B8E	<OnlyWhenSelectedCodeController>isControlWanted
+8r45654	16r4BAC	<AlwaysAcceptCodeController>accept
+8r45716	16r4BCE	<TextView>emphasizeView
+8r45720	16r4BD0	<TextView>deEmphasizeView
+8r45722	16r4BD2	<TextView>on:aspect:change:menu:
+8r45724	16r4BD4	<TextView>initialize
+8r45762	16r4BF2	<CodeView class>on:aspect:change:menu:initialSelection:
+8r46004	16r4C04	<CodeView>update:
+8r46010	16r4C08	<CodeView>defaultControllerClass
+8r46012	16r4C0A	<CodeView>newText:
+8r46014	16r4C0C	<CodeView>initialSelection:
+8r46032	16r4C1A	<OnlyWhenSelectedCodeView class>on:aspect:change:menu:initialSelection:selection:
+8r46054	16r4C2C	<OnlyWhenSelectedCodeView>isSelected
+8r46056	16r4C2E	<OnlyWhenSelectedCodeView>defaultControllerClass
+8r46062	16r4C32	<OnlyWhenSelectedCodeView>selectionMsg:
+8r46132	16r4C5A	<Debugger class>initialize
+8r46140	16r4C60	<Debugger class>flushMenus
+8r46254	16r4CAC	<Debugger>resumeProcess
+8r46256	16r4CAE	<Debugger>fullStack
+8r46260	16r4CB0	<Debugger>text
+8r46262	16r4CB2	<Debugger>restart
+8r46264	16r4CB4	<Debugger>pcRange
+8r46266	16r4CB6	<Debugger>send
+8r46270	16r4CB8	<Debugger>context:
+8r46274	16r4CBC	<Debugger>process:context:interrupted:
+8r46276	16r4CBE	<Debugger>computeSourceMap
+8r46300	16r4CC0	<Debugger>revertBlock
+8r46304	16r4CC4	<Debugger>resetContext:
+8r46306	16r4CC6	<Debugger>updateInspectors
+8r46310	16r4CC8	<Debugger>contextList
+8r46312	16r4CCA	<Debugger>contextMenu
+8r46322	16r4CD2	<Debugger>spawn:
+8r46364	16r4CF4	<MethodListBrowser>on:
+8r46366	16r4CF6	<MethodListBrowser>removeMethod
+8r46370	16r4CF8	<MethodListBrowser>methodName:
+8r46376	16r4CFE	<MethodListBrowser>methodMenu
+8r46402	16r4D02	<MethodListBrowser>methodName
+8r46404	16r4D04	<MethodListBrowser>methodList
+8r46406	16r4D06	<MethodListBrowser>acceptText:from:
+8r46436	16r4D1E	<Debugger>checkContextSelection
+8r46440	16r4D20	<Debugger>spawnEdits:from:
+8r46442	16r4D22	<Debugger>openInspectors
+8r46456	16r4D2E	<Inspector class>inspect:
+8r46460	16r4D30	<Inspector class>flushMenus
+8r46626	16r4D96	<Inspector>textMenu
+8r46632	16r4D9A	<Inspector>printItems
+8r46634	16r4D9C	<Inspector>field
+8r46636	16r4D9E	<Inspector>field:
+8r46640	16r4DA0	<Inspector>fieldList
+8r46644	16r4DA4	<Inspector>fieldMenu
+8r46646	16r4DA6	<Inspector>object
+8r46650	16r4DA8	<Inspector>evaluateText:from:ifFail:
+8r46652	16r4DAA	<Inspector>fieldIndex
+8r46654	16r4DAC	<Inspector>fieldValue
+8r46660	16r4DB0	<Inspector>text
+8r46662	16r4DB2	<Inspector>doItValue:
+8r46664	16r4DB4	<Inspector>doItContext
+8r46666	16r4DB6	<Inspector>doItReceiver
+8r46670	16r4DB8	<Inspector>inspectField
+8r46672	16r4DBA	<Inspector>inspect:
+8r46674	16r4DBC	<Inspector>update
+8r46676	16r4DBE	<Inspector>acceptText:from:
+8r46712	16r4DCA	<DictionaryInspector class>flushMenus
+8r46766	16r4DF6	<DictionaryInspector class>example
+8r47006	16r4E06	<DictionaryInspector>printItems
+8r47010	16r4E08	<DictionaryInspector>fieldList
+8r47012	16r4E0A	<DictionaryInspector>fieldMenu
+8r47026	16r4E16	<DictionaryInspector>insertAndSelect:at:
+8r47030	16r4E18	<DictionaryInspector>fieldValue
+8r47032	16r4E1A	<DictionaryInspector>browseReferences
+8r47034	16r4E1C	<DictionaryInspector>addField
+8r47044	16r4E24	<DictionaryInspector>acceptText:from:
+8r47046	16r4E26	<DictionaryInspector>removeField
+8r47124	16r4E54	<ContextInspector>fieldList
+8r47126	16r4E56	<ContextInspector>fieldMenu
+8r47134	16r4E5C	<ContextInspector>fieldIndex
+8r47136	16r4E5E	<ContextInspector>fieldValue
+8r47142	16r4E62	<ContextInspector>doItContext
+8r47144	16r4E64	<ContextInspector>doItReceiver
+8r47146	16r4E66	<ContextInspector>acceptText:from:
+8r47152	16r4E6A	<ContextInspector>inspect:
+8r47220	16r4E90	<Debugger>selectedClass
+8r47222	16r4E92	<Debugger>context
+8r47224	16r4E94	<Debugger>acceptText:from:
+8r47234	16r4E9C	<Debugger>proceed
+8r47236	16r4E9E	<Debugger>receiverInspector
+8r47240	16r4EA0	<Debugger>removeDependent:
+8r47242	16r4EA2	<Debugger>release
+8r47246	16r4EA6	<Debugger>contextInspector
+8r47250	16r4EA8	<Debugger>step
+8r47252	16r4EAA	<Debugger>doItValue:
+8r47254	16r4EAC	<Debugger>interruptedContext
+8r47256	16r4EAE	<Debugger>doItContext
+8r47260	16r4EB0	<Debugger>doItReceiver
+8r47262	16r4EB2	<Debugger>correct:
+8r47334	16r4EDC	<NotifierController>initialize
+8r47404	16r4F04	<ScreenController class>initialize
+8r47514	16r4F4C	<ScreenController>initialize
+8r47520	16r4F50	<ScreenController>centerCursorInView
+8r47522	16r4F52	<ScreenController>initializeYellowButtonMenu
+8r47524	16r4F54	<ScreenController>openSystemWorkspace
+8r47526	16r4F56	<ScreenController>restoreDisplay
+8r47530	16r4F58	<ScreenController>exitProject
+8r47532	16r4F5A	<ScreenController>openProject
+8r47534	16r4F5C	<ScreenController>openFileList
+8r47560	16r4F70	<FileModel class>open:named:
+8r47562	16r4F72	<FileModel class>open:named:withController:
+8r47564	16r4F74	<FileModel class>flushMenus
+8r47570	16r4F78	<FileModel class>fileStream:
+8r47622	16r4F92	<FileModel>fileItIn:from:
+8r47624	16r4F94	<FileModel>getNew:from:
+8r47626	16r4F96	<FileModel>setFileName:
+8r47630	16r4F98	<FileModel>fileInFile
+8r47634	16r4F9C	<FileModel>text
+8r47646	16r4FA6	<FileModel>doItValue:
+8r47650	16r4FA8	<FileModel>doItContext
+8r47652	16r4FAA	<FileModel>doItReceiver
+8r47654	16r4FAC	<FileModel>acceptText:from:
+8r47662	16r4FB2	<FileModel>setFileStream:
+8r47664	16r4FB4	<FileModel>textMenu
+8r47726	16r4FD6	<FileList class>open
+8r47762	16r4FF2	<FileList class>openOnFileNames:label:
+8r47770	16r4FF8	<FileList class>flushMenus
+8r50130	16r5058	<FileList>getFile
+8r50132	16r505A	<FileList>copyName
+8r50134	16r505C	<FileList>renameFile
+8r50166	16r5076	<BinaryChoice class>message:
+8r50170	16r5078	<BinaryChoice class>message:displayAt:centered:ifTrue:ifFalse:
+8r50210	16r5088	<BinaryChoiceView class>openOn:message:displayAt:centered:
+8r50246	16r50A6	<BinaryChoiceView class>buildSwitchesFor:width:
+8r50274	16r50BC	<BinaryChoiceView>defaultControllerClass
+8r50314	16r50CC	<BinaryChoice class>message:displayAt:ifFalse:
+8r50316	16r50CE	<BinaryChoice class>message:displayAt:ifTrue:
+8r50320	16r50D0	<BinaryChoice class>message:displayAt:ifTrue:ifFalse:
+8r50322	16r50D2	<BinaryChoice class>example
+8r50346	16r50E6	<BinaryChoice>actionTaken
+8r50350	16r50E8	<BinaryChoice>selectTrue
+8r50352	16r50EA	<BinaryChoice>selectFalse
+8r50354	16r50EC	<BinaryChoice>active
+8r50356	16r50EE	<BinaryChoice>initialize
+8r50360	16r50F0	<BinaryChoice>trueAction:
+8r50362	16r50F2	<BinaryChoice>falseAction:
+8r50410	16r5108	<FileList>deleteFile
+8r50414	16r510C	<FileList>list:
+8r50416	16r510E	<FileList>text
+8r50422	16r5112	<FileList>isSelected
+8r50424	16r5114	<FileList>fileName:
+8r50426	16r5116	<FileList>filesMatching:
+8r50430	16r5118	<FileList>pattern
+8r50432	16r511A	<FileList>acceptPattern:from:
+8r50440	16r5120	<FileList>fileName
+8r50442	16r5122	<FileList>patternMenu
+8r50446	16r5126	<FileList>fileNameList
+8r50450	16r5128	<FileList>fileListMenu
+8r50454	16r512C	<FileList>isLegalFileName:
+8r50504	16r5144	<ScreenController>openBrowser
+8r50506	16r5146	<ScreenController>openWorkspace
+8r50510	16r5148	<ScreenController>openTranscript
+8r50516	16r514E	<ScreenController>save
+8r50524	16r5154	<ScreenController>quit
+8r50532	16r515A	<ScreenController>isControlActive
+8r50534	16r515C	<ScreenController>isControlWanted
+8r50606	16r5186	<FormEditor class>flashCursor:
+8r50614	16r518C	<FormEditor class>newForm
+8r50616	16r518E	<FormEditor class>initialize
+8r50672	16r51BA	<FormEditor class>openOnForm:
+8r50674	16r51BC	<FormEditor class>openOnForm:at:
+8r50676	16r51BE	<FormEditor class>createOnForm:
+8r50714	16r51CC	<FormView class>exampleOne
+8r50716	16r51CE	<FormView class>exampleTwo
+8r50742	16r51E2	<FormView>displayView
+8r50746	16r51E6	<FormView>accept
+8r50750	16r51E8	<FormView>cancel
+8r50752	16r51EA	<FormView>mask
+8r50754	16r51EC	<FormView>changeValueAt:put:
+8r50756	16r51EE	<FormView>update:
+8r50760	16r51F0	<FormView>defaultControllerClass
+8r50764	16r51F4	<FormView>defaultWindow
+8r50766	16r51F6	<FormView>rule
+8r50770	16r51F8	<FormView>mask:
+8r50772	16r51FA	<FormView>rule:
+8r50774	16r51FC	<FormView>defaultRule
+8r50776	16r51FE	<FormView>defaultMask
+8r51050	16r5228	<FormHolderView>model:
+8r51052	16r522A	<FormHolderView>updateDisplay
+8r51054	16r522C	<FormHolderView>workingForm
+8r51056	16r522E	<FormHolderView>accept
+8r51060	16r5230	<FormHolderView>cancel
+8r51062	16r5232	<FormHolderView>release
+8r51064	16r5234	<FormHolderView>displayView
+8r51066	16r5236	<FormHolderView>changeValueAt:put:
+8r51122	16r5252	<FormMenuView class>initialize
+8r51276	16r52BE	<FormButtonCache>form:
+8r51300	16r52C0	<FormButtonCache>form
+8r51302	16r52C2	<FormButtonCache>offset:
+8r51304	16r52C4	<FormButtonCache>offset
+8r51306	16r52C6	<FormButtonCache>value:
+8r51310	16r52C8	<FormButtonCache>initialState:
+8r51312	16r52CA	<FormButtonCache>initialState
+8r51314	16r52CC	<FormButtonCache>value
+8r51746	16r53E6	<FormMenuView>makeGridSwitch:
+8r51766	16r53F6	<Switch class>newOn
+8r51774	16r53FC	<Switch class>new
+8r51776	16r53FE	<Switch class>newOff
+8r52036	16r541E	<Switch>isOn
+8r52040	16r5420	<Switch>initializeOff
+8r52042	16r5422	<Switch>onAction:
+8r52044	16r5424	<Switch>offAction:
+8r52046	16r5426	<Switch>isOff
+8r52050	16r5428	<Switch>turnOff
+8r52052	16r542A	<Switch>doAction:
+8r52054	16r542C	<Switch>set
+8r52056	16r542E	<Switch>turnOn
+8r52060	16r5430	<Switch>removeDependent:
+8r52062	16r5432	<Switch>release
+8r52064	16r5434	<Switch>clear
+8r52066	16r5436	<Switch>switch
+8r52070	16r5438	<Switch>initializeOn
+8r52130	16r5458	<OneOnSwitch>update:
+8r52132	16r545A	<OneOnSwitch>connection
+8r52134	16r545C	<OneOnSwitch>isConnectionSet
+8r52136	16r545E	<OneOnSwitch>notifyConnection
+8r52140	16r5460	<OneOnSwitch>connection:
+8r52142	16r5462	<OneOnSwitch>release
+8r52146	16r5466	<OneOnSwitch>turnOn
+8r52202	16r5482	<Button class>newOn
+8r52222	16r5492	<Button>turnOn
+8r52224	16r5494	<Button>turnOff
+8r52272	16r54BA	<FormMenuView>defaultControllerClass
+8r52324	16r54D4	<FormMenuController>isControlWanted
+8r52326	16r54D6	<FormMenuController>processMenuKey
+8r52330	16r54D8	<FormMenuController>isControlActive
+8r52332	16r54DA	<FormMenuController>controlActivity
+8r52350	16r54E8	<FormMenuView>makeConnections:
+8r52352	16r54EA	<FormMenuView>makeFormEditorMenu
+8r52354	16r54EC	<FormMenuView>makeButton:
+8r52362	16r54F2	<FormMenuView>makeSwitch:
+8r52364	16r54F4	<FormMenuView>makeViews:for:
+8r52366	16r54F6	<FormMenuView>makeColorConnections:
+8r52370	16r54F8	<FormMenuView>subViewContainingCharacter:
+8r52414	16r550C	<FormEditor class>openFullScreenForm
+8r52416	16r550E	<FormEditor class>setKeyboardMap
+8r52544	16r5564	<FormEditor class>formFromDisplay
+8r52546	16r5566	<FormEditor class>newFormAtOrigin
+8r52550	16r5568	<FormEditor class>createFullScreenForm
+8r52552	16r556A	<FormEditor class>fullScreen
+8r52662	16r55B2	<FormEditor>promptRequest:
+8r52666	16r55B6	<FormEditor>curve
+8r52670	16r55B8	<FormEditor>controlInitialize
+8r52672	16r55BA	<FormEditor>line
+8r52674	16r55BC	<FormEditor>toolMenu:
+8r52676	16r55BE	<FormEditor>controlTerminate
+8r52700	16r55C0	<FormEditor>overMode
+8r52702	16r55C2	<FormEditor>rubberBandCurve:to:until:
+8r52704	16r55C4	<FormEditor>colorWhite
+8r52706	16r55C6	<FormEditor>colorBlack
+8r52710	16r55C8	<FormEditor>setVariables
+8r52712	16r55CA	<FormEditor>block
+8r52714	16r55CC	<FormEditor>singleCopy
+8r52716	16r55CE	<FormEditor>reverseMode
+8r52720	16r55D0	<FormEditor>dragForm
+8r52724	16r55D4	<FormEditor>selectTool:
+8r52726	16r55D6	<FormEditor>togglexGridding
+8r52730	16r55D8	<FormEditor>underMode
+8r52732	16r55DA	<FormEditor>colorGray
+8r52734	16r55DC	<FormEditor>toggleyGridding
+8r52736	16r55DE	<FormEditor>newSourceForm
+8r52740	16r55E0	<FormEditor>eraseMode
+8r52742	16r55E2	<FormEditor>colorLightGray
+8r52744	16r55E4	<FormEditor>fileInForm
+8r52752	16r55EA	<FormEditor>changeGridding
+8r52764	16r55F4	<FormEditor>fileOutForm
+8r52774	16r55FC	<FormEditor>colorDarkGray
+8r52776	16r55FE	<FormEditor>magnify
+8r53004	16r5604	<FormEditor>changeTool:
+8r53010	16r5608	<FormEditor>trackFormUntil:
+8r53012	16r560A	<FormEditor>redButtonActivity
+8r53014	16r560C	<FormEditor>cursorPoint
+8r53016	16r560E	<FormEditor>isControlWanted
+8r53020	16r5610	<FormEditor>initialize
+8r53022	16r5612	<FormEditor>accept
+8r53024	16r5614	<FormEditor>cancel
+8r53026	16r5616	<FormEditor>release
+8r53030	16r5618	<FormEditor>initializeYellowButtonMenu
+8r53032	16r561A	<FormEditor>normalizeColor:
+8r53034	16r561C	<FormEditor>rubberBandFrom:until:
+8r53036	16r561E	<FormEditor>repeatCopy
+8r53040	16r5620	<FormEditor>isControlActive
+8r53042	16r5622	<FormEditor>controlActivity
+8r53164	16r5674	<BitEditor class>locateMagnifiedView:scale:
+8r53166	16r5676	<BitEditor class>openScreenViewOnForm:at:magnifiedAt:scale:
+8r53170	16r5678	<BitEditor class>openOnForm:
+8r53172	16r567A	<BitEditor class>bitEdit:at:scale:remoteView:
+8r53220	16r5690	<OpaqueForm class>example
+8r53222	16r5692	<OpaqueForm class>figure:shape:
+8r53226	16r5696	<OpaqueForm class>shape:
+8r53230	16r5698	<OpaqueForm class>makeStar
+8r53252	16r56AA	<OpaqueForm>computeBoundingBox
+8r53254	16r56AC	<OpaqueForm>bitEdit
+8r53256	16r56AE	<OpaqueForm>valueAt:
+8r53260	16r56B0	<OpaqueForm>setFigure:shape:
+8r53262	16r56B2	<OpaqueForm>valueAt:put:
+8r53264	16r56B4	<OpaqueForm>copyBits:from:at:clippingBox:rule:mask:
+8r53266	16r56B6	<OpaqueForm>figure
+8r53270	16r56B8	<OpaqueForm>shape
+8r53272	16r56BA	<OpaqueForm>deepCopy
+8r53274	16r56BC	<OpaqueForm>offset
+8r53276	16r56BE	<OpaqueForm>displayOn:transformation:clippingBox:align:with:rule:mask:
+8r53300	16r56C0	<OpaqueForm>displayOn:at:clippingBox:rule:mask:
+8r53302	16r56C2	<OpaqueForm>storeOn:
+8r53332	16r56DA	<BitEditor class>magnifyWithSmall
+8r53334	16r56DC	<BitEditor class>magnifyOnScreen
+8r53336	16r56DE	<BitEditor class>openOnForm:at:scale:
+8r53340	16r56E0	<BitEditor class>openOnForm:at:
+8r53342	16r56E2	<BitEditor class>buildColorMenu:colorCount:
+8r53354	16r56EC	<BitEditor class>initialize
+8r53440	16r5720	<BitEditor>setColor:
+8r53442	16r5722	<BitEditor>controlInitialize
+8r53446	16r5726	<BitEditor>controlTerminate
+8r53450	16r5728	<BitEditor>accept
+8r53452	16r572A	<BitEditor>cancel
+8r53454	16r572C	<BitEditor>release
+8r53456	16r572E	<BitEditor>initializeYellowButtonMenu
+8r53460	16r5730	<BitEditor>view:
+8r53462	16r5732	<BitEditor>initialize
+8r53464	16r5734	<BitEditor>isControlActive
+8r53466	16r5736	<BitEditor>controlActivity
+8r53524	16r5754	<Form>valueAt:
+8r53540	16r5760	<Form>copy:from:in:rule:
+8r53542	16r5762	<Form>fromDisplay:
+8r53544	16r5764	<Form>valueAt:put:
+8r53546	16r5766	<Form>borderWidth:mask:
+8r53550	16r5768	<Form>edit
+8r53552	16r576A	<Form>editAt:
+8r53554	16r576C	<Form>writeOn:
+8r53556	16r576E	<Form>nextLifeGeneration
+8r53564	16r5774	<Form>convexShapeFill:
+8r53570	16r5778	<Form>magnifyBy:
+8r53572	16r577A	<Form>scanLineStringAt:
+8r53576	16r577E	<Form>setExtent:fromCompactArray:setOffset:
+8r53602	16r5782	<Form>extent:offset:
+8r53604	16r5784	<Form>bitEditAt:
+8r53606	16r5786	<Form>spread:from:by:spacing:direction:
+8r53612	16r578A	<Form>setExtent:fromArray:setOffset:
+8r53614	16r578C	<Form>bits:
+8r53616	16r578E	<Form>shapeFill:interiorPoint:
+8r53620	16r5790	<Form>shrinkBy:
+8r53622	16r5792	<Form>bitEditAt:scale:
+8r53704	16r57C4	<StrikeFont>glyphs:
+8r53706	16r57C6	<StrikeFont>xTable
+8r53710	16r57C8	<StrikeFont>emphasized:named:
+8r53712	16r57CA	<StrikeFont>minAscii
+8r53714	16r57CC	<StrikeFont>glyphs
+8r53716	16r57CE	<StrikeFont>stopConditions
+8r53720	16r57D0	<StrikeFont>widthOf:
+8r53722	16r57D2	<StrikeFont>familySizeFace
+8r53740	16r57E0	<StrikeFont>ascent
+8r53742	16r57E2	<StrikeFont>maxAscii
+8r53744	16r57E4	<StrikeFont>subscript:
+8r53746	16r57E6	<StrikeFont>superscript:
+8r53750	16r57E8	<StrikeFont>name:
+8r53752	16r57EA	<StrikeFont>emphasized:
+8r53754	16r57EC	<StrikeFont>ascent:
+8r53756	16r57EE	<StrikeFont>descent
+8r53760	16r57F0	<StrikeFont>checkCharacter:
+8r53762	16r57F2	<StrikeFont>characterForm:
+8r53764	16r57F4	<StrikeFont>composeWord:in:beginningAt:
+8r53766	16r57F6	<StrikeFont>printOn:
+8r53774	16r57FC	<StrikeFont>characters:in:displayAt:clippedBy:rule:mask:
+8r54000	16r5800	<StrikeFont>emphasis
+8r54002	16r5802	<StrikeFont>emphasis:
+8r54004	16r5804	<StrikeFont>raster
+8r54006	16r5806	<StrikeFont>maxWidth
+8r54010	16r5808	<StrikeFont>superscript
+8r54012	16r580A	<StrikeFont>subscript
+8r54014	16r580C	<StrikeFont>height
+8r54016	16r580E	<StrikeFont>name
+8r54440	16r5920	<TextStyle class>fontArray:
+8r54524	16r5954	<TextStyle>leftMarginTabAt:
+8r54526	16r5956	<TextStyle>rightMarginTabAt:
+8r54530	16r5958	<TextStyle>defaultFont
+8r54532	16r595A	<TextStyle>outputMedium
+8r54534	16r595C	<TextStyle>newFontArray:
+8r54536	16r595E	<TextStyle>unSubscriptedFontFor:
+8r54540	16r5960	<TextStyle>unSuperscriptedFontFor:
+8r54542	16r5962	<TextStyle>isFontBoldItalic:
+8r54544	16r5964	<TextStyle>isFontItalic:
+8r54546	16r5966	<TextStyle>isFontBold:
+8r54550	16r5968	<TextStyle>fontNamed:
+8r54552	16r596A	<TextStyle>flushFonts
+8r54560	16r5970	<TextStyle>marginTabAt:side:
+8r54562	16r5972	<TextStyle>fontAt:put:
+8r54564	16r5974	<TextStyle>fontFor:face:
+8r54566	16r5976	<TextStyle>lineGrid:
+8r54570	16r5978	<TextStyle>baseline:
+8r54572	16r597A	<TextStyle>fontArray
+8r54574	16r597C	<TextStyle>boldItalicFontFor:
+8r54576	16r597E	<TextStyle>subscriptedFontFor:
+8r54600	16r5980	<TextStyle>isFontSubscripted:
+8r54602	16r5982	<TextStyle>superscriptedFontFor:
+8r54604	16r5984	<TextStyle>isFontSuperscripted:
+8r54606	16r5986	<TextStyle>nextTabXFrom:leftMargin:rightMargin:
+8r54610	16r5988	<TextStyle>descent
+8r54612	16r598A	<TextStyle>nestingDepth
+8r54614	16r598C	<TextStyle>alignment
+8r54616	16r598E	<TextStyle>underlinedFontFor:
+8r54620	16r5990	<TextStyle>isFontUnderlined:
+8r54622	16r5992	<TextStyle>tabWidth
+8r54624	16r5994	<TextStyle>baseline
+8r54626	16r5996	<TextStyle>lineGrid
+8r54630	16r5998	<TextStyle>outputMedium:
+8r54632	16r599A	<TextStyle>alignment:
+8r54634	16r599C	<TextStyle>gridForFont:withLead:
+8r54636	16r599E	<TextStyle>unUnderlinedFontFor:
+8r54640	16r59A0	<TextStyle>boldFontFor:
+8r54642	16r59A2	<TextStyle>basalFontFor:
+8r54644	16r59A4	<TextStyle>italicFontFor:
+8r54646	16r59A6	<TextStyle>restIndent
+8r54650	16r59A8	<TextStyle>clearIndents
+8r54652	16r59AA	<TextStyle>firstIndent:
+8r54654	16r59AC	<TextStyle>restIndent:
+8r54656	16r59AE	<TextStyle>rightIndent:
+8r54660	16r59B0	<TextStyle>rightIndent
+8r54662	16r59B2	<TextStyle>firstIndent
+8r54664	16r59B4	<TextStyle>fontAt:
+8r54734	16r59DC	<PopUpMenu class>labels:
+8r54754	16r59EC	<ActionMenu class>labels:lines:selectors:
+8r54760	16r59F0	<ActionMenu class>confirm
+8r54764	16r59F4	<ActionMenu class>labels:selectors:
+8r55006	16r5A06	<ActionMenu>selectorAt:
+8r55010	16r5A08	<ActionMenu>setSelectors:
+8r55404	16r5B04	<Browser class>newOnClass:
+8r55500	16r5B40	<Browser>selectorMenu
+8r55504	16r5B44	<Browser>onClass:
+8r55506	16r5B46	<Browser>protocol:
+8r55512	16r5B4A	<Browser>categoryMenu
+8r55530	16r5B58	<Browser>classList
+8r55534	16r5B5C	<Browser>classMode
+8r55544	16r5B64	<Browser>newClassList:
+8r55546	16r5B66	<Browser>classMenu
+8r55556	16r5B6E	<Browser>acceptClass:from:
+8r55560	16r5B70	<Browser>categoryList
+8r55562	16r5B72	<Browser>protocolList
+8r55564	16r5B74	<Browser>prompt:initially:
+8r55570	16r5B78	<Browser>meta
+8r55572	16r5B7A	<Browser>browseHierarchy
+8r55576	16r5B7E	<Browser>newCategoryList:
+8r55600	16r5B80	<Browser>newProtocolList:
+8r55602	16r5B82	<Browser>protocol
+8r55604	16r5B84	<Browser>selectedClass
+8r55606	16r5B86	<Browser>selectorList
+8r55610	16r5B88	<Browser>acceptMethod:from:
+8r55612	16r5B8A	<Browser>protocolMenu
+8r55626	16r5B96	<Browser>fileOutCategory
+8r55630	16r5B98	<Browser>printOutCategory
+8r55632	16r5B9A	<Browser>spawnCategory
+8r55634	16r5B9C	<Browser>addCategory
+8r55644	16r5BA4	<Browser>renameCategory
+8r55652	16r5BAA	<Browser>removeCategory
+8r55660	16r5BB0	<Browser>updateCategories
+8r55662	16r5BB2	<Browser>editCategories
+8r55664	16r5BB4	<Browser>explainSpecial:
+8r55714	16r5BCC	<Browser>acceptText:from:
+8r55720	16r5BD0	<Browser>textMenu
+8r55730	16r5BD8	<Browser>nonMetaClass
+8r55732	16r5BDA	<Browser>logProtocolChange:
+8r55734	16r5BDC	<Browser>meta:
+8r55736	16r5BDE	<Browser>newSelectorList:
+8r55740	16r5BE0	<Browser>promptClass
+8r55742	16r5BE2	<Browser>on:
+8r55744	16r5BE4	<Browser>doItValue:
+8r55746	16r5BE6	<Browser>fileOutClass
+8r55750	16r5BE8	<Browser>printOutClass
+8r55754	16r5BEC	<Browser>spawnClass
+8r55756	16r5BEE	<Browser>spawnHierarchy
+8r55760	16r5BF0	<Browser>showHierarchy
+8r55762	16r5BF2	<Browser>editClass
+8r55764	16r5BF4	<Browser>editComment
+8r55766	16r5BF6	<Browser>editProtocols
+8r55770	16r5BF8	<Browser>browseFieldReferences
+8r55772	16r5BFA	<Browser>browseClassVariables
+8r55776	16r5BFE	<Browser>browseClassReferences
+8r56000	16r5C00	<Browser>renameClass
+8r56014	16r5C0C	<Browser>removeClass
+8r56024	16r5C14	<Browser>text
+8r56036	16r5C1E	<Browser>browseSenders
+8r56040	16r5C20	<Browser>browseImplementors
+8r56044	16r5C24	<Browser>browseMessages
+8r56050	16r5C28	<Browser>spawnEdits:from:
+8r56052	16r5C2A	<Browser>category
+8r56054	16r5C2C	<Browser>fileOutMessage
+8r56056	16r5C2E	<Browser>printOutMessage
+8r56060	16r5C30	<Browser>spawnMethod
+8r56062	16r5C32	<Browser>moveMethod
+8r56076	16r5C3E	<Browser>category:
+8r56100	16r5C40	<Browser>className
+8r56102	16r5C42	<Browser>fileOutProtocol
+8r56104	16r5C44	<Browser>printOutProtocol
+8r56106	16r5C46	<Browser>spawnProtocol
+8r56110	16r5C48	<Browser>addProtocol
+8r56122	16r5C52	<Browser>renameProtocol
+8r56132	16r5C5A	<Browser>removeProtocol
+8r56140	16r5C60	<Browser>selector:
+8r56142	16r5C62	<Browser>removeMethod
+8r56146	16r5C66	<Browser>className:
+8r56150	16r5C68	<Browser>selector
+8r56152	16r5C6A	<Browser>doItContext
+8r56154	16r5C6C	<Browser>doItReceiver
+8r56156	16r5C6E	<Browser>textMode:
+8r56276	16r5CBE	<BrowserView class>openMethodBrowserOn:withController:
+8r56306	16r5CC6	<BrowserView class>openListBrowserOn:label:initialSelection:
+8r56322	16r5CD2	<LookupKey>hashMappedBy:
+8r56324	16r5CD4	<LookupKey>key
+8r56326	16r5CD6	<LookupKey>hash
+8r56330	16r5CD8	<LookupKey><
+8r56332	16r5CDA	<LookupKey>printOn:
+8r56334	16r5CDC	<LookupKey>=
+8r56336	16r5CDE	<LookupKey>key:
+8r56372	16r5CFA	<BrowserView class>openCategoryBrowserOn:
+8r56414	16r5D0C	<BrowserView class>openMethodBrowserOn:
+8r56424	16r5D14	<BrowserView class>openOn:withController:
+8r56446	16r5D26	<BrowserView class>openProtocolBrowserOn:
+8r56464	16r5D34	<BrowserView class>openClassBrowserOn:
+8r56520	16r5D50	<BrowserView>addCategoryView:on:readOnly:
+8r56522	16r5D52	<BrowserView>addClassView:on:readOnly:
+8r56524	16r5D54	<BrowserView>addMetaView:on:readOnly:
+8r56534	16r5D5C	<BrowserView>addProtocolView:on:readOnly:
+8r56536	16r5D5E	<BrowserView>addMethodView:on:readOnly:
+8r56540	16r5D60	<BrowserView>addSelectorView:on:readOnly:
+8r56542	16r5D62	<BrowserView>addTextView:on:initialSelection:
+8r56562	16r5D72	<ChangeList>restoreCurrent
+8r56564	16r5D74	<ChangeList>deselect
+8r56570	16r5D78	<ChangeList>checkWith:
+8r56572	16r5D7A	<ChangeList>addDoIt:
+8r56574	16r5D7C	<ChangeList>list
+8r56600	16r5D80	<ChangeList>fileOutOn:
+8r56602	16r5D82	<ChangeList>changesAt:add:
+8r56604	16r5D84	<ChangeList>switchFilter:perform:
+8r56606	16r5D86	<ChangeList>hasFilter:
+8r56610	16r5D88	<ChangeList>nextNonComment:
+8r56612	16r5D8A	<ChangeList>addChanges:
+8r56614	16r5D8C	<ChangeList>reportChangesOn:extension:
+8r56624	16r5D94	<ChangeList>findLast:in:
+8r56626	16r5D96	<ChangeList>updateSelection:
+8r56630	16r5D98	<ChangeList>finishReportOn:
+8r56642	16r5DA2	<ChangeList>writeContendor:on:oldText:
+8r56652	16r5DAA	<ChangeList>addFilter:
+8r56654	16r5DAC	<ChangeList>reportConflictsByClassWithExtension:
+8r56660	16r5DB0	<ChangeList>updateList
+8r56662	16r5DB2	<ChangeList>tabText:on:
+8r56664	16r5DB4	<ChangeList>listName:changes:removed:
+8r56666	16r5DB6	<ChangeList>showingField:
+8r56670	16r5DB8	<ChangeList>switchField:perform:
+8r56672	16r5DBA	<ChangeList>toggleListIndex:
+8r56674	16r5DBC	<ChangeList>listIndex
+8r56676	16r5DBE	<ChangeList>listName
+8r56702	16r5DC2	<ChangeList>listSize
+8r56704	16r5DC4	<ChangeList>doThis:
+8r56706	16r5DC6	<ChangeList>hasRemoved:
+8r56710	16r5DC8	<ChangeList>reportConflictsOn:
+8r56712	16r5DCA	<ChangeList>changesAt:
+8r56716	16r5DCE	<ChangeList>equalWithoutComments:and:
+8r56720	16r5DD0	<ChangeList>checkSystem
+8r56722	16r5DD2	<ChangeList>filterCopy
+8r56730	16r5DD8	<ChangeList>removeAll
+8r56732	16r5DDA	<ChangeList>restoreAll
+8r56734	16r5DDC	<ChangeList>forget
+8r56736	16r5DDE	<ChangeList>initialize
+8r56744	16r5DE4	<ChangeList>doThis
+8r56746	16r5DE6	<ChangeList>checkWithSystem:
+8r56750	16r5DE8	<ChangeList>contents:notifying:
+8r56752	16r5DEA	<ChangeList>scanFile:
+8r56756	16r5DEE	<ChangeList>recoverFile:
+8r56762	16r5DF2	<ChangeList>addChangeSet:
+8r56764	16r5DF4	<ChangeList>unlock
+8r56766	16r5DF6	<ChangeList>isUnlocked
+8r56770	16r5DF8	<ChangeList>lock
+8r56772	16r5DFA	<ChangeList>release
+8r56776	16r5DFE	<ChangeList>contents:
+8r57126	16r5E56	<FillInTheBlank class>message:displayAt:centered:action:initialAnswer:
+8r57136	16r5E5E	<FillInTheBlank class>action:initialAnswer:
+8r57140	16r5E60	<FillInTheBlank class>request:displayAt:centered:action:initialAnswer:useCRController:
+8r57144	16r5E64	<FillInTheBlank class>request:displayAt:centered:action:initialAnswer:
+8r57150	16r5E68	<FillInTheBlank class>request:
+8r57154	16r5E6C	<FillInTheBlank class>example2
+8r57162	16r5E72	<FillInTheBlank class>example1
+8r57170	16r5E78	<FillInTheBlank class>example3
+8r57172	16r5E7A	<FillInTheBlank class>request:initialAnswer:
+8r57210	16r5E88	<FillInTheBlank>actionTaken
+8r57212	16r5E8A	<FillInTheBlank>selectAction
+8r57214	16r5E8C	<FillInTheBlank>action:
+8r57216	16r5E8E	<FillInTheBlank>initialize
+8r57220	16r5E90	<FillInTheBlank>setAction:
+8r57246	16r5EA6	<Text class>string:emphasis:
+8r57250	16r5EA8	<Text class>string:runs:
+8r57254	16r5EAC	<Text class>initTextConstants
+8r57256	16r5EAE	<Text class>initTextConstants2
+8r57260	16r5EB0	<Text class>fromString:
+8r57262	16r5EB2	<Text class>initialize
+8r57266	16r5EB6	<Text class>new:
+8r57306	16r5EC6	<Text>replaceFrom:to:with:
+8r57310	16r5EC8	<Text>copyFrom:to:
+8r57312	16r5ECA	<Text>copyReplaceFrom:to:with:
+8r57314	16r5ECC	<Text>runs
+8r57316	16r5ECE	<Text>at:
+8r57320	16r5ED0	<Text>at:put:
+8r57322	16r5ED2	<Text>string
+8r57324	16r5ED4	<Text>emphasizeFrom:to:with:
+8r57326	16r5ED6	<Text>findString:startingAt:
+8r57330	16r5ED8	<Text>setString:setRuns:
+8r57332	16r5EDA	<Text>makeSelectorBoldIn:
+8r57334	16r5EDC	<Text>size
+8r57336	16r5EDE	<Text>printOn:
+8r57342	16r5EE2	<Text>asNumber
+8r57344	16r5EE4	<Text>asUppercase
+8r57346	16r5EE6	<Text>copy
+8r57350	16r5EE8	<Text>asString
+8r57352	16r5EEA	<Text>emphasisAt:
+8r57354	16r5EEC	<Text>=
+8r57356	16r5EEE	<Text>allBold
+8r57360	16r5EF0	<Text>runLengthFor:
+8r57362	16r5EF2	<Text>asDisplayText
+8r57364	16r5EF4	<Text>asText
+8r57366	16r5EF6	<Text>asLowercase
+8r57370	16r5EF8	<Text>asParagraph
+8r57372	16r5EFA	<Text>storeOn:
+8r57444	16r5F24	<WordArray class>maxSize
+8r57470	16r5F38	<WordArray>toStream:
+8r57472	16r5F3A	<WordArray>fromByteStream:
+8r57474	16r5F3C	<WordArray>countBits
+8r57476	16r5F3E	<WordArray>printOn:
+8r57526	16r5F56	<InputSensor>anyButtonPressed
+8r57530	16r5F58	<InputSensor>buttons
+8r57532	16r5F5A	<InputSensor>mapKeyboardEvent:
+8r57534	16r5F5C	<InputSensor>cursorPoint
+8r57536	16r5F5E	<InputSensor>primMouseButtons
+8r57540	16r5F60	<InputSensor>keyboardEvent
+8r57542	16r5F62	<InputSensor>primLeftShiftDown
+8r57544	16r5F64	<InputSensor>primKbdPeek
+8r57546	16r5F66	<InputSensor>primKbdNext
+8r57550	16r5F68	<InputSensor>waitClickButton
+8r57552	16r5F6A	<InputSensor>flushKeyboard
+8r57554	16r5F6C	<InputSensor>mousePointNext
+8r57556	16r5F6E	<InputSensor>blueButtonPressed
+8r57560	16r5F70	<InputSensor>currentCursor:
+8r57562	16r5F72	<InputSensor>currentCursor
+8r57564	16r5F74	<InputSensor>waitNoButton
+8r57566	16r5F76	<InputSensor>noButtonPressed
+8r57570	16r5F78	<InputSensor>redButtonPressed
+8r57572	16r5F7A	<InputSensor>yellowButtonPressed
+8r57574	16r5F7C	<InputSensor>keyboardPressed
+8r57576	16r5F7E	<InputSensor>keyboard
+8r57600	16r5F80	<InputSensor>waitButton
+8r57604	16r5F84	<InputSensor>initMap
+8r57606	16r5F86	<InputSensor>keyboardPeek
+8r57612	16r5F8A	<InputSensor>mousePoint
+8r57614	16r5F8C	<InputSensor>primCursorLocPut:
+8r57640	16r5FA0	<Controller>release
+8r57642	16r5FA2	<Controller>model:
+8r57644	16r5FA4	<Controller>model
+8r57646	16r5FA6	<Controller>startUp
+8r57650	16r5FA8	<Controller>viewHasCursor
+8r57652	16r5FAA	<Controller>controlToNextLevel
+8r57654	16r5FAC	<Controller>isControlActive
+8r57656	16r5FAE	<Controller>controlActivity
+8r57706	16r5FC6	<View>defaultWindow
+8r57710	16r5FC8	<View>window:
+8r57712	16r5FCA	<View>addSubView:align:with:
+8r57714	16r5FCC	<View>resetSubViews
+8r57716	16r5FCE	<View>addSubView:viewport:
+8r57720	16r5FD0	<View>inverseDisplayTransform:
+8r57722	16r5FD2	<View>deEmphasizeView
+8r57724	16r5FD4	<View>deEmphasizeSubViews
+8r57726	16r5FD6	<View>addSubView:ifCyclic:
+8r57730	16r5FD8	<View>window
+8r57732	16r5FDA	<View>displaySubViews
+8r57734	16r5FDC	<View>flash
+8r57736	16r5FDE	<View>clearInside
+8r57740	16r5FE0	<View>clearInside:
+8r57742	16r5FE2	<View>borderWidthLeft:right:top:bottom:
+8r57744	16r5FE4	<View>computeInsetDisplayBox
+8r57746	16r5FE6	<View>subViews
+8r57750	16r5FE8	<View>highlight
+8r57752	16r5FEA	<View>borderColor
+8r57754	16r5FEC	<View>borderColor:
+8r57756	16r5FEE	<View>borderWidth
+8r57760	16r5FF0	<View>insideColor
+8r57762	16r5FF2	<View>borderWidth:
+8r57764	16r5FF4	<View>insideColor:
+8r57766	16r5FF6	<View>releaseSubView:
+8r57770	16r5FF8	<View>displayView
+8r57772	16r5FFA	<View>setTransformation:
+8r57774	16r5FFC	<View>computeDisplayTransformation
+8r57776	16r5FFE	<View>superView
+8r60000	16r6000	<View>displayBorder
+8r60002	16r6002	<View>model:
+8r60004	16r6004	<View>model
+8r60006	16r6006	<View>transformation
+8r60010	16r6008	<View>viewport
+8r60012	16r600A	<View>defaultController
+8r60014	16r600C	<View>containsPoint:
+8r60016	16r600E	<View>addSubView:below:
+8r60020	16r6010	<View>addSubView:toRightOf:
+8r60022	16r6012	<View>controller:
+8r60024	16r6014	<View>addSubView:toLeftOf:
+8r60026	16r6016	<View>subViewWantingControl
+8r60030	16r6018	<View>initialize
+8r60032	16r601A	<View>removeFromSuperView
+8r60034	16r601C	<View>removeSubView:
+8r60036	16r601E	<View>addSubView:above:
+8r60040	16r6020	<View>update
+8r60042	16r6022	<View>removeSubViews
+8r60044	16r6024	<View>superView:
+8r60046	16r6026	<View>getViewport
+8r60050	16r6028	<View>topView
+8r60052	16r602A	<View>insetDisplayBox
+8r60054	16r602C	<View>setWindow:
+8r60056	16r602E	<View>isCyclic:
+8r60060	16r6030	<View>transformation:
+8r60062	16r6032	<View>addSubView:
+8r60066	16r6036	<View>lastSubView
+8r60070	16r6038	<View>releaseSubViews
+8r60072	16r603A	<View>addSubView:window:viewport:
+8r60074	16r603C	<View>displayTransform:
+8r60076	16r603E	<View>firstSubView
+8r60100	16r6040	<View>unlock
+8r60102	16r6042	<View>update:
+8r60104	16r6044	<View>isUnlocked
+8r60106	16r6046	<View>isLocked
+8r60110	16r6048	<View>lock
+8r60112	16r604A	<View>emphasizeSubViews
+8r60114	16r604C	<View>emphasize
+8r60116	16r604E	<View>emphasizeView
+8r60120	16r6050	<View>inspect
+8r60156	16r606E	<View>release
+8r60160	16r6070	<View>boundingBox
+8r60162	16r6072	<View>computeBoundingBox
+8r60164	16r6074	<View>align:with:
+8r60166	16r6076	<View>scaleBy:
+8r60170	16r6078	<View>translateBy:
+8r60172	16r607A	<View>display
+8r60174	16r607C	<View>controller
+8r60176	16r607E	<View>addSubView:in:borderWidth:
+8r60202	16r6082	<View>scale:translation:
+8r60204	16r6084	<View>window:viewport:
+8r60330	16r60D8	<ListView>boundingBox
+8r60332	16r60DA	<ListView>display
+8r60336	16r60DE	<ListView>update:
+8r60340	16r60E0	<ListView>defaultControllerClass
+8r60342	16r60E2	<ListView>selection
+8r60344	16r60E4	<ListView>deselect
+8r60346	16r60E6	<ListView>deEmphasizeView
+8r60350	16r60E8	<ListView>clippingBox
+8r60352	16r60EA	<ListView>reset
+8r60354	16r60EC	<ListView>list
+8r60356	16r60EE	<ListView>selectionBox
+8r60360	16r60F0	<ListView>resetAndDisplayView
+8r60362	16r60F2	<ListView>topDelimiter
+8r60364	16r60F4	<ListView>maximumSelection
+8r60366	16r60F6	<ListView>selectionBoxOffset
+8r60370	16r60F8	<ListView>topDelimiter:
+8r60372	16r60FA	<ListView>noTopDelimiter
+8r60374	16r60FC	<ListView>noBottomDelimiter
+8r60376	16r60FE	<ListView>wrappingBox
+8r60400	16r6100	<ListView>positionList
+8r60402	16r6102	<ListView>bottomDelimiter
+8r60404	16r6104	<ListView>bottomDelimiter:
+8r60406	16r6106	<ListView>displayView
+8r60410	16r6108	<ListView>displaySelectionBox
+8r60412	16r610A	<ListView>isSelectionBoxClipped
+8r60414	16r610C	<ListView>minimumSelection
+8r60416	16r610E	<ListView>list:
+8r60420	16r6110	<ListView>findSelection:
+8r60422	16r6112	<ListView>moveSelectionBox:
+8r60424	16r6114	<ListView>initialize
+8r60472	16r613A	<SelectionInListView class>on:printItems:oneItem:aspect:change:list:menu:initialSelection:
+8r60476	16r613E	<SelectionInListView class>on:aspect:change:list:menu:initialSelection:
+8r60522	16r6152	<SelectionInListView>update:
+8r60524	16r6154	<SelectionInListView>defaultControllerClass
+8r60526	16r6156	<SelectionInListView>on:printItems:oneItem:aspect:change:list:menu:initialSelection:
+8r60534	16r615C	<SelectionInListView>list:
+8r60536	16r615E	<SelectionInListView>getList
+8r60540	16r6160	<SelectionInListView>initialSelection
+8r60542	16r6162	<SelectionInListView>isEmpty
+8r60544	16r6164	<SelectionInListView>changeModelSelection:
+8r60546	16r6166	<SelectionInListView>yellowButtonMenu
+8r60550	16r6168	<SelectionInListView>displayView
+8r60610	16r6188	<InspectorView class>inspector:
+8r60612	16r618A	<InspectorView class>buildScheduledView:
+8r60640	16r61A0	<Dictionary>grow
+8r60642	16r61A2	<Dictionary>select:
+8r60644	16r61A4	<Dictionary>add:
+8r60646	16r61A6	<Dictionary>do:
+8r60650	16r61A8	<Dictionary>storeOn:
+8r60662	16r61B2	<Dictionary>findKeyOrNil:
+8r60676	16r61BE	<SystemDictionary class>initialize
+8r61044	16r6224	<SystemDictionary>copyChangesTo:
+8r61056	16r622E	<SystemDictionary>allClassesDo:
+8r61060	16r6230	<SystemDictionary>recover:
+8r61064	16r6234	<SystemDictionary>condenseChanges
+8r61070	16r6238	<SystemDictionary>snapshotPrimitive
+8r61074	16r623C	<SystemDictionary>valueAtNewKey:put:atIndex:declareFrom:
+8r61076	16r623E	<SystemDictionary>core
+8r61100	16r6240	<SystemDictionary>pointersTo:do:
+8r61102	16r6242	<SystemDictionary>browseAllSelect:
+8r61106	16r6246	<SystemDictionary>allImplementedMessages
+8r61112	16r624A	<SystemDictionary>browseAllCallsOn:and:
+8r61114	16r624C	<SystemDictionary>allImplementorsOf:
+8r61120	16r6250	<SystemDictionary>renameSystemFiles:
+8r61140	16r6260	<SystemDictionary>signal:atOopsLeft:wordsLeft:
+8r61142	16r6262	<SystemDictionary>oopsLeft
+8r61144	16r6264	<SystemDictionary>noChanges
+8r61152	16r626A	<SystemDictionary>newChanges:
+8r61154	16r626C	<SystemDictionary>classNames
+8r61162	16r6272	<SystemDictionary>newClassNames
+8r61164	16r6274	<SystemDictionary>newSourceFile:without:
+8r61172	16r627A	<SystemDictionary>browseAllImplementorsOf:
+8r61176	16r627E	<SystemDictionary>showMenuThenBrowse:
+8r61202	16r6282	<SystemDictionary>specialSelectorSize
+8r61210	16r6288	<SystemDictionary>specialSelectorAt:
+8r61212	16r628A	<SystemDictionary>version
+8r61216	16r628E	<SystemDictionary>allCallsOn:
+8r61222	16r6292	<SystemDictionary>browseAllCallsOn:
+8r61230	16r6298	<SystemDictionary>resetSpaceLimits
+8r61242	16r62A2	<SystemDictionary>printOn:
+8r61250	16r62A8	<SystemDictionary>specialNargsAt:
+8r61252	16r62AA	<SystemDictionary>timeStamp:
+8r61262	16r62B2	<SystemDictionary>at:put:
+8r61264	16r62B4	<SystemDictionary>install
+8r61324	16r62D4	<Random class>new
+8r61344	16r62E4	<Random>setSeed
+8r61350	16r62E8	<Random>nextPut:
+8r61352	16r62EA	<Random>contents
+8r61354	16r62EC	<Random>atEnd
+8r61356	16r62EE	<Random>next
+8r61436	16r631E	<LinkedList>last
+8r61440	16r6320	<LinkedList>add:
+8r61442	16r6322	<LinkedList>addFirst:
+8r61444	16r6324	<LinkedList>isEmpty
+8r61446	16r6326	<LinkedList>remove:ifAbsent:
+8r61450	16r6328	<LinkedList>removeFirst
+8r61452	16r632A	<LinkedList>size
+8r61454	16r632C	<LinkedList>do:
+8r61456	16r632E	<LinkedList>removeLast
+8r61460	16r6330	<LinkedList>first
+8r61462	16r6332	<LinkedList>addLast:
+8r61524	16r6354	<MappedCollection class>collection:map:
+8r61530	16r6358	<MappedCollection class>new
+8r61550	16r6368	<MappedCollection>select:
+8r61552	16r636A	<MappedCollection>at:
+8r61554	16r636C	<MappedCollection>at:put:
+8r61556	16r636E	<MappedCollection>setCollection:map:
+8r61560	16r6370	<MappedCollection>copy
+8r61562	16r6372	<MappedCollection>collect:
+8r61564	16r6374	<MappedCollection>add:
+8r61566	16r6376	<MappedCollection>contents
+8r61570	16r6378	<MappedCollection>species
+8r61572	16r637A	<MappedCollection>do:
+8r61574	16r637C	<MappedCollection>size
+8r61576	16r637E	<MappedCollection>storeOn:
+8r61644	16r63A4	<InfiniteForm class>with:
+8r61662	16r63B2	<InfiniteForm>form:
+8r61664	16r63B4	<InfiniteForm>displayOn:at:clippingBox:rule:mask:
+8r61666	16r63B6	<InfiniteForm>offset
+8r61670	16r63B8	<InfiniteForm>computeBoundingBox
+8r61724	16r63D4	<Boolean class>new
+8r61746	16r63E6	<Boolean>ifFalse:
+8r61750	16r63E8	<Boolean>ifTrue:ifFalse:
+8r61752	16r63EA	<Boolean>&
+8r61754	16r63EC	<Boolean>ifFalse:ifTrue:
+8r61756	16r63EE	<Boolean>and:
+8r61760	16r63F0	<Boolean>or:
+8r61762	16r63F2	<Boolean>shallowCopy
+8r61764	16r63F4	<Boolean>eqv:
+8r61766	16r63F6	<Boolean>not
+8r61770	16r63F8	<Boolean>xor:
+8r61772	16r63FA	<Boolean>deepCopy
+8r61774	16r63FC	<Boolean>|
+8r61776	16r63FE	<Boolean>storeOn:
+8r62000	16r6400	<Boolean>ifTrue:
+8r62026	16r6416	<False>ifFalse:
+8r62030	16r6418	<False>ifTrue:ifFalse:
+8r62032	16r641A	<False>ifFalse:ifTrue:
+8r62034	16r641C	<False>and:
+8r62036	16r641E	<False>or:
+8r62040	16r6420	<False>&
+8r62042	16r6422	<False>not
+8r62044	16r6424	<False>|
+8r62046	16r6426	<False>printOn:
+8r62052	16r642A	<False>ifTrue:
+8r62114	16r644C	<True>ifFalse:
+8r62116	16r644E	<True>ifTrue:ifFalse:
+8r62120	16r6450	<True>ifFalse:ifTrue:
+8r62122	16r6452	<True>and:
+8r62124	16r6454	<True>or:
+8r62126	16r6456	<True>&
+8r62130	16r6458	<True>not
+8r62132	16r645A	<True>|
+8r62134	16r645C	<True>printOn:
+8r62140	16r6460	<True>ifTrue:
+8r62210	16r6488	<UndefinedObject class>new
+8r62230	16r6498	<UndefinedObject>deepCopy
+8r62232	16r649A	<UndefinedObject>shallowCopy
+8r62234	16r649C	<UndefinedObject>addDependent:
+8r62240	16r64A0	<UndefinedObject>notNil
+8r62242	16r64A2	<UndefinedObject>isNil
+8r62244	16r64A4	<UndefinedObject>printOn:
+8r62250	16r64A8	<UndefinedObject>release
+8r62252	16r64AA	<UndefinedObject>storeOn:
+8r62276	16r64BE	<SystemTracer class>writeClone
+8r62300	16r64C0	<SystemTracer class>initialize
+8r62336	16r64DE	<SystemTracer class>writeCloneWithout:
+8r62460	16r6530	<SystemTracer>writeImage:
+8r62464	16r6534	<SystemTracer>writeSpecial1
+8r62476	16r653E	<SystemTracer>writeSpecial2
+8r62504	16r6544	<SystemTracer>writeBytes:
+8r62506	16r6546	<SystemTracer>writeClamped:
+8r62510	16r6548	<SystemTracer>writeIdentityDictionary:
+8r62512	16r654A	<SystemTracer>writeMethod:
+8r62514	16r654C	<SystemTracer>trace:
+8r62516	16r654E	<SystemTracer>init:
+8r62526	16r6556	<SystemTracer>writePointers:
+8r62530	16r6558	<SystemTracer>writeProcess:
+8r62532	16r655A	<SystemTracer>writeSet:
+8r62534	16r655C	<SystemTracer>writeWords:
+8r62536	16r655E	<SystemTracer>clamp:
+8r62540	16r6560	<SystemTracer>hasClamped:
+8r62542	16r6562	<SystemTracer>initDict
+8r62544	16r6564	<SystemTracer>newHashFor:
+8r62546	16r6566	<SystemTracer>oopOf:
+8r62550	16r6568	<SystemTracer>permutation:for:
+8r62552	16r656A	<SystemTracer>permute:by:
+8r62554	16r656C	<SystemTracer>refctOf:
+8r62556	16r656E	<SystemTracer>sizeInWordsOf:
+8r62560	16r6570	<SystemTracer>printDanglingRefs
+8r62570	16r6578	<SystemTracer>allCallsOn:clampedBy:
+8r62574	16r657C	<SystemTracer>initClampedClasses:
+8r62602	16r6582	<SystemTracer>doitWithout:
+8r62612	16r658A	<SystemTracer>unref:
+8r62616	16r658E	<SystemTracer>writeBitField:
+8r62620	16r6590	<SystemTracer>writePointerField:
+8r62622	16r6592	<SystemTracer>asOopToIndex:
+8r62626	16r6596	<SystemTracer>asOopFromIndex:
+8r62632	16r659A	<SystemTracer>newSmallIntegerHash:
+8r62634	16r659C	<SystemTracer>new:class:length:trace:write:
+8r62642	16r65A2	<SystemTracer>preserve:
+8r62652	16r65AA	<SystemTracer>winnow:
+8r62764	16r65F4	<MetaclassForMultipleInheritance class>subclassOf:and:
+8r63014	16r660C	<MetaclassForMultipleInheritance>setOtherSuperclasses:
+8r63016	16r660E	<MetaclassForMultipleInheritance>superclasses
+8r63020	16r6610	<MetaclassForMultipleInheritance>otherSuperclasses
+8r63022	16r6612	<MetaclassForMultipleInheritance>instHasMultipleSuperclasses
+8r63064	16r6634	<ProcessorScheduler class>hiddenBackgroundProcess
+8r63066	16r6636	<ProcessorScheduler class>new
+8r63072	16r663A	<ProcessorScheduler class>initialize
+8r63134	16r665C	<ProcessorScheduler class>background:
+8r63162	16r6672	<ProcessorScheduler class>sweepHandBackgroundProcess
+8r63224	16r6694	<ProcessorScheduler>userSchedulingPriority
+8r63226	16r6696	<ProcessorScheduler>highIOPriority
+8r63230	16r6698	<ProcessorScheduler>suspendFirstAt:
+8r63234	16r669C	<ProcessorScheduler>signal:atMilliseconds:
+8r63236	16r669E	<ProcessorScheduler>highestPriority:
+8r63242	16r66A2	<ProcessorScheduler>userBackgroundPriority
+8r63244	16r66A4	<ProcessorScheduler>suspendFirstAt:ifNone:
+8r63246	16r66A6	<ProcessorScheduler>activePriority
+8r63250	16r66A8	<ProcessorScheduler>anyProcessesAbove:
+8r63252	16r66AA	<ProcessorScheduler>systemBackgroundPriority
+8r63254	16r66AC	<ProcessorScheduler>highestPriority
+8r63256	16r66AE	<ProcessorScheduler>timingPriority
+8r63260	16r66B0	<ProcessorScheduler>userInterruptPriority
+8r63262	16r66B2	<ProcessorScheduler>terminateActive
+8r63264	16r66B4	<ProcessorScheduler>lowIOPriority
+8r63266	16r66B6	<ProcessorScheduler>remove:ifAbsent:
+8r63270	16r66B8	<ProcessorScheduler>signal:atTime:
+8r63274	16r66BC	<ProcessorScheduler>activeProcess
+8r63276	16r66BE	<ProcessorScheduler>yield
+8r63354	16r66EC	<Benchmark class>testStandardTests
+8r63540	16r6760	<Benchmark class>testStandardToFile:
+8r63544	16r6764	<Benchmark class>new
+8r63552	16r676A	<Benchmark class>setStandardTests
+8r63644	16r67A4	<Benchmark>testLoadLiteralIndirect
+8r63650	16r67A8	<Benchmark>testPopStoreInstVar
+8r63654	16r67AC	<Benchmark>testPopStoreTemp
+8r63660	16r67B0	<Benchmark>test3plus4
+8r63664	16r67B4	<Benchmark>test3lessThan4
+8r63670	16r67B8	<Benchmark>test3times4
+8r63674	16r67BC	<Benchmark>test3div4
+8r63700	16r67C0	<Benchmark>test16bitArith
+8r63706	16r67C6	<Benchmark>testLargeIntArith
+8r63714	16r67CC	<Benchmark>testActivationReturn
+8r63720	16r67D0	<Benchmark>testShortBranch
+8r63724	16r67D4	<Benchmark>testWhileLoop
+8r63730	16r67D8	<Benchmark>testArrayAt
+8r63736	16r67DE	<Benchmark>testArrayAtPut
+8r63744	16r67E4	<Benchmark>testStringAt
+8r63752	16r67EA	<Benchmark>testStringAtPut
+8r63762	16r67F2	<Benchmark>testSize
+8r63770	16r67F8	<Benchmark>testPointCreation
+8r63774	16r67FC	<Benchmark>testStreamNext
+8r64002	16r6802	<Benchmark>testStreamNextPut
+8r64010	16r6808	<Benchmark>testEQ
+8r64014	16r680C	<Benchmark>testClass
+8r64020	16r6810	<Benchmark>testBlockCopy
+8r64024	16r6814	<Benchmark>testValue
+8r64030	16r6818	<Benchmark>testCreation
+8r64034	16r681C	<Benchmark>testPointX
+8r64040	16r6820	<Benchmark>testLoadThisContext
+8r64044	16r6824	<Benchmark>testBasicAt
+8r64050	16r6828	<Benchmark>testBasicAtPut
+8r64054	16r682C	<Benchmark>testPerform
+8r64060	16r6830	<Benchmark>testStringReplace
+8r64064	16r6834	<Benchmark>testAsFloat
+8r64070	16r6838	<Benchmark>testFloatingPointAddition
+8r64100	16r6840	<Benchmark>testBitBLT
+8r64104	16r6844	<Benchmark>testTextScanning
+8r64114	16r684C	<Benchmark>testClassOrganizer
+8r64120	16r6850	<Benchmark>testPrintDefinition
+8r64124	16r6854	<Benchmark>testPrintHierarchy
+8r64132	16r685A	<Benchmark>testAllCallsOn
+8r64136	16r685E	<Benchmark>testAllImplementors
+8r64142	16r6862	<Benchmark>testInspect
+8r64146	16r6866	<Benchmark>testCompiler
+8r64160	16r6870	<Benchmark>testDecompiler
+8r64164	16r6874	<Benchmark>testKeyboardLookAhead
+8r64172	16r687A	<Benchmark>testKeyboardSingle
+8r64200	16r6880	<Benchmark>testTextDisplay
+8r64204	16r6884	<Benchmark>testTextFormatting
+8r64210	16r6888	<Benchmark>testTextEditing
+8r64216	16r688E	<Benchmark>testList:toFile:
+8r64222	16r6892	<Benchmark>defaultOutputParameters
+8r64224	16r6894	<Benchmark>clearOutputs
+8r64232	16r689A	<Benchmark>closeOutput:
+8r64234	16r689C	<Benchmark>setOutputParameters
+8r64246	16r68A6	<Benchmark>outputNamed:
+8r64250	16r68A8	<Benchmark>stringForDisplay
+8r64254	16r68AC	<Benchmark>textForDisplay
+8r64256	16r68AE	<Benchmark>time:repeated10K:
+8r64262	16r68B2	<Benchmark>displayOutputNamed:
+8r64264	16r68B4	<Benchmark>makeOutputNamed:
+8r64266	16r68B6	<Benchmark>readOutput:intoDict:andCollection:
+8r64270	16r68B8	<Benchmark>streamsRatherThanFiles
+8r64272	16r68BA	<Benchmark>longishString
+8r64276	16r68BE	<Benchmark>fileOutputParameters:
+8r64300	16r68C0	<Benchmark>sampleBitBLT
+8r64302	16r68C2	<Benchmark>recur:
+8r64304	16r68C4	<Benchmark>test:labeled:repeated:
+8r64306	16r68C6	<Benchmark>time:repeated:
+8r64310	16r68C8	<Benchmark>compareOldTimes:toNewTimes:outputTo:
+8r64322	16r68D2	<Benchmark>report:timedAt:repeated:
+8r64330	16r68D8	<Benchmark>reportStringFor:timedAt:repeated:
+8r64344	16r68E4	<Benchmark>favoriteStringHolderView
+8r64346	16r68E6	<Benchmark>testList:
+8r64352	16r68EA	<Benchmark>testLoadInstVar
+8r64356	16r68EE	<Benchmark>testLoadTempNRef
+8r64362	16r68F2	<Benchmark>testLoadTempRef
+8r64366	16r68F6	<Benchmark>testLoadQuickConstant
+8r64372	16r68FA	<Benchmark>testLoadLiteralNRef
+8r64462	16r6932	<MessageTally class>spyOn:to:
+8r64474	16r693C	<MessageTally class>spyOn:
+8r64554	16r696C	<MessageTally>method
+8r64556	16r696E	<MessageTally>spyOn:to:
+8r64560	16r6970	<MessageTally>spyOn:
+8r64564	16r6974	<MessageTally><
+8r64566	16r6976	<MessageTally>spyEvery:on:
+8r64614	16r698C	<MessageTally>defaultInterval
+8r64616	16r698E	<MessageTally>continueSpying
+8r64624	16r6994	<MessageTally>reportOn:
+8r64626	16r6996	<MessageTally>>
+8r64630	16r6998	<MessageTally>close
+8r64632	16r699A	<MessageTally>fullPrintOn:cutoff:
+8r64642	16r69A2	<MessageTally>treePrintOn:tabs:thisTab:total:over:
+8r64650	16r69A8	<MessageTally>reportOn:cutoff:
+8r64660	16r69B0	<MessageTally>hash
+8r64662	16r69B2	<MessageTally>tally
+8r64664	16r69B4	<MessageTally>into:
+8r64666	16r69B6	<MessageTally>sonsOver:
+8r64672	16r69BA	<MessageTally>tallyPath:
+8r64674	16r69BC	<MessageTally>=
+8r64676	16r69BE	<MessageTally>bump:
+8r64700	16r69C0	<MessageTally>printOn:total:
+8r64710	16r69C8	<MessageTally>primitives:
+8r64712	16r69CA	<MessageTally>bump
+8r64714	16r69CC	<MessageTally>leaves:
+8r64716	16r69CE	<MessageTally>leavesPrintOn:over:
+8r64720	16r69D0	<MessageTally>class:method:
+8r64722	16r69D2	<MessageTally>tally:
+8r65156	16r6A6E	<Checker class>instanceVariablesNotReferenced
+8r65162	16r6A72	<Checker class>instanceCountsAndSpaceDo:
+8r65164	16r6A74	<Checker class>obsoleteClassReferences
+8r65166	16r6A76	<Checker class>obsoleteAssociations
+8r65172	16r6A7A	<Checker class>rehashBadSets
+8r65176	16r6A7E	<Checker class>obsoleteInstanceCounts
+8r65200	16r6A80	<Checker class>categoriesSelect:
+8r65204	16r6A84	<Checker class>obsoleteClasses
+8r65206	16r6A86	<Checker class>printCategoryNamesOn:
+8r65210	16r6A88	<Checker class>printUnaryCategoryNamesOn:
+8r65212	16r6A8A	<Checker class>multipleCategoryMessageNames
+8r65214	16r6A8C	<Checker class>allUnSentMessages
+8r65216	16r6A8E	<Checker class>printReceivedButNotSentOn:
+8r65220	16r6A90	<Checker class>unResponsives
+8r65226	16r6A96	<Checker class>checkOrganizations
+8r65240	16r6AA0	<Checker class>printMultipleCategoryMessageNamesOn:
+8r65244	16r6AA4	<Checker class>printMessageUsage
+8r65250	16r6AA8	<Checker class>findSharedPoolVariables
+8r65252	16r6AAA	<Checker class>browseAllUnimplementedCalls
+8r65256	16r6AAE	<Checker class>browseAllNonAsciiMessages
+8r65262	16r6AB2	<Checker class>findAllNonAsciiSources
+8r65266	16r6AB6	<Checker class>whichClassesIncludeCategory:
+8r65270	16r6AB8	<Checker class>printInstanceCounts
+8r65274	16r6ABC	<Checker class>allUnimplementedCalls
+8r65302	16r6AC2	<Checker class>printSingleClassCategoryNamesOn:
+8r65304	16r6AC4	<Checker class>printUnresponsivesOn:
+8r65306	16r6AC6	<Checker class>whichClassesHaveCategory:
+8r65310	16r6AC8	<Checker class>onlyReturnSelves
+8r65314	16r6ACC	<Checker class>printInstanceVariablesNotReferencedOn:
+8r65316	16r6ACE	<Checker class>singleClassCategoryNames
+8r65322	16r6AD2	<Checker class>unaryCategoryNames
+8r65326	16r6AD6	<Checker class>printSentButNotReceivedOn:
+8r65330	16r6AD8	<Checker class>printAllMessagesOn:
+8r65332	16r6ADA	<Checker class>printOnlyReturnSelvesOn:
+8r65334	16r6ADC	<Checker class>allCategoryNames
+8r65336	16r6ADE	<Checker class>removeEmptyCategories
+8r65372	16r6AFA	<SystemDictionary>lowSpaceNotificationLoop
+8r65404	16r6B04	<SystemDictionary>hasSpecialSelector:ifTrueSetByte:
+8r65406	16r6B06	<SystemDictionary>quit
+8r65410	16r6B08	<SystemDictionary>logChange:
+8r65414	16r6B0C	<SystemDictionary>getImagePrefix
+8r65434	16r6B1C	<SystemDictionary>saveAs:thenQuit:
+8r65442	16r6B22	<SystemDictionary>frills
+8r65450	16r6B28	<SystemDictionary>allClassesImplementing:
+8r65452	16r6B2A	<SystemDictionary>changes
+8r65454	16r6B2C	<SystemDictionary>allBehaviorsDo:
+8r65456	16r6B2E	<SystemDictionary>releaseExternalViews
+8r65460	16r6B30	<SystemDictionary>recompileCallsOn:
+8r65462	16r6B32	<SystemDictionary>collectPointersTo:
+8r65464	16r6B34	<SystemDictionary>quitPrimitive
+8r65466	16r6B36	<SystemDictionary>allCallsOn:and:
+8r65472	16r6B3A	<SystemDictionary>shutdown
+8r65474	16r6B3C	<SystemDictionary>allSelect:
+8r65500	16r6B40	<SystemDictionary>exitToDebugger
+8r65502	16r6B42	<SystemDictionary>coreLeftLimit
+8r65504	16r6B44	<SystemDictionary>recompileMethodsForWhich:
+8r65510	16r6B48	<SystemDictionary>frills:
+8r65512	16r6B4A	<SystemDictionary>renameClass:as:
+8r65514	16r6B4C	<SystemDictionary>browseChangedMessages
+8r65520	16r6B50	<SystemDictionary>recompileAllFrom:
+8r65522	16r6B52	<SystemDictionary>resetLowSpaceSignal
+8r65524	16r6B54	<SystemDictionary>oopsLeftLimit
+8r65526	16r6B56	<SystemDictionary>copyright
+8r65532	16r6B5A	<SystemDictionary>versionName
+8r65536	16r6B5E	<SystemDictionary>coreLeftLimit:
+8r65540	16r6B60	<SystemDictionary>oopsLeftLimit:
+8r65542	16r6B62	<SystemDictionary>flushClassNameCache
+8r65544	16r6B64	<SystemDictionary>snapshotAs:thenQuit:
+8r65554	16r6B6C	<SystemDictionary>forgetDoIts
+8r65556	16r6B6E	<SystemDictionary>specialSelectors
+8r65560	16r6B70	<SystemDictionary>coreLeft
+8r65562	16r6B72	<SystemDictionary>removeClassNamed:
+8r65564	16r6B74	<SystemDictionary>snapshot
+8r65654	16r6BAC	<StandardSystemView class>model:label:minimumSize:
+8r65676	16r6BBE	<NotifierView class>openContext:label:contents:
+8r65704	16r6BC4	<NotifierView class>openDebugger:contents:label:displayAt:
+8r65706	16r6BC6	<NotifierView class>openInterrupt:onProcess:
+8r65726	16r6BD6	<NotifierView>defaultControllerClass
+8r65730	16r6BD8	<NotifierView>defaultWindow
+8r65732	16r6BDA	<NotifierView>window:
+8r65734	16r6BDC	<NotifierView>contents
+8r65736	16r6BDE	<NotifierView>centerContents
+8r65740	16r6BE0	<NotifierView>displayView
+8r65742	16r6BE2	<NotifierView>contents:
+8r65744	16r6BE4	<NotifierView>initialize
+8r65764	16r6BF4	<ControlManager>scheduleActive:
+8r65766	16r6BF6	<ControlManager>pullBottomToTop
+8r65770	16r6BF8	<ControlManager>unschedule:
+8r65772	16r6BFA	<ControlManager>activeControllerNoTerminate:andProcess:
+8r66000	16r6C00	<ControlManager>inActiveControllerProcess
+8r66002	16r6C02	<ControlManager>schedulePassive:
+8r66004	16r6C04	<ControlManager>scheduleOnBottom:
+8r66006	16r6C06	<ControlManager>release
+8r66010	16r6C08	<ControlManager>scheduled:from:
+8r66012	16r6C0A	<ControlManager>promote:
+8r66014	16r6C0C	<ControlManager>restore
+8r66016	16r6C0E	<ControlManager>activeController:
+8r66020	16r6C10	<ControlManager>scheduleActiveNoTerminate:
+8r66022	16r6C12	<ControlManager>activeController:andProcess:
+8r66030	16r6C18	<ControlManager>activeControllerProcess
+8r66032	16r6C1A	<ControlManager>activeController
+8r66034	16r6C1C	<ControlManager>initialize
+8r71642	16r73A2	<DisplayScreen>beDisplay
+8r71644	16r73A4	<DisplayScreen>flash:
+8r71666	16r73B6	<DisplayObject>displayOn:transformation:clippingBox:rule:mask:
+8r71670	16r73B8	<DisplayObject>displayOn:at:clippingBox:
+8r71672	16r73BA	<DisplayObject>offset:
+8r71674	16r73BC	<DisplayObject>boundingBox
+8r71676	16r73BE	<DisplayObject>computeBoundingBox
+8r71700	16r73C0	<DisplayObject>align:with:
+8r71702	16r73C2	<DisplayObject>scaleBy:
+8r71704	16r73C4	<DisplayObject>translateBy:
+8r71706	16r73C6	<DisplayObject>display
+8r71710	16r73C8	<DisplayObject>relativeRectangle
+8r71712	16r73CA	<DisplayObject>follow:while:
+8r71714	16r73CC	<DisplayObject>rounded
+8r71716	16r73CE	<DisplayObject>extent
+8r71720	16r73D0	<DisplayObject>displayOn:transformation:clippingBox:
+8r71722	16r73D2	<DisplayObject>displayOn:transformation:clippingBox:fixedPoint:
+8r71724	16r73D4	<DisplayObject>displayOn:at:
+8r71726	16r73D6	<DisplayObject>displayOn:transformation:clippingBox:align:with:
+8r71730	16r73D8	<DisplayObject>backgroundAt:
+8r71732	16r73DA	<DisplayObject>offset
+8r71734	16r73DC	<DisplayObject>displayOn:
+8r71736	16r73DE	<DisplayObject>moveTo:restoring:
+8r71740	16r73E0	<DisplayObject>displayOn:transformation:clippingBox:align:with:rule:mask:
+8r71742	16r73E2	<DisplayObject>width
+8r71744	16r73E4	<DisplayObject>height
+8r71746	16r73E6	<DisplayObject>displayOn:at:clippingBox:rule:mask:
+8r71750	16r73E8	<DisplayObject>displayOn:at:rule:
+8r72030	16r7418	<Form class>white
+8r72032	16r741A	<Form class>reverse
+8r72034	16r741C	<Form class>black
+8r72036	16r741E	<Form class>exampleMagnify
+8r72040	16r7420	<Form class>initializeMasks
+8r72056	16r742E	<Form class>exampleShrink
+8r72060	16r7430	<Form class>exampleSketch
+8r72062	16r7432	<Form class>exampleEdits
+8r72064	16r7434	<Form class>exampleSpaceFill
+8r72066	16r7436	<Form class>extent:fromCompactArray:offset:
+8r72070	16r7438	<Form class>readFormFile:
+8r72076	16r743E	<Form class>extent:fromArray:offset:
+8r72100	16r7440	<Form class>dotOfSize:
+8r72102	16r7442	<Form class>fromUser:
+8r72104	16r7444	<Form class>fromUser
+8r72106	16r7446	<Form class>extent:
+8r72110	16r7448	<Form class>over
+8r72112	16r744A	<Form class>erase
+8r72114	16r744C	<Form class>paint
+8r72116	16r744E	<Form class>fromDisplay:
+8r72120	16r7450	<Form class>lightGray
+8r72122	16r7452	<Form class>under
+8r72124	16r7454	<Form class>veryLightGray
+8r72126	16r7456	<Form class>readFrom:
+8r72130	16r7458	<Form class>gray
+8r72132	16r745A	<Form class>and
+8r72134	16r745C	<Form class>initialize
+8r72136	16r745E	<Form class>stringScanLineOfWidth:
+8r72140	16r7460	<Form class>darkGray
+8r72202	16r7482	<Cursor class>execute
+8r72210	16r7488	<Cursor class>up
+8r72224	16r7494	<Cursor class>extent:fromArray:offset:
+8r72232	16r749A	<Cursor class>normal
+8r72246	16r74A6	<Cursor class>corner
+8r72262	16r74B2	<Cursor class>currentCursor:
+8r72272	16r74BA	<Cursor class>currentCursor
+8r72274	16r74BC	<Cursor class>origin
+8r72310	16r74C8	<Cursor class>marker
+8r72324	16r74D4	<Cursor class>down
+8r72340	16r74E0	<Cursor class>wait
+8r72354	16r74EC	<Cursor class>cursorLink:
+8r72360	16r74F0	<Cursor class>read
+8r72374	16r74FC	<Cursor class>crossHair
+8r72410	16r7508	<Cursor class>write
+8r72424	16r7514	<Cursor class>blank
+8r72440	16r7520	<Cursor class>new
+8r72442	16r7522	<Cursor class>initialize
+8r72736	16r75DE	<Cursor class>square
+8r72754	16r75EC	<Cursor>showWhile:
+8r72756	16r75EE	<Cursor>showGridded:
+8r72760	16r75F0	<Cursor>show
+8r72762	16r75F2	<Cursor>changed:
+8r72764	16r75F4	<Cursor>beCursor
+8r72766	16r75F6	<Cursor>printOn:
+8r73004	16r7604	<ReadWriteStream>fileOutChanges
+8r73006	16r7606	<ReadWriteStream>fileOutChangesFor:
+8r73010	16r7608	<ReadWriteStream>contents
+8r73012	16r760A	<ReadWriteStream>next
+8r73036	16r761E	<ExternalStream class>new
+8r73054	16r762C	<FileStream class>fileNamed:
+8r73056	16r762E	<FileStream class>on:
+8r73060	16r7630	<FileStream class>oldFileNamed:
+8r73062	16r7632	<FileStream class>newFileNamed:
+8r73124	16r7654	<FileStream>position
+8r73126	16r7656	<FileStream>position:
+8r73130	16r7658	<FileStream>read:
+8r73132	16r765A	<FileStream>reset
+8r73136	16r765E	<FileStream>beSnapshotFile
+8r73140	16r7660	<FileStream>nextPage
+8r73142	16r7662	<FileStream>directory
+8r73144	16r7664	<FileStream>on:
+8r73146	16r7666	<FileStream>reopen
+8r73152	16r766A	<FileStream>positionSize:
+8r73154	16r766C	<FileStream>writing
+8r73156	16r766E	<FileStream>printOutChanges
+8r73160	16r7670	<FileStream>fixEnd
+8r73162	16r7672	<FileStream>positionPage:character:
+8r73164	16r7674	<FileStream>skip:
+8r73170	16r7678	<FileStream>writeShorten
+8r73172	16r767A	<FileStream>binary
+8r73174	16r767C	<FileStream>setMode:
+8r73176	16r767E	<FileStream>next:into:
+8r73200	16r7680	<FileStream>position:size:
+8r73204	16r7684	<FileStream>nextPut:
+8r73212	16r768A	<FileStream>atEnd
+8r73214	16r768C	<FileStream>wordPosition
+8r73216	16r768E	<FileStream>next:
+8r73220	16r7690	<FileStream>padTo:put:
+8r73222	16r7692	<FileStream>nextPutAll:
+8r73230	16r7698	<FileStream>wordPosition:
+8r73232	16r769A	<FileStream>next
+8r73234	16r769C	<FileStream>closed
+8r73236	16r769E	<FileStream>padTo:
+8r73240	16r76A0	<FileStream>text
+8r73242	16r76A2	<FileStream>flush
+8r73244	16r76A4	<FileStream>contentsOfEntireFile
+8r73246	16r76A6	<FileStream>shorten
+8r73250	16r76A8	<FileStream>readWriteShorten
+8r73252	16r76AA	<FileStream>file
+8r73254	16r76AC	<FileStream>readWrite
+8r73256	16r76AE	<FileStream>size
+8r73260	16r76B0	<FileStream>printOn:
+8r73264	16r76B4	<FileStream>close
+8r73266	16r76B6	<FileStream>fileIn
+8r73272	16r76BA	<FileStream>fileOutChanges
+8r73276	16r76BE	<FileStream>name
+8r73300	16r76C0	<FileStream>release
+8r73302	16r76C2	<FileStream>page
+8r73304	16r76C4	<FileStream>edit
+8r73306	16r76C6	<FileStream>readOnly
+8r73310	16r76C8	<FileStream>setToEnd
+8r73432	16r771A	<RemoteString>fileNumber:position:
+8r73434	16r771C	<RemoteString>string
+8r73440	16r7720	<RemoteString>sourceFileNumber
+8r73474	16r773C	<Collection>remove:
+8r73476	16r773E	<Collection>inject:into:
+8r73500	16r7740	<Collection>asOrderedCollection
+8r73502	16r7742	<Collection>errorNoMatch
+8r73506	16r7746	<Collection>asSortedCollection:
+8r73510	16r7748	<Collection>asBag
+8r73512	16r774A	<Collection>asSet
+8r73514	16r774C	<Collection>select:
+8r73516	16r774E	<Collection>detect:
+8r73520	16r7750	<Collection>isEmpty
+8r73522	16r7752	<Collection>add:
+8r73524	16r7754	<Collection>do:
+8r73526	16r7756	<Collection>storeOn:
+8r73572	16r777A	<SequenceableCollection>reverse
+8r73574	16r777C	<SequenceableCollection>last
+8r73576	16r777E	<SequenceableCollection>findFirst:
+8r73600	16r7780	<SequenceableCollection>shallowCopy
+8r73602	16r7782	<SequenceableCollection>atAllPut:
+8r73604	16r7784	<SequenceableCollection>replaceFrom:to:with:
+8r73610	16r7788	<SequenceableCollection>copyFrom:to:
+8r73612	16r778A	<SequenceableCollection>copyReplaceFrom:to:with:
+8r73614	16r778C	<SequenceableCollection>indexOf:ifAbsent:
+8r73616	16r778E	<SequenceableCollection>first
+8r73620	16r7790	<SequenceableCollection>collect:
+8r73622	16r7792	<SequenceableCollection>copyWithout:
+8r73624	16r7794	<SequenceableCollection>remove:ifAbsent:
+8r73626	16r7796	<SequenceableCollection>copyWith:
+8r73630	16r7798	<SequenceableCollection>size
+8r73632	16r779A	<SequenceableCollection>swap:with:
+8r73634	16r779C	<SequenceableCollection>copyReplaceAll:with:
+8r73636	16r779E	<SequenceableCollection>reverseDo:
+8r73640	16r77A0	<SequenceableCollection>grow
+8r73642	16r77A2	<SequenceableCollection>select:
+8r73644	16r77A4	<SequenceableCollection>findLast:
+8r73646	16r77A6	<SequenceableCollection>indexOf:
+8r73650	16r77A8	<SequenceableCollection>,
+8r73652	16r77AA	<SequenceableCollection>=
+8r73654	16r77AC	<SequenceableCollection>asArray
+8r73656	16r77AE	<SequenceableCollection>atAll:put:
+8r73660	16r77B0	<SequenceableCollection>replaceFrom:to:with:startingAt:
+8r73662	16r77B2	<SequenceableCollection>do:
+8r73664	16r77B4	<SequenceableCollection>indexOfSubCollection:startingAt:
+8r73666	16r77B6	<SequenceableCollection>indexOfSubCollection:startingAt:ifAbsent:
+8r73670	16r77B8	<SequenceableCollection>mappedBy:
+8r73672	16r77BA	<SequenceableCollection>errorOutOfBounds
+8r73676	16r77BE	<SequenceableCollection>with:do:
+8r73722	16r77D2	<OrderedCollection class>new
+8r73724	16r77D4	<OrderedCollection class>new:
+8r73774	16r77FC	<OrderedCollection>reverse
+8r73776	16r77FE	<OrderedCollection>last
+8r74000	16r7800	<OrderedCollection>copyFrom:to:
+8r74002	16r7802	<OrderedCollection>addFirst:
+8r74004	16r7804	<OrderedCollection>copyReplaceFrom:to:with:
+8r74006	16r7806	<OrderedCollection>at:
+8r74010	16r7808	<OrderedCollection>at:put:
+8r74012	16r780A	<OrderedCollection>removeAllSuchThat:
+8r74014	16r780C	<OrderedCollection>first
+8r74016	16r780E	<OrderedCollection>collect:
+8r74020	16r7810	<OrderedCollection>addAll:
+8r74022	16r7812	<OrderedCollection>errorNotFound
+8r74026	16r7816	<OrderedCollection>find:
+8r74030	16r7818	<OrderedCollection>copyWithout:
+8r74032	16r781A	<OrderedCollection>remove:ifAbsent:
+8r74034	16r781C	<OrderedCollection>copyWith:
+8r74036	16r781E	<OrderedCollection>size
+8r74040	16r7820	<OrderedCollection>copyEmpty
+8r74042	16r7822	<OrderedCollection>reverseDo:
+8r74044	16r7824	<OrderedCollection>grow
+8r74046	16r7826	<OrderedCollection>add:before:
+8r74050	16r7828	<OrderedCollection>select:
+8r74052	16r782A	<OrderedCollection>removeFirst
+8r74054	16r782C	<OrderedCollection>setIndices
+8r74056	16r782E	<OrderedCollection>removeLast
+8r74060	16r7830	<OrderedCollection>addLast:
+8r74062	16r7832	<OrderedCollection>insert:before:
+8r74064	16r7834	<OrderedCollection>errorLastObject
+8r74070	16r7838	<OrderedCollection>makeRoomAtFirst
+8r74072	16r783A	<OrderedCollection>removeIndex:
+8r74074	16r783C	<OrderedCollection>before:
+8r74076	16r783E	<OrderedCollection>errorNoSuchElement
+8r74102	16r7842	<OrderedCollection>do:
+8r74104	16r7844	<OrderedCollection>after:
+8r74106	16r7846	<OrderedCollection>makeRoomAtLast
+8r74110	16r7848	<OrderedCollection>addAllFirst:
+8r74112	16r784A	<OrderedCollection>add:after:
+8r74114	16r784C	<OrderedCollection>addAllLast:
+8r74116	16r784E	<OrderedCollection>errorFirstObject
+8r74122	16r7852	<OrderedCollection>add:
+8r74150	16r7868	<Stream>do:
+8r74152	16r786A	<Stream>nextPutAll:
+8r74154	16r786C	<Stream>nextMatchFor:
+8r74156	16r786E	<Stream>next:put:
+8r74160	16r7870	<Stream>next
+8r74204	16r7884	<PositionableStream class>on:from:to:
+8r74206	16r7886	<PositionableStream class>on:
+8r74226	16r7896	<WriteStream class>with:from:to:
+8r74230	16r7898	<WriteStream class>on:from:to:
+8r74232	16r789A	<WriteStream class>with:
+8r74252	16r78AA	<WriteStream>position:
+8r74254	16r78AC	<WriteStream>on:
+8r74256	16r78AE	<WriteStream>space
+8r74260	16r78B0	<WriteStream>print:
+8r74262	16r78B2	<WriteStream>crtab:
+8r74264	16r78B4	<WriteStream>cr
+8r74266	16r78B6	<WriteStream>with:
+8r74270	16r78B8	<WriteStream>store:
+8r74272	16r78BA	<WriteStream>crtab
+8r74274	16r78BC	<WriteStream>tab
+8r74276	16r78BE	<WriteStream>nextChunkPut:
+8r74300	16r78C0	<WriteStream>nextPut:
+8r74302	16r78C2	<WriteStream>contents
+8r74304	16r78C4	<WriteStream>pastEndPut:
+8r74306	16r78C6	<WriteStream>on:from:to:
+8r74310	16r78C8	<WriteStream>size
+8r74312	16r78CA	<WriteStream>reset
+8r74314	16r78CC	<WriteStream>emphasis
+8r74316	16r78CE	<WriteStream>emphasis:
+8r74320	16r78D0	<WriteStream>next
+8r74344	16r78E4	<Object>yourself
+8r74346	16r78E6	<Object>shallowCopy
+8r74350	16r78E8	<Object>storeString
+8r74352	16r78EA	<Object>errorSubscriptBounds:
+8r74356	16r78EE	<Object>basicSize
+8r74360	16r78F0	<Object>primitiveFailed
+8r74364	16r78F4	<Object>perform:with:with:with:
+8r74366	16r78F6	<Object>broadcast:
+8r74370	16r78F8	<Object>at:
+8r74372	16r78FA	<Object>at:put:
+8r74374	16r78FC	<Object>halt:
+8r74376	16r78FE	<Object>error:
+8r74400	16r7900	<Object>confirm:
+8r74402	16r7902	<Object>notify:
+8r74406	16r7906	<Object>updateRequest
+8r74410	16r7908	<Object>hashMappedBy:
+8r74412	16r790A	<Object>isLiteral
+8r74414	16r790C	<Object>readFromString:
+8r74416	16r790E	<Object>basicInspect
+8r74420	16r7910	<Object>doesNotUnderstand:
+8r74426	16r7916	<Object>errorNonIntegerIndex
+8r74432	16r791A	<Object>changed
+8r74434	16r791C	<Object>addDependent:
+8r101370	16r82F8	<Object>isKindOf:
+8r101372	16r82FA	<Object>mustBeBoolean
+8r101376	16r82FE	<Object>perform:withArguments:
+8r101400	16r8300	<Object>changed:
+8r101402	16r8302	<Object>isNil
+8r101404	16r8304	<Object>update:
+8r101406	16r8306	<Object>perform:with:
+8r101410	16r8308	<Object>instVarAt:
+8r101412	16r830A	<Object>instVarAt:put:
+8r101414	16r830C	<Object>~~
+8r101416	16r830E	<Object>species
+8r101420	16r8310	<Object>subclassResponsibility
+8r101424	16r8314	<Object>basicAt:
+8r101426	16r8316	<Object>perform:with:with:
+8r101430	16r8318	<Object>respondsTo:
+8r101432	16r831A	<Object>become:
+8r101434	16r831C	<Object>size
+8r101436	16r831E	<Object>printOn:
+8r101444	16r8324	<Object>==
+8r101446	16r8326	<Object>~=
+8r101450	16r8328	<Object>errorImproperStore
+8r101454	16r832C	<Object>inspect
+8r101456	16r832E	<Object>changeRequest
+8r101460	16r8330	<Object>changeRequestFrom:
+8r101462	16r8332	<Object>shouldNotImplement
+8r101466	16r8336	<Object>broadcast:with:
+8r101470	16r8338	<Object>halt
+8r101474	16r833C	<Object>hash
+8r101476	16r833E	<Object>perform:
+8r101500	16r8340	<Object>setDependents
+8r101502	16r8342	<Object>dependents
+8r101504	16r8344	<Object>breakDependents
+8r101506	16r8346	<Object>copy
+8r101510	16r8348	<Object>removeDependent:
+8r101512	16r834A	<Object>release
+8r101514	16r834C	<Object>=
+8r101516	16r834E	<Object>deepCopy
+8r101520	16r8350	<Object>isMemberOf:
+8r101522	16r8352	<Object>isInteger
+8r101524	16r8354	<Object>asOop
+8r101526	16r8356	<Object>notNil
+8r101530	16r8358	<Object>forkEmergencyEvaluatorAt:
+8r101540	16r8360	<Object>conflictingInheritanceError
+8r101544	16r8364	<Object>nilFields
+8r101546	16r8366	<Object>primitiveError:
+8r101554	16r836C	<Object>basicAt:put:
+8r101556	16r836E	<Object>storeOn:
+8r101600	16r8380	<Object>class
+8r101630	16r8398	<Magnitude>hashMappedBy:
+8r101632	16r839A	<Magnitude>min:
+8r101634	16r839C	<Magnitude>max:
+8r101636	16r839E	<Magnitude>hash
+8r101640	16r83A0	<Magnitude><
+8r101642	16r83A2	<Magnitude><=
+8r101644	16r83A4	<Magnitude>>=
+8r101646	16r83A6	<Magnitude>>
+8r101650	16r83A8	<Magnitude>=
+8r101652	16r83AA	<Magnitude>between:and:
+8r101676	16r83BE	<LookupKey class>key:
+8r101714	16r83CC	<Association class>key:value:
+8r101734	16r83DC	<Association>value:
+8r101736	16r83DE	<Association>key:value:
+8r101740	16r83E0	<Association>printOn:
+8r101744	16r83E4	<Association>value
+8r101766	16r83F6	<ClassOrganizer class>initialize
+8r101776	16r83FE	<ClassOrganizer class>defaultProtocol
+8r102032	16r841A	<ClassOrganizer>setDefaultList
+8r102036	16r841E	<ClassOrganizer>classComment
+8r102042	16r8422	<ClassOrganizer>scanFrom:
+8r102044	16r8424	<ClassOrganizer>setDefaultList:
+8r102050	16r8428	<ClassOrganizer>classifyAll:under:
+8r102052	16r842A	<ClassOrganizer>hasNoComment
+8r102054	16r842C	<ClassOrganizer>includesElement:
+8r102056	16r842E	<ClassOrganizer>numberOfCategoryOfElement:
+8r102060	16r8430	<ClassOrganizer>listAtCategoryNumber:
+8r102062	16r8432	<ClassOrganizer>categories:
+8r102066	16r8436	<ClassOrganizer>changeFromString:
+8r102070	16r8438	<ClassOrganizer>putCommentOnFile:numbered:moveSource:
+8r102072	16r843A	<ClassOrganizer>categoryOfElement:
+8r102074	16r843C	<ClassOrganizer>listAtCategoryNamed:
+8r102076	16r843E	<ClassOrganizer>addCategory:before:
+8r102100	16r8440	<ClassOrganizer>renameCategory:to:
+8r102102	16r8442	<ClassOrganizer>categories
+8r102104	16r8444	<ClassOrganizer>removeElement:
+8r102106	16r8446	<ClassOrganizer>addCategory:
+8r102110	16r8448	<ClassOrganizer>printOn:
+8r102112	16r844A	<ClassOrganizer>classify:under:
+8r102114	16r844C	<ClassOrganizer>classComment:
+8r102116	16r844E	<ClassOrganizer>moveChangedCommentToFile:numbered:
+8r102120	16r8450	<ClassOrganizer>removeCategory:
+8r102124	16r8454	<ClassOrganizer>removeEmptyCategories
+8r102172	16r847A	<Set class>new
+8r102174	16r847C	<Set class>new:
+8r102226	16r8496	<IdentityDictionary class>new:
+8r102266	16r84B6	<MethodDictionary>removeKey:ifAbsent:
+8r102270	16r84B8	<MethodDictionary>methodArray
+8r102312	16r84CA	<Class class>named:superclasses:instanceVariableNames:classVariableNames:category:
+8r102322	16r84D2	<Class class>getSuperclasses:
+8r102326	16r84D6	<Class class>template:
+8r102372	16r84FA	<Class>obsolete
+8r102400	16r8500	<Class>compileAllFrom:
+8r102402	16r8502	<Class>hasMultipleSuperclasses
+8r102404	16r8504	<Class>isObsolete
+8r102406	16r8506	<Class>initialize
+8r102410	16r8508	<Class>poolHas:ifTrue:
+8r102412	16r850A	<Class>allClassVarNames
+8r102414	16r850C	<Class>allSharedPools
+8r102416	16r850E	<Class>fileOutOn:moveSource:toFile:
+8r102424	16r8514	<Class>classVarNames
+8r102426	16r8516	<Class>removeFromSystem
+8r102430	16r8518	<Class>removeFromChanges
+8r102432	16r851A	<Class>subclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
+8r102436	16r851E	<Class>sharedPools
+8r102440	16r8520	<Class>hasMethods
+8r102442	16r8522	<Class>validateFrom:in:instanceVariableNames:methods:
+8r102444	16r8524	<Class>addInstVarName:
+8r102446	16r8526	<Class>removeInstVarName:
+8r102456	16r852E	<Class>subclass:otherSupers:instanceVariableNames:classVariableNames:category:
+8r102464	16r8534	<Class>rename:
+8r102470	16r8538	<Class>copy
+8r102472	16r853A	<Class>name
+8r102474	16r853C	<Class>copyForValidation
+8r102476	16r853E	<Class>variableByteSubclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
+8r102506	16r8546	<Class>variableSubclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
+8r102512	16r854A	<Class>variableWordSubclass:instanceVariableNames:classVariableNames:poolDictionaries:category:
+8r102522	16r8552	<Class>superclass:methodDict:format:name:organization:instVarNames:classPool:sharedPools:
+8r102524	16r8554	<Class>removeSharedPool:
+8r102532	16r855A	<Class>declare:
+8r102542	16r8562	<Class>sharing:
+8r102544	16r8564	<Class>removeClassVarName:
+8r102552	16r856A	<Class>addSharedPool:
+8r102556	16r856E	<Class>fileOut
+8r102564	16r8574	<Class>printOut
+8r102566	16r8576	<Class>classPool
+8r102570	16r8578	<Class>addClassVarName:
+8r102650	16r85A8	<Object class>initializeDependentsFields
+8r102652	16r85AA	<Object class>howToModifyPrimitives
+8r102656	16r85AE	<Object class>whatIsAPrimitive
+8r102662	16r85B2	<Object class>readFrom:
+8r102666	16r85B6	<Object class>initialize
+8r102672	16r85BA	<Object class>initializeErrorRecursion
+8r102710	16r85C8	<Behavior class>init
+8r102740	16r85E0	<Metaclass class>subclassOf:
+8r102764	16r85F4	<Metaclass>instHasMultipleSuperclasses
+8r102766	16r85F6	<Metaclass>soleInstance
+8r102770	16r85F8	<Metaclass>nonTrivial
+8r102772	16r85FA	<Metaclass>definition
+8r102776	16r85FE	<Metaclass>name:inEnvironment:subclassOf:instanceVariableNames:variable:words:pointers:classVariableNames:poolDictionaries:category:comment:changed:
+8r103004	16r8604	<Metaclass>fileOutOn:moveSource:toFile:
+8r103010	16r8608	<Metaclass>superclass:
+8r103012	16r860A	<Metaclass>name:inEnvironment:subclassOf:and:instanceVariableNames:variable:words:pointers:classVariableNames:poolDictionaries:category:comment:changed:
+8r103020	16r8610	<Metaclass>addInstVarName:
+8r103024	16r8614	<Metaclass>removeInstVarName:
+8r103034	16r861C	<Metaclass>copy
+8r103036	16r861E	<Metaclass>scopeHas:ifTrue:
+8r103040	16r8620	<Metaclass>name
+8r103046	16r8626	<Metaclass>isMeta
+8r103050	16r8628	<Metaclass>copyForValidation
+8r103052	16r862A	<Metaclass>newNamed:
+8r103054	16r862C	<Metaclass>instanceVariableNames:
+8r103056	16r862E	<Metaclass>newNamed:otherSupers:
+8r103060	16r8630	<Metaclass>subclasses
+8r103062	16r8632	<Metaclass>obsolete
+8r103064	16r8634	<Metaclass>subclassOf:
+8r103066	16r8636	<Metaclass>classPool
+8r103070	16r8638	<Metaclass>addClassVarName:
+8r103072	16r863A	<Metaclass>isObsolete
+8r103074	16r863C	<Metaclass>new
+8r103130	16r8658	<String class>readFrom:
+8r103132	16r865A	<String class>example
+8r103136	16r865E	<String class>fromString:
+8r103156	16r866E	<Symbol class>table:
+8r103164	16r8674	<Symbol class>rehash
+8r103166	16r8676	<Symbol class>intern:
+8r103174	16r867C	<Symbol class>internCharacter:
+8r103546	16r8766	<Symbol class>hasInterned:ifTrue:
+8r103550	16r8768	<Symbol class>correctMessage:
+8r103554	16r876C	<Symbol class>table
+8r103556	16r876E	<Symbol class>initialize
+8r103576	16r877E	<Symbol>errorNoModification
+8r103602	16r8782	<Symbol>isInfix
+8r103604	16r8784	<Symbol>keywords
+8r103606	16r8786	<Symbol>shallowCopy
+8r103610	16r8788	<Symbol>classPart
+8r103614	16r878C	<Symbol>selectorPart
+8r103616	16r878E	<Symbol>hash
+8r103620	16r8790	<Symbol>isCompound
+8r103622	16r8792	<Symbol>at:put:
+8r103624	16r8794	<Symbol>copy
+8r103626	16r8796	<Symbol>asString
+8r103630	16r8798	<Symbol>=
+8r103632	16r879A	<Symbol>numArgs
+8r103634	16r879C	<Symbol>asSymbol
+8r103636	16r879E	<Symbol>hashMappedBy:
+8r103640	16r87A0	<Symbol>replaceFrom:to:with:startingAt:
+8r103642	16r87A2	<Symbol>isLiteral
+8r103644	16r87A4	<Symbol>species
+8r103646	16r87A6	<Symbol>isKeyword
+8r103650	16r87A8	<Symbol>string:
+8r103652	16r87AA	<Symbol>stringhash
+8r103654	16r87AC	<Symbol>storeOn:
+8r103660	16r87B0	<Symbol>printOn:
+8r103732	16r87DA	<SmallInteger class>minVal
+8r103734	16r87DC	<SmallInteger class>maxBytes
+8r103736	16r87DE	<SmallInteger class>maxBits
+8r103740	16r87E0	<SmallInteger class>new
+8r103744	16r87E4	<SmallInteger class>initialize
+8r103756	16r87EE	<SmallInteger class>maxVal
+8r103760	16r87F0	<SmallInteger class>guideToDivision
+8r104012	16r880A	<SmallInteger>bitXor:
+8r104014	16r880C	<SmallInteger>//
+8r104016	16r880E	<SmallInteger>+
+8r104020	16r8810	<SmallInteger>fromString:radix:
+8r104022	16r8812	<SmallInteger>shallowCopy
+8r104024	16r8814	<SmallInteger>asFloat
+8r104026	16r8816	<SmallInteger>digitAt:
+8r104030	16r8818	<SmallInteger>odd
+8r104032	16r881A	<SmallInteger>bitAnd:
+8r104034	16r881C	<SmallInteger>bitOr:
+8r104036	16r881E	<SmallInteger>bitShift:
+8r104040	16r8820	<SmallInteger>generality
+8r104042	16r8822	<SmallInteger>coerce:
+8r104044	16r8824	<SmallInteger>even
+8r104046	16r8826	<SmallInteger>printOn:base:
+8r104050	16r8828	<SmallInteger>hashMappedBy:
+8r104052	16r882A	<SmallInteger>instVarAt:
+8r104056	16r882E	<SmallInteger>-
+8r104060	16r8830	<SmallInteger><
+8r104062	16r8832	<SmallInteger><=
+8r104064	16r8834	<SmallInteger>quo:
+8r104070	16r8838	<SmallInteger>>=
+8r104072	16r883A	<SmallInteger>>
+8r104074	16r883C	<SmallInteger>~=
+8r104076	16r883E	<SmallInteger>digitAt:put:
+8r104102	16r8842	<SmallInteger>asObject
+8r104104	16r8844	<SmallInteger>highBit
+8r104110	16r8848	<SmallInteger>digitLength
+8r104112	16r884A	<SmallInteger>hash
+8r104114	16r884C	<SmallInteger>=
+8r104116	16r884E	<SmallInteger>deepCopy
+8r104120	16r8850	<SmallInteger>subtractOrFail:
+8r104122	16r8852	<SmallInteger>asOop
+8r104130	16r8858	<SmallInteger>*
+8r104132	16r885A	<SmallInteger>\\
+8r104134	16r885C	<SmallInteger>/
+8r104164	16r8874	<String>spellAgainst:
+8r104166	16r8876	<String>displayAt:
+8r104170	16r8878	<String>sameAs:
+8r104172	16r887A	<String>at:
+8r104174	16r887C	<String>at:put:
+8r104200	16r8880	<String>displayOn:at:
+8r104202	16r8882	<String>asSymbol
+8r104204	16r8884	<String>hashMappedBy:
+8r104206	16r8886	<String>isLiteral
+8r104210	16r8888	<String>match:
+8r104212	16r888A	<String><
+8r104214	16r888C	<String><=
+8r104216	16r888E	<String>>=
+8r104220	16r8890	<String>oldRunEncoded
+8r104222	16r8892	<String>>
+8r104224	16r8894	<String>primReplaceFrom:to:with:startingAt:
+8r104226	16r8896	<String>replaceFrom:to:with:startingAt:
+8r104230	16r8898	<String>asText
+8r104232	16r889A	<String>compare:
+8r104234	16r889C	<String>replaceFrom:to:withByteArray:startingAt:
+8r104236	16r889E	<String>asLowercase
+8r104240	16r88A0	<String>stringhash
+8r104242	16r88A2	<String>oldRunDecodeOn:
+8r104244	16r88A4	<String>string
+8r104246	16r88A6	<String>asFileName
+8r104250	16r88A8	<String>findString:startingAt:
+8r104252	16r88AA	<String>basicAt:
+8r104254	16r88AC	<String>size
+8r104256	16r88AE	<String>printOn:
+8r104260	16r88B0	<String>asNumber
+8r104262	16r88B2	<String>hash
+8r104266	16r88B6	<String>copyUpTo:
+8r104270	16r88B8	<String>asUppercase
+8r104272	16r88BA	<String>withCRs
+8r104276	16r88BE	<String>asString
+8r104300	16r88C0	<String>contractTo:
+8r104304	16r88C4	<String>asDisplayText
+8r104306	16r88C6	<String>deepCopy
+8r104310	16r88C8	<String>asParagraph
+8r104312	16r88CA	<String>basicAt:put:
+8r104316	16r88CE	<String>storeOn:
+8r104364	16r88F4	<Array>hashMappedBy:
+8r104366	16r88F6	<Array>isLiteral
+8r104370	16r88F8	<Array>printOn:
+8r104374	16r88FC	<Array>hash
+8r104400	16r8900	<Array>DoIt
+8r104402	16r8902	<Array>asArray
+8r104404	16r8904	<Array>storeOn:
+8r104430	16r8918	<Float class>readFrom:
+8r104434	16r891C	<Float class>pi
+8r104444	16r8924	<Float class>initialize
+8r104756	16r89EE	<Float>*
+8r104760	16r89F0	<Float>/
+8r104764	16r89F4	<Float>+
+8r104766	16r89F6	<Float>shallowCopy
+8r104772	16r89FA	<Float>asFloat
+8r104774	16r89FC	<Float>floorLog:
+8r104776	16r89FE	<Float>generality
+8r105000	16r8A00	<Float>sin
+8r105004	16r8A04	<Float>coerce:
+8r105006	16r8A06	<Float>rounded
+8r105014	16r8A0C	<Float>-
+8r105016	16r8A0E	<Float>cos
+8r105022	16r8A12	<Float>degreesToRadians
+8r105024	16r8A14	<Float>isLiteral
+8r105026	16r8A16	<Float>asFraction
+8r105036	16r8A1E	<Float><
+8r105040	16r8A20	<Float><=
+8r105042	16r8A22	<Float>>=
+8r105044	16r8A24	<Float>printOn:
+8r105046	16r8A26	<Float>>
+8r105050	16r8A28	<Float>~=
+8r105052	16r8A2A	<Float>negated
+8r105056	16r8A2E	<Float>truncated
+8r105062	16r8A32	<Float>hash
+8r105064	16r8A34	<Float>integerPart
+8r105066	16r8A36	<Float>fractionPart
+8r105070	16r8A38	<Float>mantissa:
+8r105072	16r8A3A	<Float>log
+8r105076	16r8A3E	<Float>exponent
+8r105104	16r8A44	<Float>printOn:digits:
+8r105114	16r8A4C	<Float>absPrintOn:digits:
+8r105126	16r8A56	<Float>timesTwoPower:
+8r105132	16r8A5A	<Float>radiansToDegrees
+8r105134	16r8A5C	<Float>arcSin
+8r105142	16r8A62	<Float>sqrt
+8r105152	16r8A6A	<Float>arcTan
+8r105164	16r8A74	<Float>=
+8r105166	16r8A76	<Float>exp
+8r105202	16r8A82	<Float>arcCos
+8r105204	16r8A84	<Float>tan
+8r105212	16r8A8A	<Float>deepCopy
+8r105214	16r8A8C	<Float>ln
+8r105250	16r8AA8	<MethodContext class>sender:receiver:method:arguments:
+8r105270	16r8AB8	<MethodContext>receiver
+8r105272	16r8ABA	<MethodContext>method
+8r105274	16r8ABC	<MethodContext>restart
+8r105276	16r8ABE	<MethodContext>tempAt:
+8r105300	16r8AC0	<MethodContext>tempAt:put:
+8r105302	16r8AC2	<MethodContext>removeSelf
+8r105304	16r8AC4	<MethodContext>restartWith:
+8r105306	16r8AC6	<MethodContext>home
+8r105310	16r8AC8	<MethodContext>setSender:receiver:method:arguments:
+8r105362	16r8AF2	<BlockContext>whileFalse
+8r105364	16r8AF4	<BlockContext>method
+8r105366	16r8AF6	<BlockContext>whileFalse:
+8r105370	16r8AF8	<BlockContext>whileTrue:
+8r105372	16r8AFA	<BlockContext>fork
+8r105374	16r8AFC	<BlockContext>tempAt:
+8r105376	16r8AFE	<BlockContext>value:
+8r105400	16r8B00	<BlockContext>tempAt:put:
+8r105402	16r8B02	<BlockContext>value
+8r105406	16r8B06	<BlockContext>value:value:value:
+8r105410	16r8B08	<BlockContext>blockReturnTop
+8r105412	16r8B0A	<BlockContext>printOn:
+8r105420	16r8B10	<BlockContext>receiver
+8r105422	16r8B12	<BlockContext>valueWithArguments:
+8r105426	16r8B16	<BlockContext>value:value:
+8r105430	16r8B18	<BlockContext>forkAt:
+8r105432	16r8B1A	<BlockContext>whileTrue
+8r105434	16r8B1C	<BlockContext>hasMethodReturn
+8r105436	16r8B1E	<BlockContext>pushArgs:from:
+8r105442	16r8B22	<BlockContext>fixTemps
+8r105444	16r8B24	<BlockContext>home
+8r105446	16r8B26	<BlockContext>home:startpc:nargs:
+8r105450	16r8B28	<BlockContext>newProcessWith:
+8r105452	16r8B2A	<BlockContext>valueError
+8r105510	16r8B48	<Point class>x:y:
+8r105542	16r8B62	<Point>//
+8r105544	16r8B64	<Point>+
+8r105546	16r8B66	<Point>shallowCopy
+8r105550	16r8B68	<Point>dotProduct:
+8r105552	16r8B6A	<Point>x
+8r105554	16r8B6C	<Point>scaleBy:
+8r105556	16r8B6E	<Point>translateBy:
+8r105560	16r8B70	<Point>transpose
+8r105562	16r8B72	<Point>generality
+8r105564	16r8B74	<Point>coerce:
+8r105566	16r8B76	<Point>rounded
+8r105570	16r8B78	<Point>-
+8r105572	16r8B7A	<Point>hashMappedBy:
+8r105574	16r8B7C	<Point>asPoint
+8r105576	16r8B7E	<Point><
+8r105600	16r8B80	<Point><=
+8r105602	16r8B82	<Point>>=
+8r105604	16r8B84	<Point>printOn:
+8r105610	16r8B88	<Point>>
+8r105612	16r8B8A	<Point>extent:
+8r105614	16r8B8C	<Point>grid:
+8r105616	16r8B8E	<Point>setX:setY:
+8r105620	16r8B90	<Point>hash
+8r105622	16r8B92	<Point>r
+8r105624	16r8B94	<Point>normal
+8r105626	16r8B96	<Point>y:
+8r105630	16r8B98	<Point>theta
+8r105642	16r8BA2	<Point>unitVector
+8r105644	16r8BA4	<Point>pointNearestLine:to:
+8r105646	16r8BA6	<Point>truncatedGrid:
+8r105650	16r8BA8	<Point>dist:
+8r105652	16r8BAA	<Point>=
+8r105654	16r8BAC	<Point>y
+8r105656	16r8BAE	<Point>truncateTo:
+8r105660	16r8BB0	<Point>deepCopy
+8r105662	16r8BB2	<Point>abs
+8r105664	16r8BB4	<Point>x:
+8r105666	16r8BB6	<Point>min:
+8r105670	16r8BB8	<Point>max:
+8r105672	16r8BBA	<Point>corner:
+8r105674	16r8BBC	<Point>*
+8r105676	16r8BBE	<Point>storeOn:
+8r105704	16r8BC4	<Point>/
+8r105742	16r8BE2	<LargePositiveInteger class>initialize
+8r105764	16r8BF4	<LargePositiveInteger>bitXor:
+8r105766	16r8BF6	<LargePositiveInteger>//
+8r105770	16r8BF8	<LargePositiveInteger>+
+8r105772	16r8BFA	<LargePositiveInteger>digitAt:
+8r105774	16r8BFC	<LargePositiveInteger>negative
+8r105776	16r8BFE	<LargePositiveInteger>positive
+8r106000	16r8C00	<LargePositiveInteger>bitAnd:
+8r106002	16r8C02	<LargePositiveInteger>bitOr:
+8r106004	16r8C04	<LargePositiveInteger>bitShift:
+8r106006	16r8C06	<LargePositiveInteger>-
+8r106010	16r8C08	<LargePositiveInteger><
+8r106012	16r8C0A	<LargePositiveInteger><=
+8r106014	16r8C0C	<LargePositiveInteger>quo:
+8r106016	16r8C0E	<LargePositiveInteger>>=
+8r106020	16r8C10	<LargePositiveInteger>>
+8r106022	16r8C12	<LargePositiveInteger>~=
+8r106024	16r8C14	<LargePositiveInteger>negated
+8r106026	16r8C16	<LargePositiveInteger>digitAt:put:
+8r106030	16r8C18	<LargePositiveInteger>asObject
+8r106040	16r8C20	<LargePositiveInteger>highBit
+8r106042	16r8C22	<LargePositiveInteger>digitLength
+8r106044	16r8C24	<LargePositiveInteger>truncated
+8r106046	16r8C26	<LargePositiveInteger>abs
+8r106050	16r8C28	<LargePositiveInteger>=
+8r106052	16r8C2A	<LargePositiveInteger>*
+8r106054	16r8C2C	<LargePositiveInteger>\\
+8r106056	16r8C2E	<LargePositiveInteger>/
+8r106136	16r8C5E	<Message class>selector:arguments:
+8r106142	16r8C62	<Message class>selector:
+8r106144	16r8C64	<Message class>selector:argument:
+8r106162	16r8C72	<Message>setSelector:arguments:
+8r106164	16r8C74	<Message>arguments
+8r106166	16r8C76	<Message>selector
+8r106170	16r8C78	<Message>printOn:
+8r106176	16r8C7E	<Message>storeOn:
+8r106236	16r8C9E	<CompiledMethod class>toReturnSelf
+8r106240	16r8CA0	<CompiledMethod class>toReturnField:
+8r106242	16r8CA2	<CompiledMethod class>newBytes:flags:nTemps:nStack:nLits:
+8r106252	16r8CAA	<CompiledMethod class>initialize
+8r106270	16r8CB8	<CompiledMethod class>newMethod:header:
+8r106334	16r8CDC	<CompiledMethod>storeOn:
+8r106352	16r8CEA	<CompiledMethod>numTemps
+8r106354	16r8CEC	<CompiledMethod>fieldsTouched
+8r106356	16r8CEE	<CompiledMethod>fileIndex
+8r106362	16r8CF2	<CompiledMethod>isQuick
+8r106364	16r8CF4	<CompiledMethod>writesField:
+8r106366	16r8CF6	<CompiledMethod>readsField:
+8r106370	16r8CF8	<CompiledMethod>messages
+8r106372	16r8CFA	<CompiledMethod>cacheTempNames:
+8r106404	16r8D04	<CompiledMethod>literalAt:
+8r106406	16r8D06	<CompiledMethod>initialPC
+8r106410	16r8D08	<CompiledMethod>setTempNamesIfCached:
+8r106412	16r8D0A	<CompiledMethod>literalAt:put:
+8r106414	16r8D0C	<CompiledMethod>needsStack:encoder:
+8r106420	16r8D10	<CompiledMethod>printOn:
+8r106424	16r8D14	<CompiledMethod>who
+8r106426	16r8D16	<CompiledMethod>numLiterals
+8r106430	16r8D18	<CompiledMethod>putSource:class:category:inFile:
+8r106434	16r8D1C	<CompiledMethod>objectAt:put:
+8r106436	16r8D1E	<CompiledMethod>scanLongStore:
+8r106440	16r8D20	<CompiledMethod>scanLongLoad:
+8r106442	16r8D22	<CompiledMethod>symbolic
+8r106454	16r8D2C	<CompiledMethod>numStack
+8r106456	16r8D2E	<CompiledMethod>writesRef:
+8r106460	16r8D30	<CompiledMethod>setSourcePosition:inFile:
+8r106466	16r8D36	<CompiledMethod>needsLargeFrame
+8r106470	16r8D38	<CompiledMethod>putSource:inFile:
+8r106476	16r8D3E	<CompiledMethod>primitive
+8r106500	16r8D40	<CompiledMethod>header
+8r106502	16r8D42	<CompiledMethod>readsRef:
+8r106504	16r8D44	<CompiledMethod>literals
+8r106506	16r8D46	<CompiledMethod>isReturnSelf
+8r106510	16r8D48	<CompiledMethod>numArgs
+8r106512	16r8D4A	<CompiledMethod>returnField
+8r106516	16r8D4E	<CompiledMethod>isReturnField
+8r106520	16r8D50	<CompiledMethod>endPC
+8r106522	16r8D52	<CompiledMethod>frameSize
+8r106524	16r8D54	<CompiledMethod>objectAt:
+8r106526	16r8D56	<CompiledMethod>flags
+8r106530	16r8D58	<CompiledMethod>numTempsField
+8r106532	16r8D5A	<CompiledMethod>getSource
+8r106534	16r8D5C	<CompiledMethod>scanFor:
+8r106536	16r8D5E	<CompiledMethod>refersToLiteral:
+8r106570	16r8D78	<Semaphore class>forMutualExclusion
+8r106572	16r8D7A	<Semaphore class>new
+8r106610	16r8D88	<Semaphore>terminateProcess
+8r106612	16r8D8A	<Semaphore>initSignals
+8r106614	16r8D8C	<Semaphore>critical:
+8r106616	16r8D8E	<Semaphore>wait
+8r106620	16r8D90	<Semaphore>signal
+8r106656	16r8DAE	<Character class>cr
+8r106660	16r8DB0	<Character class>tab
+8r106662	16r8DB2	<Character class>space
+8r106664	16r8DB4	<Character class>newPage
+8r106666	16r8DB6	<Character class>esc
+8r106670	16r8DB8	<Character class>digitValue:
+8r106676	16r8DBE	<Character class>value:
+8r106700	16r8DC0	<Character class>new
+8r106704	16r8DC4	<Character class>characterTable
+8r106706	16r8DC6	<Character class>initialize
+8r106710	16r8DC8	<Character class>backspace
+8r106730	16r8DD8	<Character>asciiValue
+8r106732	16r8DDA	<Character>asSymbol
+8r106734	16r8DDC	<Character>asInteger
+8r106736	16r8DDE	<Character>isSeparator
+8r106740	16r8DE0	<Character>isLiteral
+8r106742	16r8DE2	<Character><
+8r106744	16r8DE4	<Character>>
+8r106746	16r8DE6	<Character>digitValue
+8r106750	16r8DE8	<Character>isVowel
+8r106754	16r8DEC	<Character>isLowercase
+8r106756	16r8DEE	<Character>tokenish
+8r106760	16r8DF0	<Character>asLowercase
+8r106762	16r8DF2	<Character>printOn:
+8r106764	16r8DF4	<Character>isDigit
+8r106766	16r8DF6	<Character>isAlphaNumeric
+8r106770	16r8DF8	<Character>isLetter
+8r106772	16r8DFA	<Character>hash
+8r106774	16r8DFC	<Character>asUppercase
+8r106776	16r8DFE	<Character>copy
+8r107000	16r8E00	<Character>=
+8r107002	16r8E02	<Character>deepCopy
+8r107004	16r8E04	<Character>isUppercase
+8r107006	16r8E06	<Character>storeOn:
+8r107010	16r8E08	<Character>asCharacter
+8r111760	16r93F0	<Integer>implementorOopAsObject
+8r112106	16r9446	<Object>implementorOop
+8r112714	16r95CC	<BinaryChoiceView class>initialize
+8r115374	16r9AFC	<ImageStatistics>printMethodsWithHex:
+8r116040	16r9C20	<ImageStatistics>printClassesWithHex:
+8r125720	16rABD0	<UndefinedObject>DoIt
+8r133370	16rB6F8	<Integer>printStringRadix:

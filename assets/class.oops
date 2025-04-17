@@ -1,0 +1,449 @@
+Copyright (c) 1983 Xerox Corp.  All rights reserved.
+8r14	16rC	SmallInteger
+8r16	16rE	String
+8r20	16r10	Array
+8r24	16r14	Float
+8r26	16r16	MethodContext
+8r30	16r18	BlockContext
+8r32	16r1A	Point
+8r34	16r1C	LargePositiveInteger
+8r36	16r1E	DisplayBitmap
+8r40	16r20	Message
+8r42	16r22	CompiledMethod
+8r46	16r26	Semaphore
+8r50	16r28	Character
+8r70	16r38	Symbol
+8r72	16r3A	Symbol class
+8r74	16r3C	Metaclass
+8r76	16r3E	Metaclass class
+8r100	16r40	ClassDescription class
+8r102	16r42	Behavior class
+8r104	16r44	Object class
+8r106	16r46	Class
+8r110	16r48	Class class
+8r114	16r4C	MethodDictionary
+8r116	16r4E	MethodDictionary class
+8r120	16r50	IdentityDictionary class
+8r122	16r52	Dictionary class
+8r124	16r54	Set class
+8r126	16r56	Collection class
+8r160	16r70	ClassOrganizer
+8r162	16r72	ClassOrganizer class
+8r204	16r84	Association
+8r206	16r86	Association class
+8r210	16r88	LookupKey class
+8r212	16r8A	Magnitude class
+8r232	16r9A	Magnitude
+8r234	16r9C	Object
+8r510	16r148	WriteStream
+8r512	16r14A	WriteStream class
+8r514	16r14C	PositionableStream class
+8r516	16r14E	Stream class
+8r542	16r162	Stream
+8r606	16r186	OrderedCollection
+8r610	16r188	OrderedCollection class
+8r612	16r18A	SequenceableCollection class
+8r630	16r198	SequenceableCollection
+8r632	16r19A	Collection
+8r1030	16r218	SortedCollection
+8r1032	16r21A	SortedCollection class
+8r1166	16r276	RemoteString
+8r1170	16r278	RemoteString class
+8r1260	16r2B0	FileStream
+8r1262	16r2B2	FileStream class
+8r1264	16r2B4	ExternalStream class
+8r1266	16r2B6	ReadWriteStream class
+8r1302	16r2C2	ReadWriteStream
+8r1350	16r2E8	Cursor
+8r1352	16r2EA	Cursor class
+8r1354	16r2EC	Form class
+8r1356	16r2EE	DisplayMedium class
+8r1360	16r2F0	DisplayObject class
+8r1376	16r2FE	DisplayObject
+8r1502	16r342	DisplayScreen
+8r1504	16r344	DisplayScreen class
+8r1564	16r374	ControlManager
+8r1566	16r376	ControlManager class
+8r1724	16r3D4	NotifierView
+8r1726	16r3D6	NotifierView class
+8r1730	16r3D8	StandardSystemView class
+8r1732	16r3DA	View class
+8r1756	16r3EE	WindowingTransformation
+8r1760	16r3F0	WindowingTransformation class
+8r2172	16r47A	Dictionary
+8r2174	16r47C	Set
+8r2300	16r4C0	IdentitySet
+8r2302	16r4C2	IdentitySet class
+8r2526	16r556	Bag
+8r2530	16r558	Bag class
+8r2720	16r5D0	InspectorView
+8r2722	16r5D2	InspectorView class
+8r2756	16r5EE	SelectionInListView
+8r2760	16r5F0	SelectionInListView class
+8r2762	16r5F2	ListView class
+8r3000	16r600	ListView
+8r3002	16r602	View
+8r3340	16r6E0	Controller
+8r3342	16r6E2	Controller class
+8r3456	16r72E	InputSensor
+8r3460	16r730	InputSensor class
+8r3500	16r740	InputState
+8r3502	16r742	InputState class
+8r3644	16r7A4	Process
+8r3646	16r7A6	Process class
+8r3650	16r7A8	Link class
+8r3672	16r7BA	Link
+8r4144	16r864	SharedQueue
+8r4146	16r866	SharedQueue class
+8r4316	16r8CE	KeyboardEvent
+8r4320	16r8D0	KeyboardEvent class
+8r5162	16rA72	WordArray
+8r5164	16rA74	WordArray class
+8r5166	16rA76	ArrayedCollection class
+8r5224	16rA94	ArrayedCollection
+8r5270	16rAB8	Text
+8r5272	16rABA	Text class
+8r5324	16rAD4	FillInTheBlank
+8r5326	16rAD6	FillInTheBlank class
+8r5330	16rAD8	StringHolder class
+8r5356	16rAEE	StringHolder
+8r5426	16rB16	ChangeList
+8r5430	16rB18	ChangeList class
+8r5624	16rB94	BrowserView
+8r5626	16rB96	BrowserView class
+8r5664	16rBB4	Browser
+8r5666	16rBB6	Browser class
+8r5720	16rBD0	ActionMenu
+8r5722	16rBD2	ActionMenu class
+8r5724	16rBD4	PopUpMenu class
+8r5750	16rBE8	TextStyle
+8r5752	16rBEA	TextStyle class
+8r5776	16rBFE	StrikeFont
+8r6000	16rC00	StrikeFont class
+8r6122	16rC52	Form
+8r6124	16rC54	DisplayMedium
+8r6260	16rCB0	Rectangle
+8r6262	16rCB2	Rectangle class
+8r6636	16rD9E	Quadrangle
+8r6640	16rDA0	Quadrangle class
+8r7022	16rE12	CharacterBlock
+8r7024	16rE14	CharacterBlock class
+8r10524	16r1154	BitBlt
+8r10526	16r1156	BitBlt class
+8r10560	16r1170	Path
+8r10562	16r1172	Path class
+8r10740	16r11E0	Spline
+8r10742	16r11E2	Spline class
+8r11020	16r1210	Line
+8r11022	16r1212	Line class
+8r11172	16r127A	LinearFit
+8r11174	16r127C	LinearFit class
+8r11244	16r12A4	Curve
+8r11246	16r12A6	Curve class
+8r11324	16r12D4	Arc
+8r11326	16r12D6	Arc class
+8r11446	16r1326	Circle
+8r11450	16r1328	Circle class
+8r11764	16r13F4	CharacterScanner
+8r11766	16r13F6	CharacterScanner class
+8r12070	16r1438	CompositionScanner
+8r12072	16r143A	CompositionScanner class
+8r12154	16r146C	TextLineInterval
+8r12156	16r146E	TextLineInterval class
+8r12160	16r1470	Interval class
+8r12216	16r148E	Interval
+8r12532	16r155A	DisplayScanner
+8r12534	16r155C	DisplayScanner class
+8r12674	16r15BC	CharacterBlockScanner
+8r12676	16r15BE	CharacterBlockScanner class
+8r13102	16r1642	Pen
+8r13104	16r1644	Pen class
+8r13440	16r1720	BitEditor
+8r13442	16r1722	BitEditor class
+8r13444	16r1724	MouseMenuController class
+8r13460	16r1730	MouseMenuController
+8r13550	16r1768	StandardSystemController
+8r13552	16r176A	StandardSystemController class
+8r13572	16r177A	PopUpMenu
+8r13714	16r17CC	Paragraph
+8r13716	16r17CE	Paragraph class
+8r13720	16r17D0	DisplayText class
+8r13762	16r17F2	DisplayText
+8r14600	16r1980	Delay
+8r14602	16r1982	Delay class
+8r14770	16r19F8	TextCollector
+8r14772	16r19FA	TextCollector class
+8r15154	16r1A6C	RunArray
+8r15156	16r1A6E	RunArray class
+8r15306	16r1AC6	AltoFileAddressArray
+8r15310	16r1AC8	AltoFileAddressArray class
+8r15442	16r1B22	Time
+8r15444	16r1B24	Time class
+8r15514	16r1B4C	ByteArray
+8r15516	16r1B4E	ByteArray class
+8r15670	16r1BB8	Date
+8r15672	16r1BBA	Date class
+8r16076	16r1C3E	Integer
+8r16100	16r1C40	Integer class
+8r16102	16r1C42	Number class
+8r16136	16r1C5E	Number
+8r16426	16r1D16	Fraction
+8r16430	16r1D18	Fraction class
+8r16640	16r1DA0	LargeNegativeInteger
+8r16642	16r1DA2	LargeNegativeInteger class
+8r20106	16r2046	TextList
+8r20110	16r2048	TextList class
+8r20642	16r21A2	NotifierController
+8r20644	16r21A4	NotifierController class
+8r21012	16r220A	Debugger
+8r21014	16r220C	Debugger class
+8r21060	16r2230	CodeView
+8r21062	16r2232	CodeView class
+8r21064	16r2234	TextView class
+8r21106	16r2246	TextView
+8r21176	16r227E	TextController
+8r21200	16r2280	TextController class
+8r21202	16r2282	ParagraphEditor class
+8r21204	16r2284	ScrollController class
+8r21222	16r2292	ScrollController
+8r21370	16r22F8	ParagraphEditor
+8r21736	16r23DE	ReadStream
+8r21740	16r23E0	ReadStream class
+8r21760	16r23F0	PositionableStream
+8r22340	16r24E0	StringHolderController
+8r22342	16r24E2	StringHolderController class
+8r22552	16r256A	ProjectController
+8r22554	16r256C	ProjectController class
+8r22724	16r25D4	TextCollectorController
+8r22726	16r25D6	TextCollectorController class
+8r23002	16r2602	ChangeController
+8r23004	16r2604	ChangeController class
+8r23046	16r2626	FillInTheBlankController
+8r23050	16r2628	FillInTheBlankController class
+8r23120	16r2650	CRFillInTheBlankController
+8r23122	16r2652	CRFillInTheBlankController class
+8r23276	16r26BE	ListController
+8r23300	16r26C0	ListController class
+8r23370	16r26F8	SelectionInListController
+8r23372	16r26FA	SelectionInListController class
+8r23442	16r2722	LockedListController
+8r23444	16r2724	LockedListController class
+8r23506	16r2746	ChangeListController
+8r23510	16r2748	ChangeListController class
+8r23660	16r27B0	ChangeListView
+8r23662	16r27B2	ChangeListView class
+8r23710	16r27C8	SwitchView
+8r23712	16r27CA	SwitchView class
+8r24004	16r2804	SwitchController
+8r24006	16r2806	SwitchController class
+8r24074	16r283C	LockedSwitchController
+8r24076	16r283E	LockedSwitchController class
+8r24140	16r2860	IndicatorOnSwitchController
+8r24142	16r2862	IndicatorOnSwitchController class
+8r24312	16r28CA	BooleanView
+8r24314	16r28CC	BooleanView class
+8r24442	16r2922	StandardSystemView
+8r24736	16r29DE	StringHolderView
+8r24740	16r29E0	StringHolderView class
+8r25102	16r2A42	TextCollectorView
+8r25104	16r2A44	TextCollectorView class
+8r25164	16r2A74	FillInTheBlankView
+8r25166	16r2A76	FillInTheBlankView class
+8r25220	16r2A90	DisplayTextView
+8r25222	16r2A92	DisplayTextView class
+8r25256	16r2AAE	NoController
+8r25260	16r2AB0	NoController class
+8r25472	16r2B3A	BinaryChoiceController
+8r25474	16r2B3C	BinaryChoiceController class
+8r25600	16r2B80	ProjectView
+8r25602	16r2B82	ProjectView class
+8r25616	16r2B8E	Project
+8r25620	16r2B90	Project class
+8r25644	16r2BA4	ChangeSet
+8r25646	16r2BA6	ChangeSet class
+8r26004	16r2C04	SystemOrganizer
+8r26006	16r2C06	SystemOrganizer class
+8r26066	16r2C36	AltoFileDirectory
+8r26070	16r2C38	AltoFileDirectory class
+8r26072	16r2C3A	FileDirectory class
+8r26160	16r2C70	FileDirectory
+8r27012	16r2E0A	AltoFile
+8r27014	16r2E0C	AltoFile class
+8r27016	16r2E0E	File class
+8r27044	16r2E24	File
+8r27546	16r2F66	ExternalStream
+8r30014	16r300C	AltoFilePage
+8r30016	16r300E	AltoFilePage class
+8r30020	16r3010	FilePage class
+8r30040	16r3020	FilePage
+8r31460	16r3330	IdentityDictionary
+8r31572	16r337A	Scanner
+8r31574	16r337C	Scanner class
+8r32050	16r3428	Parser
+8r32052	16r342A	Parser class
+8r32254	16r34AC	MethodNode
+8r32256	16r34AE	MethodNode class
+8r32260	16r34B0	ParseNode class
+8r32500	16r3540	ParseNode
+8r32632	16r359A	ReturnNode
+8r32634	16r359C	ReturnNode class
+8r32710	16r35C8	VariableNode
+8r32712	16r35CA	VariableNode class
+8r32714	16r35CC	LeafNode class
+8r32732	16r35DA	LeafNode
+8r33016	16r360E	LiteralNode
+8r33020	16r3610	LiteralNode class
+8r33066	16r3636	SelectorNode
+8r33070	16r3638	SelectorNode class
+8r33202	16r3682	Encoder
+8r33204	16r3684	Encoder class
+8r33362	16r36F2	MessageNode
+8r33364	16r36F4	MessageNode class
+8r33564	16r3774	BlockNode
+8r33566	16r3776	BlockNode class
+8r33704	16r37C4	ParseStack
+8r33706	16r37C6	ParseStack class
+8r34522	16r3952	LiteralDictionary
+8r34524	16r3954	LiteralDictionary class
+8r35376	16r3AFE	AssignmentNode
+8r35400	16r3B00	AssignmentNode class
+8r35476	16r3B3E	CascadeNode
+8r35500	16r3B40	CascadeNode class
+8r35556	16r3B6E	DecompilerConstructor
+8r35560	16r3B70	DecompilerConstructor class
+8r36430	16r3D18	ChangeScanner
+8r36432	16r3D1A	ChangeScanner class
+8r36516	16r3D4E	MethodOtherChange
+8r36520	16r3D50	MethodOtherChange class
+8r36522	16r3D52	MethodChange class
+8r36524	16r3D54	ClassRelatedChange class
+8r36526	16r3D56	Change class
+8r36552	16r3D6A	Change
+8r36604	16r3D84	Compiler
+8r36606	16r3D86	Compiler class
+8r36716	16r3DCE	SyntaxError
+8r36720	16r3DD0	SyntaxError class
+8r36736	16r3DDE	ProcessHandle
+8r36740	16r3DE0	ProcessHandle class
+8r37354	16r3EEC	ClassRelatedChange
+8r37406	16r3F06	ClassChange
+8r37410	16r3F08	ClassChange class
+8r37434	16r3F1C	ClassDefinitionChange
+8r37436	16r3F1E	ClassDefinitionChange class
+8r37522	16r3F52	ClassOtherChange
+8r37524	16r3F54	ClassOtherChange class
+8r37570	16r3F78	ClassCommentChange
+8r37572	16r3F7A	ClassCommentChange class
+8r37676	16r3FBE	MethodChange
+8r37722	16r3FD2	MethodDefinitionChange
+8r37724	16r3FD4	MethodDefinitionChange class
+8r40116	16r404E	OtherChange
+8r40120	16r4050	OtherChange class
+8r41420	16r4310	CodeController
+8r41422	16r4312	CodeController class
+8r41476	16r433E	Explainer
+8r41500	16r4340	Explainer class
+8r42124	16r4454	Behavior
+8r42614	16r458C	MethodDescription
+8r42616	16r458E	MethodDescription class
+8r43140	16r4660	Decompiler
+8r43142	16r4662	Decompiler class
+8r43144	16r4664	InstructionStream class
+8r43176	16r467E	InstructionStream
+8r43356	16r46EE	ContextPart
+8r43360	16r46F0	ContextPart class
+8r43774	16r47FC	InstructionPrinter
+8r43776	16r47FE	InstructionPrinter class
+8r44666	16r49B6	ClassDescription
+8r45156	16r4A6E	ClassCategoryReader
+8r45160	16r4A70	ClassCategoryReader class
+8r45572	16r4B7A	OnlyWhenSelectedCodeController
+8r45574	16r4B7C	OnlyWhenSelectedCodeController class
+8r45634	16r4B9C	AlwaysAcceptCodeController
+8r45636	16r4B9E	AlwaysAcceptCodeController class
+8r46020	16r4C10	OnlyWhenSelectedCodeView
+8r46022	16r4C12	OnlyWhenSelectedCodeView class
+8r46326	16r4CD6	MethodListBrowser
+8r46330	16r4CD8	MethodListBrowser class
+8r46446	16r4D26	Inspector
+8r46450	16r4D28	Inspector class
+8r46702	16r4DC2	DictionaryInspector
+8r46704	16r4DC4	DictionaryInspector class
+8r47100	16r4E40	ContextInspector
+8r47102	16r4E42	ContextInspector class
+8r47374	16r4EFC	ScreenController
+8r47376	16r4EFE	ScreenController class
+8r47540	16r4F60	FileList
+8r47542	16r4F62	FileList class
+8r47544	16r4F64	FileModel class
+8r47604	16r4F84	FileModel
+8r50146	16r5066	BinaryChoice
+8r50150	16r5068	BinaryChoice class
+8r50200	16r5080	BinaryChoiceView
+8r50202	16r5082	BinaryChoiceView class
+8r50552	16r516A	FormEditor
+8r50554	16r516C	FormEditor class
+8r50702	16r51C2	FormHolderView
+8r50704	16r51C4	FormHolderView class
+8r50706	16r51C6	FormView class
+8r50732	16r51DA	FormView
+8r51112	16r524A	FormMenuView
+8r51114	16r524C	FormMenuView class
+8r51246	16r52A6	FormButtonCache
+8r51250	16r52A8	FormButtonCache class
+8r51754	16r53EC	Switch
+8r51756	16r53EE	Switch class
+8r52074	16r543C	OneOnSwitch
+8r52076	16r543E	OneOnSwitch class
+8r52172	16r547A	Button
+8r52174	16r547C	Button class
+8r52276	16r54BE	FormMenuController
+8r52300	16r54C0	FormMenuController class
+8r53202	16r5682	OpaqueForm
+8r53204	16r5684	OpaqueForm class
+8r56314	16r5CCC	LookupKey
+8r60666	16r61B6	SystemDictionary
+8r60670	16r61B8	SystemDictionary class
+8r61314	16r62CC	Random
+8r61316	16r62CE	Random class
+8r61414	16r630C	LinkedList
+8r61416	16r630E	LinkedList class
+8r61512	16r634A	MappedCollection
+8r61514	16r634C	MappedCollection class
+8r61634	16r639C	InfiniteForm
+8r61636	16r639E	InfiniteForm class
+8r61714	16r63CC	Boolean
+8r61716	16r63CE	Boolean class
+8r62004	16r6404	False
+8r62006	16r6406	False class
+8r62072	16r643A	True
+8r62074	16r643C	True class
+8r62200	16r6480	UndefinedObject
+8r62202	16r6482	UndefinedObject class
+8r62264	16r64B4	SystemTracer
+8r62266	16r64B6	SystemTracer class
+8r62752	16r65EA	MetaclassForMultipleInheritance
+8r62754	16r65EC	MetaclassForMultipleInheritance class
+8r63046	16r6626	ProcessorScheduler
+8r63050	16r6628	ProcessorScheduler class
+8r63336	16r66DE	Benchmark
+8r63340	16r66E0	Benchmark class
+8r64446	16r6926	MessageTally
+8r64450	16r6928	MessageTally class
+8r65040	16r6A20	Checker
+8r65042	16r6A22	Checker class
+8r103122	16r8652	String class
+8r103720	16r87D0	SmallInteger class
+8r104342	16r88E2	Array class
+8r104422	16r8912	Float class
+8r105242	16r8AA2	MethodContext class
+8r105336	16r8ADE	BlockContext class
+8r105502	16r8B42	Point class
+8r105734	16r8BDC	LargePositiveInteger class
+8r106074	16r8C3C	DisplayBitmap class
+8r106126	16r8C56	Message class
+8r106226	16r8C96	CompiledMethod class
+8r106562	16r8D72	Semaphore class
+8r106646	16r8DA6	Character class
+8r111660	16r93B0	ImageStatistics class
+8r113160	16r9670	ImageStatistics
