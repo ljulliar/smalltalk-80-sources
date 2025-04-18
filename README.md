@@ -1,8 +1,8 @@
 # Smalltalk-80 by the Book
 
-This project is about delivering the promise of the book "Smalltalk-80 The Language and its Implementation" (aka the "Blue Book") as published by Xerox Parc in 1983. That is implementing and running the complete Smalltalk-80 VM environment using only the Smalltalk language itself. Want to know more about the background of this project? Read our [bits of history](doc/History.md).
+This project is about delivering the promise of the book "Smalltalk-80: The Language and its Implementation" (also known as the "Blue Book") as published by Xerox PARC in 1983. That is, implementing and running the complete Smalltalk-80 VM environment using only the Smalltalk language itself. Want to know more about the background of this project? Read our [bits of history](doc/History.md).
 
-**Disclaimer**: this project is still very much work in progress.  If you feel like throwing some of your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions be it bug reports, code fixes, missing features, improved documentation... are very welcome.
+**Disclaimer**: This project is still very much a work in progress. If you feel like contributing your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions, be it bug reports, code fixes, missing features, improved documentation, etc., are very welcome.
 
 # Installation
 * Install the Smalltalk [Pharo](https://www.pharo.org/) environment
