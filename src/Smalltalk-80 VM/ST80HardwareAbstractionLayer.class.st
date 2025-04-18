@@ -607,6 +607,14 @@ ST80HardwareAbstractionLayer >> signal: aST80Semaphore atMilliseconds: time [
 	
 ]
 
+{ #category : #settings }
+ST80HardwareAbstractionLayer >> supportedKeyboardLayouts [
+	^ (KeyMap  keys) select: [ :eachKey |
+			"Check if the key is a String AND its size is 2"
+			(eachKey isString) and: [ eachKey size = 2 ]
+		].
+]
+
 { #category : #'display access' }
 ST80HardwareAbstractionLayer >> updateDisplayRect: rectangle fromForm: sourceForm [
 	"Not BB code"

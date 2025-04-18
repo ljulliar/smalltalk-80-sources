@@ -30,10 +30,10 @@ Class {
 	#category : #'Smalltalk-80 VM'
 }
 
-{ #category : #running }
-ST80VirtualMachine class >> run [
+{ #category : #initialization }
+ST80VirtualMachine class >> runWithImagePath: imagePath keyboard: keyboardLayout [
 	"Launch the VM in a separate process"
-	^ self basicNew initializeRun; yourself.
+	^ self basicNew initializeRunWithImagePath: imagePath keyboard: keyboardLayout; yourself.
 ]
 
 { #category : #accessing }
@@ -49,32 +49,60 @@ ST80VirtualMachine >> hal [
 ]
 
 { #category : #initialization }
-ST80VirtualMachine >> initialize [
+ST80VirtualMachine >> initializeRunWithImagePath: imagePath keyboard: keyboardLayout [
+	
+	"Fork the VM process at standard User priority"
+	vmProcess := [ 
+		[ self initializeWithImagePath: imagePath keyboard: keyboardLayout ] forkAt: Processor userSchedulingPriority ] 
+		ensure: [ Logger flush ]
+]
+
+{ #category : #initialization }
+ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayout [
    "Not BB code"
 	"Initialize a new ST80 VM"
 	
-	| snapshot |
+	| snapshot imagePathRef |
 	
 	debug := false.
 	
-	Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80ljulliard.log' asFileReference).
+	Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
 	Logger truncate.
-
-	vmImagePath := '/misc/applications/Smalltalk/ST80_Image/'.
-	vmImageFile := vmImagePath, 'Smalltalk-80.image'.
-	vmSourcesFile := vmImagePath, 'Smalltalk-80.sources'.
-	vmChangesFile := vmImagePath, 'Smalltalk-80.changes'.
-	vmClassOopsFile := vmImagePath, 'class.oops'.
-	vmMethodOopsFile := vmImagePath, 'method.oops'.
+	
+	"Check image path and image file exist"
+	"TODO: use snapshot.im first if it exists (image snapshot created
+	by the ST-80 VM"
+   (imagePathRef := imagePath asFileReference) exists
+		ifFalse: [ 
+			Transcript show: 'ERROR: Path to image folder incorrect. Exiting'; cr.
+			self terminate 
+		].
+	
+	" Replace the directory below with your own"
+	vmImageFile := imagePathRef / 'Smalltalk-80.image'.
+	vmSourcesFile := imagePathRef / 'Smalltalk-80.sources'.
+	vmChangesFile := imagePathRef /  'Smalltalk-80.changes'.
+	vmClassOopsFile := imagePathRef / 'class.oops'.
+	vmMethodOopsFile := imagePathRef /  'method.oops'.
 	
 	"Open snapshot stream"
 	hal := ST80HardwareAbstractionLayer withVM: self.
 	fs := ST80FileSystem new.
-	keyboard := 'FR'.
 	snapshot := vmImageFile asFileReference binaryReadStream.
 	interpreter := Interpreter withSnapshot: snapshot 
 						hal: hal fileSystem: fs
 						debug: debug.
+	
+	"Check that keyboard layout exists"
+	(hal supportedKeyboardLayouts includes: keyboardLayout)
+		ifTrue: [ keyboard := keyboardLayout ]
+		ifFalse: [ 
+			keyboard := 'US'.
+			Transcript show: '!! WARNING !!: Unsupported Keyboard layout: '; 
+				nextPutAll: keyboardLayout printString; 
+				nextPutAll: '. Defaulting to ''';
+				nextPutAll: keyboard; nextPutAll:''''; cr.
+			 ].
 	
 	"Load symbol tables if debug activated"
 	debug ifTrue: [ 
@@ -86,15 +114,6 @@ ST80VirtualMachine >> initialize [
 	interpreter interpret.
 
 
-]
-
-{ #category : #initialization }
-ST80VirtualMachine >> initializeRun [
-	
-	"Fork the VM process at standard User priority"
-	vmProcess := [ 
-		[ self initialize ] forkAt: Processor userSchedulingPriority ] 
-		ensure: [ Logger flush ]
 ]
 
 { #category : #accessing }
