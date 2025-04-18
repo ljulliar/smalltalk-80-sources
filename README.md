@@ -16,13 +16,15 @@ Disclaimer: this project is still very much work in progress.  Do you feel like 
 ST80VirtualMachine runWithImagePath: 'local_path/assets' keyboard: 'XX'.
 ```
 where local_path is where you created your local git repo and XX is your host keyboard layout (for now only 'US' (US international) and 'FR' (French) keyboards are supported).  
-* Right click in the Playground and Do It. Et voilà!
+* Right click in the Playground and Do It. Et voilà! 
 
 # Smalltalk-80 at work
 But does it actually work ? the answer is yes it does :-) As seeing is believing, here is a screenshot of the ST-80 VM running for real in my Smalltalk Pharo environment. 
 ![Screenshot of the ST-80 VM startup screen ) ](images/ST80-startup-screen.png)
 
 The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book. Notice the date of the VM image in the System Transcript window. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace...
+
+Paraphrasing a well known character of the French history: "With this screen, Developers, 40+ years of Computer Science history look down upon you.” :smile:
 
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
