@@ -26,6 +26,7 @@ The Smalltalk-80 startup screen that you see here is exactly as presented in the
 
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
+* The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf), courtesy Stéphane Ducasse)
 * The [Pharo](https://www.pharo.org/) developers community for providing this remarkable Open Source Smalltalk environment
 * [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project, a C++ implementation of the VM, that proved very helpful when I started debugging my Smalltalk implementation.
 * Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) dedicated to the Smalltalk-80 specifications.
