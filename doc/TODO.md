@@ -12,5 +12,6 @@ Implement the missing features of the VM. For instance:
 - [ ] The accelerated CharacterScanner primitives and function on the host side
 - [ ] Make the execution of the DisplayScreen dispayExtent:  work (see sample code int he ST-80 System Workspace window)
 - [ ] Save a snapshot of the Smalltalk 80 environment (right click on the desktop background and select 'save')
+- [ ] Writing unit and stress tests for the virtual machine interpreter and object memory manager
 - [ ] and many others!
   
