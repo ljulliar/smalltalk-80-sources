@@ -16,6 +16,6 @@ More recently, to celebrate the 40th anniversary of the book, several open-sourc
 ## Objectives of the project.
 So, are the specifications of the Smalltalk-80 VM, written in Smalltalk, good enough to reimplement the whole system? As shown in this project, the answer is definitely yes, although there is still some additional work to be done so that the [implementation](Implementation.md) works for real.
 
-* One objective was to transcribe the Smalltalk code from the Blue Book and merge all the known errata published either by Xerox between 1983 and 1985 or later by those who reimplemented the VM in other languages. This archaeology work took some time :-)
-* Second, you have to write your own hardware abstraction layer (HAL) to serve as an interface between the ST-80 VM and its host. One of the benefits of hosting the VM on a Smalltalk environment (Pharo) is that I also wrote the HAL in Smalltalk, which brings a further level of abstraction to the HAL as well.
+* The first task was to transcribe the Smalltalk code from the Blue Book and merge all the known errata published either by Xerox between 1983 and 1985 or later by those who reimplemented the VM in other languages. This archaeology work took some time :-)
+* Second, I had to write a specific hardware abstraction layer (HAL) to serve as an interface between the ST-80 VM and its host (in my case the Smalltalk Pharo environment). One of the benefits of hosting the VM on a Smalltalk environment is that I also wrote the HAL in Smalltalk, which brings a further level of abstraction to the HAL as well.
 
