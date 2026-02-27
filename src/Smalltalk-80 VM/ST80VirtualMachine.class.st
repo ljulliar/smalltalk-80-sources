@@ -51,6 +51,10 @@ ST80VirtualMachine >> hal [
 { #category : #initialization }
 ST80VirtualMachine >> initializeRunWithImagePath: imagePath keyboard: keyboardLayout [
 	
+	"Initialize the Logger as a global variable"
+	Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
+	Logger truncate.
+	
 	"Fork the VM process at standard User priority"
 	vmProcess := [ 
 		[ self initializeWithImagePath: imagePath keyboard: keyboardLayout ] forkAt: Processor userSchedulingPriority ] 
@@ -66,8 +70,8 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 	
 	debug := false.
 	
-	Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
-	Logger truncate.
+	"Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
+	Logger truncate."
 	
 	"Check image path and image file exist"
 	"TODO: use snapshot.im first if it exists (image snapshot created
