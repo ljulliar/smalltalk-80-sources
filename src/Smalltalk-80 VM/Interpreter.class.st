@@ -1845,6 +1845,8 @@ Interpreter >> primitiveAt [
 
    | index array arrayClass result |
    index := self positive16BitValueOf: self popStack.
+	"Make sure the primitive succeeded before proceeding further"
+	self success ifFalse: [ ^ self unPop: 1 ].
    array := self popStack.
    arrayClass := memory fetchClassOf: array.
    self checkIndexableBoundsOf: index in: array.
