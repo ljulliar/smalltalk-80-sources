@@ -3,8 +3,8 @@ This class serves as a proxy to create an object representation of the
 Bitblt instances coming from the ST80 Virtual Machine
 "
 Class {
-	#name : #ST80BitBlt,
-	#superclass : #ST80Object,
+	#name : 'ST80BitBlt',
+	#superclass : 'ST80Object',
 	#instVars : [
 		'destForm',
 		'sourceForm',
@@ -63,17 +63,18 @@ Class {
 		'SourceYIndex',
 		'WidthIndex'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 ST80BitBlt class >> bitBltPointer: bitBltPointer memory: memory [
   	^ (super fromObject: bitBltPointer memory: memory)
 		  initializeWithBitBltPointer: bitBltPointer memory: memory;
 		  yourself
 ]
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80BitBlt class >> initialize [
 
 	"BitBltSimulation: initialize a table of bit masks BB 356"	
@@ -101,7 +102,7 @@ ST80BitBlt class >> initialize [
 	ClipHeightIndex := 13.
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 ST80BitBlt >> calculateOffsets [
 	"BitBltSimulation code BB 359"
 	"check if need to preload buffer
@@ -130,7 +131,7 @@ ST80BitBlt >> calculateOffsets [
 		]	
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 ST80BitBlt >> checkOverlap [
 	"BitBltSimulation code BB 358"
 	| t |
@@ -168,7 +169,7 @@ ST80BitBlt >> checkOverlap [
 		]
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 ST80BitBlt >> clipRange [
 	"BitBltSimulation code BB 356"
 	"clip and adjust source origin and extent appropriately"
@@ -205,13 +206,13 @@ ST80BitBlt >> clipRange [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80BitBlt >> combinationRule [
 
 	^ combinationRule
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 ST80BitBlt >> computeMasks [
 	"BitBltSimulation code BB 357"
 	"calculate skew and edge masks"	
@@ -259,7 +260,7 @@ ST80BitBlt >> computeMasks [
 		]
 ]
 
-{ #category : #operations }
+{ #category : 'operations' }
 ST80BitBlt >> copyBits [
 	"BitBltSimulation code BB 356"
 	"The bits copy operation"
@@ -310,7 +311,7 @@ ST80BitBlt >> copyBits [
 	
 ]
 
-{ #category : #'inner loop' }
+{ #category : 'inner loop' }
 ST80BitBlt >> copyLoop [
 	"BitBltSimulation code BB 359"
 	"With some optimization from ljulliard"
@@ -382,13 +383,13 @@ ST80BitBlt >> copyLoop [
 			destIndex := destIndex + destDelta]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80BitBlt >> destForm [
 
 	^ destForm
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
 
 	| sourceFormOop halftoneFormOop |
@@ -419,7 +420,7 @@ ST80BitBlt >> initializeWithBitBltPointer: bbp memory: m [
 
 ]
 
-{ #category : #'inner loop' }
+{ #category : 'inner loop' }
 ST80BitBlt >> merge: sourceWord with: destinationWord [
 	"These are the 16 combination rules:"
 	combinationRule = 0
@@ -457,7 +458,7 @@ ST80BitBlt >> merge: sourceWord with: destinationWord [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80BitBlt >> updatedRect [
 
 	^ updatedRect

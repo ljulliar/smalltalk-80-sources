@@ -3,8 +3,8 @@ To access locations in the address space of the host machine, machine language i
 In RealObjectMemory, the load and store instructions are symbolized by messages to an instance of RealWordMemory whose name is wordMemory. 
 "
 Class {
-	#name : #RealWordMemory,
-	#superclass : #Object,
+	#name : 'RealWordMemory',
+	#superclass : 'Object',
 	#instVars : [
 		'realWordMemory'
 	],
@@ -12,10 +12,11 @@ Class {
 		'SegmentCount',
 		'WordSegmentCount'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 RealWordMemory class >> initialize [
 	"Real World memory parameters"
 
@@ -24,7 +25,7 @@ RealWordMemory class >> initialize [
 	WordSegmentCount := 65536.
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> at: address [
 	"Not BB code"
 	"Direct access to memory. Dirty hack to speed up access to
@@ -32,7 +33,7 @@ RealWordMemory >> at: address [
 	^ realWordMemory at: (address + 1).
 ]
 
-{ #category : #copying }
+{ #category : 'copying' }
 RealWordMemory >> copyFrom: startIndex to: endIndex [
 	"Return an Array representing a copy of the memory. Values
 	are 16-bit integer. CAUTION !! The start Index and endIndex
@@ -41,7 +42,7 @@ RealWordMemory >> copyFrom: startIndex to: endIndex [
 	^ realWordMemory copyFrom:  (startIndex + 1) to: (endIndex + 1) 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 RealWordMemory >> initialize [
 	"Initialize the real world memory (not BB code)"
 
@@ -59,7 +60,7 @@ RealWordMemory >> initialize [
 	realWordMemory := Array new: (WordSegmentCount * SegmentCount)  withAll: 0.
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> segment: s word: w [
 	"Return word w of segment s."
 	"ShouldBeImplemented signalFor: thisContext sender selector"
@@ -73,7 +74,7 @@ RealWordMemory >> segment: s word: w [
 
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	"Return bits firstBitIndex to lastBitIndex of word w of segment s."
 	"ShouldBeImplemented signalFor: thisContext sender selector"
@@ -88,7 +89,7 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	^ (shift & mask)
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex put: value [
 	"Store value into bits firstBitIndex to lastBitIndex of word w of segment s; return value"
 	"ShouldBeImplemented signalFor: thisContext sender selector"
@@ -108,7 +109,7 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex put: v
 	^ value
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> segment: s word: w byte: byteNumber [
 	"Return byte byteNumber of word w of segment s."
 	"ShouldBeImplemented signalFor: thisContext sender selector"
@@ -132,7 +133,7 @@ RealWordMemory >> segment: s word: w byte: byteNumber [
 	^ byte 
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 	"Store value into byte byteNumber of word w of segment s; return value."
 	"ShouldBeImplemented signalFor: thisContext sender selector"
@@ -158,7 +159,7 @@ RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 	
 ]
 
-{ #category : #access }
+{ #category : 'access' }
 RealWordMemory >> segment: s word: w put: value [
 	"Store value into word w of segment s; return value."
 	"ShouldBeImplemented signalFor: thisContext sender selector"

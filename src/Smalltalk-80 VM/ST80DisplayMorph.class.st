@@ -6,17 +6,18 @@ Class instance is also responsible for capturing UI events and forward
 them to the ST80 VM.
 "
 Class {
-	#name : #ST80DisplayMorph,
-	#superclass : #ImageMorph,
+	#name : 'ST80DisplayMorph',
+	#superclass : 'ImageMorph',
 	#instVars : [
 		'displayForm',
 		'hal',
 		'vm'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #geometry }
+{ #category : 'geometry' }
 ST80DisplayMorph class >> extent: extentPoint vm: aVm [
 	"Return a new display morph for the ST80 VM with proper 
 	display dimension"
@@ -25,7 +26,7 @@ ST80DisplayMorph class >> extent: extentPoint vm: aVm [
 
 ]
 
-{ #category : #announcements }
+{ #category : 'announcements' }
 ST80DisplayMorph >> announceDeleted [ 
 
 	"On closing App window, terminate the ST80 VM"
@@ -33,7 +34,7 @@ ST80DisplayMorph >> announceDeleted [
 
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> checkHandPosition [
 	"Direct keyboard focus to this morph if the active hand
 	is over it"
@@ -46,13 +47,13 @@ ST80DisplayMorph >> checkHandPosition [
 	
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80DisplayMorph >> displayForm [
 
 	^ displayForm
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> handlesKeyDown: anEvent [
 	"Accept keyboard events only when the ST80 VM 
 	input semaphore is set"
@@ -60,7 +61,7 @@ ST80DisplayMorph >> handlesKeyDown: anEvent [
 	^ hal inputSemaphore notNil.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> handlesKeyUp: anEvent [
 	"Accept keyboard events only when the ST80 VM 
 	input semaphore is set"
@@ -69,28 +70,28 @@ ST80DisplayMorph >> handlesKeyUp: anEvent [
 	
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> handlesMouseDown: anEvent [
 	"Accept mouseDown:, mouseMove:, mouseUp: event notifications"
 	"but only when the ST80 VM input event handling is ready"
 	^ hal inputSemaphore notNil.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> handlesMouseMove: anEvent [
 	"Accept mouseMove: event notifications"
 	"but only when the ST80 VM input event handling is ready"
 	^ hal inputSemaphore notNil.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> handlesMouseOver: anEvent [
 	"Accept mouseEnter: and mouseLeave: event notifications"
 	"but only when the ST80 VM input event handling is ready"
 	^ hal inputSemaphore notNil.
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 
 	vm := aVm.
@@ -105,7 +106,7 @@ ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> keyDown: anEvent [
 	"A key on the keyboard was pressed"
 	"Transcript show: '-----------------------------'; cr; show: 'Key down: '; cr;
@@ -125,7 +126,7 @@ ST80DisplayMorph >> keyDown: anEvent [
 	hal handleKeyboardEvent: anEvent way: #down.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> keyStroke: anEvent [
    "***WARNING ! This method is currently not used***"
 	"This method is invoked when the handlesKeyboard: method is implemented by the 
@@ -158,7 +159,7 @@ ST80DisplayMorph >> keyStroke: anEvent [
 	hal handleKeyboardEvent: anEvent way: #down.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> keyUp: anEvent [
 	"A key on the keyboard was released"
 	"Transcript show: 'Key up '; nextPutAll: anEvent keyValue printString; 
@@ -171,7 +172,7 @@ ST80DisplayMorph >> keyUp: anEvent [
 	hal handleKeyboardEvent: anEvent way: #up.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> mouseDown: anEvent [
 	"One of the mouse buttons was clicked down"
 	"Which button: 
@@ -184,7 +185,7 @@ ST80DisplayMorph >> mouseDown: anEvent [
 	hal handleMouseEvent: anEvent way: #down.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> mouseEnter: anEvent [
 	"The mouse pointer is entering the ST80 Morph"
 	Transcript show: 'Mouse enters ST80 Morph'; cr; flush.
@@ -194,7 +195,7 @@ ST80DisplayMorph >> mouseEnter: anEvent [
 	"self world currentCursor: hal cursor."
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> mouseLeave: anEvent [
 	"The mouse pointer is leaving the ST80 Morph"
 	Transcript show: 'Mouse leaves ST80 Morph'; cr; flush.
@@ -204,7 +205,7 @@ ST80DisplayMorph >> mouseLeave: anEvent [
 	self currentHand showTemporaryCursor: nil.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> mouseMove: anEvent [
 	"One of the mouse buttons was clicked down"
 
@@ -218,7 +219,7 @@ ST80DisplayMorph >> mouseMove: anEvent [
 	hal mouseMove: relative_position 
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80DisplayMorph >> mouseUp: anEvent [
 	"One of the mouse buttons was clicked down"
 

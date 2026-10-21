@@ -10,8 +10,8 @@ Instance Variables
 Implementation Points
 "
 Class {
-	#name : #ST80VirtualMachine,
-	#superclass : #Object,
+	#name : 'ST80VirtualMachine',
+	#superclass : 'Object',
 	#instVars : [
 		'vmImageFile',
 		'vmSourcesFile',
@@ -27,28 +27,29 @@ Class {
 		'vmProcess',
 		'keyboard'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80VirtualMachine class >> runWithImagePath: imagePath keyboard: keyboardLayout [
 	"Launch the VM in a separate process"
 	^ self basicNew initializeRunWithImagePath: imagePath keyboard: keyboardLayout; yourself.
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80VirtualMachine >> fs [
 
 	^ fs
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80VirtualMachine >> hal [
 
 	^ hal
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80VirtualMachine >> initializeRunWithImagePath: imagePath keyboard: keyboardLayout [
 	
 	"Initialize the Logger as a global variable"
@@ -61,7 +62,7 @@ ST80VirtualMachine >> initializeRunWithImagePath: imagePath keyboard: keyboardLa
 		ensure: [ Logger flush ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayout [
    "Not BB code"
 	"Initialize a new ST80 VM"
@@ -120,18 +121,18 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80VirtualMachine >> interpreter [
 
 	^ interpreter
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80VirtualMachine >> keyboard [
 	^keyboard 
 ]
 
-{ #category : #'debugging actions' }
+{ #category : 'debugging actions' }
 ST80VirtualMachine >> terminate [
 	vmProcess terminate.
 ]

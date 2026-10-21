@@ -12,8 +12,8 @@ Instance Variables
 Implementation Points
 "
 Class {
-	#name : #ST80HardwareAbstractionLayer,
-	#superclass : #Object,
+	#name : 'ST80HardwareAbstractionLayer',
+	#superclass : 'Object',
 	#instVars : [
 		'display',
 		'displayWidth',
@@ -67,10 +67,11 @@ Class {
 		'YLocation',
 		'YellowButton'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80HardwareAbstractionLayer class >> initialize [
 	"Not BB code"
 
@@ -190,18 +191,18 @@ ST80HardwareAbstractionLayer class >> initialize [
 
 ]
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80HardwareAbstractionLayer class >> withVM: aVm [
 	^ self basicNew initializeWithVM: aVm; yourself
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80HardwareAbstractionLayer >> cursor [
 
 	^ cursor
 ]
 
-{ #category : #'cursor access' }
+{ #category : 'cursor access' }
 ST80HardwareAbstractionLayer >> cursor: aCursorOop memory: memory [
 	"This message receives a pointer to a 16x16 Proxy ST80 Form
 	to use as the current cursor on the display screen"
@@ -211,14 +212,14 @@ ST80HardwareAbstractionLayer >> cursor: aCursorOop memory: memory [
 	^ true
 ]
 
-{ #category : #'cursor access' }
+{ #category : 'cursor access' }
 ST80HardwareAbstractionLayer >> cursorLink: aBoolean [
 	"TODO ? Keep track of the boolean flag but we
 	are not using it for now"
 	cursorLink := aBoolean.
 ]
 
-{ #category : #'cursor access' }
+{ #category : 'cursor access' }
 ST80HardwareAbstractionLayer >> cursorLocation: aPoint [
 	"Place the cursor at the location given (position is relative
 	to the upperleft corner of the ST80 display. This message is
@@ -227,7 +228,7 @@ ST80HardwareAbstractionLayer >> cursorLocation: aPoint [
    self currentWorld activeHand position: (displayMorph position + aPoint).
 ]
 
-{ #category : #'display access' }
+{ #category : 'display access' }
 ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 	| newDisplayMorph			
@@ -268,7 +269,7 @@ ST80HardwareAbstractionLayer >> displayWidth: width displayHeight: height [
 
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 	"Receives keyboard events from the Display morph and	 turns it into a 
 	keyboard input event well formatted for the ST80 VM. Events received here 
@@ -366,7 +367,7 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> handleMouseEvent: anEvent way: way [
 
 	"ERROR in BB p. 650 the parameter values for the left and right
@@ -396,7 +397,7 @@ ST80HardwareAbstractionLayer >> handleMouseEvent: anEvent way: way [
 	Error new signal: 'Unknown mouse button: ', anEvent whichButton printString.
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 
 	"Make sure to initialize class variables"
@@ -429,12 +430,12 @@ ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputSemaphore [
 	^ inputSemaphore
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
 	"keep track of the semaphore to signal when input events occur"
 	self assert: aSemaphore notNil.
@@ -443,7 +444,7 @@ ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
 
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputTimeWord [
   "As per BB p. 649:
    A type 0 word will be used if the number of milliseconds since the last
@@ -468,7 +469,7 @@ ST80HardwareAbstractionLayer >> inputTimeWord [
 	
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputWord: aValue [
 	"Push a 16 bit value in the input event queue
 	and signal the input semaphore. BB p. 648"
@@ -482,7 +483,7 @@ ST80HardwareAbstractionLayer >> inputWord: aValue [
 	
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputWordType: anEventType parameter: aParameter [
 	"For a description of the format for input event words see
 	BB p. 649"
@@ -493,7 +494,7 @@ ST80HardwareAbstractionLayer >> inputWordType: anEventType parameter: aParameter
 	self inputWord: (anEventType << 12) | (aParameter & 16rFFF).
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> isInputEventDriven [
 	"If set to False, the ST80 interpreter will poll the mouse 
 	position at every cycle which is very time consuming and 
@@ -501,7 +502,7 @@ ST80HardwareAbstractionLayer >> isInputEventDriven [
 	^ true
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> keyValueFrom: anEvent [
 	"Map native key scan code to valid values for ST80 keyboard 
 	input parameters"
@@ -528,14 +529,14 @@ ST80HardwareAbstractionLayer >> keyValueFrom: anEvent [
 	^ nil
 ]
 
-{ #category : #'time management' }
+{ #category : 'time management' }
 ST80HardwareAbstractionLayer >> millisecondsUptime [
 	"number of ticks of the millisecond clock (since it 
 	last was reset or rolled over)"
 	^ Time millisecondClockValue.
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> mouseMove: position [
 	"Process the mouse move events received from the host Smalltalk
 	environment and feed it into the ST80 input events queue.
@@ -550,7 +551,7 @@ ST80HardwareAbstractionLayer >> mouseMove: position [
 	self inputWordType: 2 parameter: mousePosition y.
 ]
 
-{ #category : #'cursor access' }
+{ #category : 'cursor access' }
 ST80HardwareAbstractionLayer >> mousePosition [
 	"returns the current mouse position"
 	Transcript show: 'MousePt: '; nextPutAll: mousePosition printString; 
@@ -559,7 +560,7 @@ ST80HardwareAbstractionLayer >> mousePosition [
 	"^ displayMorph cursorPoint"
 ]
 
-{ #category : #'event handling' }
+{ #category : 'event handling' }
 ST80HardwareAbstractionLayer >> nextInputWord [
 	"Pick the next 16 bit word event from the event queue"
 	inputQueue isEmpty 
@@ -568,14 +569,14 @@ ST80HardwareAbstractionLayer >> nextInputWord [
 
 ]
 
-{ #category : #protocol }
+{ #category : 'protocol' }
 ST80HardwareAbstractionLayer >> quit [
 	"message sent by primitiveQuit"
 	window close.
 	vm terminate.
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
 	"For now we accept the intrnval value from primitiveSampleInterval 
 	but we actually don't do anything with it"
@@ -584,14 +585,14 @@ ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
 	sampleInterval := anInterval.
 ]
 
-{ #category : #'time management' }
+{ #category : 'time management' }
 ST80HardwareAbstractionLayer >> secondsSinceSmalltalkEpoch [
 	"number of seconds since the midnight previous to 
 	January 1, 1901"
 	^ Time totalSeconds.
 ]
 
-{ #category : #'time management' }
+{ #category : 'time management' }
 ST80HardwareAbstractionLayer >> signal: aST80Semaphore atMilliseconds: time [
 	"This is called by the ST80 primitiveSignalAtTick primitive.
 	From BB p 652: If a new call is made on it before the last timer
@@ -609,7 +610,7 @@ ST80HardwareAbstractionLayer >> signal: aST80Semaphore atMilliseconds: time [
 	
 ]
 
-{ #category : #settings }
+{ #category : 'settings' }
 ST80HardwareAbstractionLayer >> supportedKeyboardLayouts [
 	^ (KeyMap  keys) select: [ :eachKey |
 			"Check if the key is a String AND its size is 2"
@@ -617,7 +618,7 @@ ST80HardwareAbstractionLayer >> supportedKeyboardLayouts [
 		].
 ]
 
-{ #category : #'display access' }
+{ #category : 'display access' }
 ST80HardwareAbstractionLayer >> updateDisplayRect: rectangle fromForm: sourceForm [
 	"Not BB code"
 	"Create a native bitBlt operation to update the dirty rectangle

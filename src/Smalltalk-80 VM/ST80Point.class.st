@@ -2,8 +2,8 @@
 Proxy class to ST80 Point objects
 "
 Class {
-	#name : #ST80Point,
-	#superclass : #ST80Object,
+	#name : 'ST80Point',
+	#superclass : 'ST80Object',
 	#instVars : [
 		'point'
 	],
@@ -13,10 +13,11 @@ Class {
 		'XIndex',
 		'YIndex'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 ST80Point class >> fromObject: objectPointer memory: memory [
 	"Make sure to initialize class variables"
 	self initialize.
@@ -27,7 +28,7 @@ ST80Point class >> fromObject: objectPointer memory: memory [
 		yourself
 ]
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80Point class >> initialize [
 
 	" Point class oop in ST80"
@@ -41,7 +42,7 @@ ST80Point class >> initialize [
     ClassPointSize := 2.
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80Point >> initializeFromObject: objectPointer memory: objectMemory [
 
 	"First make sure it is a Point object we are pointing at"
@@ -54,7 +55,7 @@ ST80Point >> initializeFromObject: objectPointer memory: objectMemory [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Point >> point [
 	^ point
 ]

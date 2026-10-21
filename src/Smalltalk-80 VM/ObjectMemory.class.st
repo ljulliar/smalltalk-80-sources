@@ -4,8 +4,8 @@ The function of the object memory is to create, store, and destroy objects and t
 This is a real-memory implementation meaning that all the objects in the environment reside in primary memory that is directly addressable by the program (as opposed to virtual memory)
 "
 Class {
-	#name : #ObjectMemory,
-	#superclass : #Object,
+	#name : 'ObjectMemory',
+	#superclass : 'Object',
 	#instVars : [
 		'currentSegment',
 		'wordMemory',
@@ -35,10 +35,11 @@ Class {
 		'ObjectTableSize',
 		'ObjectTableStart'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ObjectMemory class >> initialize [ 
 	"Initialize memory parameters. Note all idex in Memory
 	management are assumed to start at 0 whether, word, byte
@@ -105,7 +106,7 @@ ObjectMemory class >> initialize [
 
 ]
 
-{ #category : #'vm image loading' }
+{ #category : 'vm image loading' }
 ObjectMemory class >> readUInt16From: stream [
 	"Read next 4 bytes from stream and return an
 	unsigned 16-bit integer"
@@ -113,7 +114,7 @@ ObjectMemory class >> readUInt16From: stream [
 	^ (stream next) + (stream next bitShift: 8).
 ]
 
-{ #category : #'vm image loading' }
+{ #category : 'vm image loading' }
 ObjectMemory class >> readUInt32From: stream [
 	"Read next 4 bytes from stream and return an
 	unsigned 32-bit integer"
@@ -121,7 +122,7 @@ ObjectMemory class >> readUInt32From: stream [
 	^ (stream next) + (stream next bitShift: 8) + (stream next bitShift: 16) + (stream next bitShift: 24).
 ]
 
-{ #category : #'private - compaction' }
+{ #category : 'private - compaction' }
 ObjectMemory >> abandonFreeChunksInSegment: segment [
 	"Computes lowWaterMark and also finds all deallocated chunks, recycles their object table entries onto the list of free pointers using the subroutine releasePointer:, and changes their class fields to the distinguished value NonPointer. During the subsequent sweep, when the compacter encounters objects so marked it can recognize them as deallocated chunks."
 
@@ -141,7 +142,7 @@ ObjectMemory >> abandonFreeChunksInSegment: segment [
 	^ lowWaterMark
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ObjectMemory >> addressOfObject: objectPointer [
 	"Not BB code.
 	This is a method used to get the absolute address in memory
@@ -151,7 +152,7 @@ ObjectMemory >> addressOfObject: objectPointer [
 	^ ((self segmentBitsOf: objectPointer) bitShift: 16) + (self locationBitsOf: objectPointer).
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ObjectMemory >> addressOfWord: objectPointer [
 	"Not BB code.
 	This is a method used to get the absolute address in memory
@@ -161,7 +162,7 @@ ObjectMemory >> addressOfWord: objectPointer [
 	^ (self addressOfObject: objectPointer) + HeaderSize
 ]
 
-{ #category : #'private - allocation' }
+{ #category : 'private - allocation' }
 ObjectMemory >> allocate: size odd: oddBit pointer: pointerBit extra: extraWord class: classPointer [
 	"Memory allocation to store objects. The way memory is allocated depends on the pointer-fields bit of the object table entry:
 	when that bit is 1, the data consist of object pointers; 
@@ -186,7 +187,7 @@ ObjectMemory >> allocate: size odd: oddBit pointer: pointerBit extra: extraWord 
 	^ objectPointer
 ]
 
-{ #category : #'private - allocation' }
+{ #category : 'private - allocation' }
 ObjectMemory >> allocateChunk: size [
 	"Allocate a chunk of memory and Attempts a marking collection if compaction of all segments has failed to yield enough space to satisfy an allocation request."
 	"BB code adapted for debug code"
@@ -210,7 +211,7 @@ ObjectMemory >> allocateChunk: size [
 
 ]
 
-{ #category : #'private - allocation' }
+{ #category : 'private - allocation' }
 ObjectMemory >> attemptToAllocateChunk: size [
 	"First tries to allocate chunk in currentSegment, the segment currently
 	targeted for allocations. If it fails (returns nil), then the routine
@@ -234,7 +235,7 @@ ObjectMemory >> attemptToAllocateChunk: size [
 	^ nil
 ]
 
-{ #category : #'private - allocation' }
+{ #category : 'private - allocation' }
 ObjectMemory >> attemptToAllocateChunkInCurrentSegment: size [
 	"Searches the current heap segment's free-chunk lists for the first chunk that is the right size or that can be subdivided to yield a chunk of the right size"
 
@@ -277,7 +278,7 @@ ObjectMemory >> attemptToAllocateChunkInCurrentSegment: size [
 	^ nil	"the end of the linked list was reached and no fit was found"
 ]
 
-{ #category : #'private - object pointers' }
+{ #category : 'private - object pointers' }
 ObjectMemory >> cantBeIntegerObject: objectPointer [
 	"object-access routine requires that its object pointer argument really be an object table index. This routine is used to trap erroneous calls"
 
@@ -286,17 +287,17 @@ ObjectMemory >> cantBeIntegerObject: objectPointer [
 		ifTrue: [ Sensor notify: 'A small integer has no object table entry' ]
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> classBitsOf: objectPointer [
 	^ self heapChunkOf: objectPointer word: 1
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> classBitsOf: objectPointer put: value [
 	^ self heapChunkOf: objectPointer word: 1 put: value
 ]
 
-{ #category : #'private - compaction' }
+{ #category : 'private - compaction' }
 ObjectMemory >> compactCurrentSegment [
 	"invokes the other compaction routines in the proper order and then creates the single free chunk at the top of the heap segment"
 
@@ -310,18 +311,18 @@ ObjectMemory >> compactCurrentSegment [
 					(self obtainPointer: HeapSpaceStop + 1 - bigSpace location: bigSpace) ]
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> countBitsOf: objectPointer [
 	^ self ot: objectPointer bits: 0 to: 7
 
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> countBitsOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 0 to: 7 put: value
 ]
 
-{ #category : #'private - ref count gc' }
+{ #category : 'private - ref count gc' }
 ObjectMemory >> countDown: rootObjectPointer [
 	"Simple garbage collector method to decrease reference count (BB p. 677)"
 
@@ -345,7 +346,7 @@ ObjectMemory >> countDown: rootObjectPointer [
 					   self deallocate: objectPointer ] ]
 ]
 
-{ #category : #'private - ref count gc' }
+{ #category : 'private - ref count gc' }
 ObjectMemory >> countUp: objectPointer [
 	"Simple garbage collector method to increase reference count (BB p. 677)"
 	| count |
@@ -355,7 +356,7 @@ ObjectMemory >> countUp: objectPointer [
 	^objectPointer
 ]
 
-{ #category : #'private - deallocation' }
+{ #category : 'private - deallocation' }
 ObjectMemory >> deallocate: objectPointer [
 	"chunk is recycled on a free-chunk list. The following routine expects the count field to have been reset to zero by a higher-level routine. deallocated objects have no provision for an extra word not counted in the size field."
 
@@ -365,23 +366,23 @@ ObjectMemory >> deallocate: objectPointer [
 	self toFreeChunkList: (space min: BigSize) add: objectPointer
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ObjectMemory >> debug [
   ^ debug
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ObjectMemory >> debug: onOff [
   debug := onOff.
 ]
 
-{ #category : #'reference counting' }
+{ #category : 'reference counting' }
 ObjectMemory >> decreaseReferencesTo: objectPointer [
 	"Substract one to the reference count of the object whose object pointer is ObjectPointer"
 	self countDown: objectPointer
 ]
 
-{ #category : #'byte access' }
+{ #category : 'byte access' }
 ObjectMemory >> fetchByte: byteIndex ofObject: objectPointer [
 	"Return the 8 bit numerical value found in the byte numbered byteIndex of the object associated with ObjectPointer"
 	|value|
@@ -393,12 +394,12 @@ ObjectMemory >> fetchByte: byteIndex ofObject: objectPointer [
 	^ value
 ]
 
-{ #category : #'length access' }
+{ #category : 'length access' }
 ObjectMemory >> fetchByteLengthOf: objectPointer [
 	^ (self fetchWordLengthOf: objectPointer) * 2 - (self oddBitOf: objectPointer)
 ]
 
-{ #category : #'class pointer access' }
+{ #category : 'class pointer access' }
 ObjectMemory >> fetchClassOf: objectPointer [
 	"Return the object pointer of the class-describing object for the object associated with objectPointer"
 	(self isIntegerObject: objectPointer)
@@ -406,7 +407,7 @@ ObjectMemory >> fetchClassOf: objectPointer [
 		ifFalse: [^ self classBitsOf: objectPointer]
 ]
 
-{ #category : #'object pointer access' }
+{ #category : 'object pointer access' }
 ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 	"Return the object pointer found in the field numbered 
 	fieldIndex of the object associated with ObjectPointer"
@@ -420,7 +421,7 @@ ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 	^ value
 ]
 
-{ #category : #'word access' }
+{ #category : 'word access' }
 ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	"Return the 16 bit numerical value found in the word numbered fieldIndex of the object associated with ObjectPointer"
 	|value|
@@ -436,12 +437,12 @@ ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	^ value
 ]
 
-{ #category : #'length access' }
+{ #category : 'length access' }
 ObjectMemory >> fetchWordLengthOf: objectPointer [
 	^ (self sizeBitsOf: objectPointer) - HeaderSize
 ]
 
-{ #category : #'private - ref count gc' }
+{ #category : 'private - ref count gc' }
 ObjectMemory >> forAllObjectsAccessibleFrom: objectPointer suchThat: predicate do: action [
 	"BB p. 578"
 	(predicate value: objectPointer) ifTrue: [
@@ -451,7 +452,7 @@ ObjectMemory >> forAllObjectsAccessibleFrom: objectPointer suchThat: predicate d
 			  do: action ]
 ]
 
-{ #category : #'private - ref count gc' }
+{ #category : 'private - ref count gc' }
 ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predicate do: action [
 	"Space-efficient traversal algorithm for reference counting garbage collector"
 	"BB p. 578"
@@ -496,17 +497,17 @@ ObjectMemory >> forAllOtherObjectsAccessibleFrom: objectPointer suchThat: predic
 				self heapChunkOf: current word: offset put: next ] ]
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> freeBitOf: objectPointer [
 	^ self ot: objectPointer bits: 10 to: 10
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> freeBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 10 to: 10 put: value
 ]
 
-{ #category : #'memory counting' }
+{ #category : 'memory counting' }
 ObjectMemory >> freeOopsCount [
    "Not BB code"
 	"Count how many free object table entries are available"
@@ -519,35 +520,35 @@ ObjectMemory >> freeOopsCount [
 	^ count
 ]
 
-{ #category : #'memory counting' }
+{ #category : 'memory counting' }
 ObjectMemory >> freeOopsLeft [
 	"Not BB code."
 	"returns the number of objecttable entries left"
 	^ freeOops
 ]
 
-{ #category : #'memory counting' }
+{ #category : 'memory counting' }
 ObjectMemory >> freeOopsLeft: count [
 	"Not BB code"
 	"Upddate count of free object table entries"
 	freeOops := count
 ]
 
-{ #category : #'memory counting' }
+{ #category : 'memory counting' }
 ObjectMemory >> freeWordsLeft [
 	"Not BB code."
 	"returns the number of words available in memory"
 	^ freeWords
 ]
 
-{ #category : #'memory counting' }
+{ #category : 'memory counting' }
 ObjectMemory >> freeWordsLeft: count [
 	"Not BB code"
 	"Upddate count of free words in memory"
 	freeWords := count
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 ObjectMemory >> hasObject: objectPointer [
 	"BB doesn't give the code for this method.
 	I implemented from the first page of the Part 4
@@ -556,13 +557,13 @@ ObjectMemory >> hasObject: objectPointer [
 	^ ((self freeBitOf: objectPointer) = 0) & ((self countBitsOf: objectPointer) ~= 0)
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> headOfFreeChunkList: size inSegment: segment [
 	"Get the head of free chunk list in segment"
 	^ wordMemory segment: segment word: FirstFreeChunkList + size
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> headOfFreeChunkList: size inSegment: segment put: objectPointer [
 	"Set the head of free chunk list in segment"
 	^ wordMemory
@@ -571,13 +572,13 @@ ObjectMemory >> headOfFreeChunkList: size inSegment: segment put: objectPointer 
 		put: objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> headOfFreePointerList [
 	"Load the head of head of the free pointer list headed at FreePointerList in segment ObjectTableSegment"
 	^ wordMemory segment: ObjectTableSegment word: FreePointerList
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> headOfFreePointerListPut: objectPointer [
 	"Store value in the head of the free pointer list headed at FreePointerList in segment ObjectTableSegment"
 	^ wordMemory
@@ -586,7 +587,7 @@ ObjectMemory >> headOfFreePointerListPut: objectPointer [
 		put: objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> heapChunkOf: objectPointer byte: offset [
 	^ wordMemory
 		segment: (self segmentBitsOf: objectPointer)
@@ -594,7 +595,7 @@ ObjectMemory >> heapChunkOf: objectPointer byte: offset [
 		byte: (offset \\ 2)
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> heapChunkOf: objectPointer byte: offset put: value [
 	^ wordMemory
 		segment: (self segmentBitsOf: objectPointer)
@@ -603,14 +604,14 @@ ObjectMemory >> heapChunkOf: objectPointer byte: offset put: value [
 		put: value
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> heapChunkOf: objectPointer word: offset [
 	^ wordMemory
 		segment: (self segmentBitsOf: objectPointer)
 		word: (self locationBitsOf: objectPointer) + offset
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> heapChunkOf: objectPointer word: offset put: value [
 	^ wordMemory
 		segment: (self segmentBitsOf: objectPointer)
@@ -618,13 +619,13 @@ ObjectMemory >> heapChunkOf: objectPointer word: offset put: value [
 		put: value
 ]
 
-{ #category : #'reference counting' }
+{ #category : 'reference counting' }
 ObjectMemory >> increaseReferencesTo: objectPointer [
 	"Add one to the reference count of the object whose object pointer is ObjectPointer"
 	self countUp: objectPointer
 ]
 
-{ #category : #'instance enumeration' }
+{ #category : 'instance enumeration' }
 ObjectMemory >> initialInstanceOf: classPointer [
 	0 to: ObjectTableSize - 2 by: 2 do: [ :pointer | 
 		(self freeBitOf: pointer) = 0
@@ -633,7 +634,7 @@ ObjectMemory >> initialInstanceOf: classPointer [
 	^ NilPointer
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ObjectMemory >> initialize [
 	"Initialize memory space (not BB code)"
 
@@ -674,7 +675,7 @@ ObjectMemory >> initialize [
 	
 ]
 
-{ #category : #'instance enumeration' }
+{ #category : 'instance enumeration' }
 ObjectMemory >> instanceAfter: objectPointer [
 	| classPointer |
 	classPointer := self fetchClassOf: objectPointer.
@@ -690,7 +691,7 @@ ObjectMemory >> instanceAfter: objectPointer [
 	^ NilPointer
 ]
 
-{ #category : #'object creation' }
+{ #category : 'object creation' }
 ObjectMemory >> instantiateClass: classPointer withBytes: length [
    | size |
 	"Replace decimal division by integer division"
@@ -700,7 +701,7 @@ ObjectMemory >> instantiateClass: classPointer withBytes: length [
    ^ self allocate: size odd: length \\ 2 pointer: 0 extra: 0 class: classPointer
 ]
 
-{ #category : #'object creation' }
+{ #category : 'object creation' }
 ObjectMemory >> instantiateClass: classPointer withPointers: length [
 	| size extra |
 	size := HeaderSize + length.
@@ -708,14 +709,14 @@ ObjectMemory >> instantiateClass: classPointer withPointers: length [
 	^ self allocate: size odd: 0 pointer: 1 extra: extra class: classPointer
 ]
 
-{ #category : #'object creation' }
+{ #category : 'object creation' }
 ObjectMemory >> instantiateClass: classPointer withWords: length [
    | size |
    size := HeaderSize + length.
    ^ self allocate: size odd: 0 pointer: 0 extra: 0 class: classPointer
 ]
 
-{ #category : #'integer access' }
+{ #category : 'integer access' }
 ObjectMemory >> integerObjectOf: value [
 	"Return the value of the instance of
    Smalllnteger whose pointer is objectPointer (BB p. 573)"
@@ -730,7 +731,7 @@ ObjectMemory >> integerObjectOf: value [
    
 ]
 
-{ #category : #'integer access' }
+{ #category : 'integer access' }
 ObjectMemory >> integerValueOf: objectPointer [
 	"BB code modified"
 	"Return the value of the instance of
@@ -756,14 +757,14 @@ ObjectMemory >> integerValueOf: objectPointer [
 
 ]
 
-{ #category : #'integer access' }
+{ #category : 'integer access' }
 ObjectMemory >> isIntegerObject: objectPointer [
 	"Return true if objectPointer is an instance of
     Smalltnteger, false if not. (BB p. 573) "
    ^ (objectPointer bitAnd: 1) = 1
 ]
 
-{ #category : #'integer access' }
+{ #category : 'integer access' }
 ObjectMemory >> isIntegerValue: valueWord [
 	"Return true if value can be represented as an
     instance of Smalllnteger, false if not. (BB p. 573)"
@@ -772,13 +773,13 @@ ObjectMemory >> isIntegerValue: valueWord [
    ^ valueWord >= -16384 and: [valueWord <= 16383]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ObjectMemory >> isObjectNil: objectPointer [
 	"Not BB code. Used by ST80 proxy classes (e.g. ST80Form, etc...)"
 	^ objectPointer = NilPointer.
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> lastPointerOf: objectPointer [
 	| methodHeader |
 	"ERROR on the line below in BB 1983 Edition. Fixed in 1985 Edition"
@@ -790,7 +791,7 @@ ObjectMemory >> lastPointerOf: objectPointer [
 		ifFalse: [ ^ self sizeBitsOf: objectPointer ]
 ]
 
-{ #category : #'vm image loading' }
+{ #category : 'vm image loading' }
 ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLength [
 	"Not BB code"
 	"Load object space from VM snapshot. The length is given in 16-bit words"
@@ -926,7 +927,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 
 ]
 
-{ #category : #'vm image loading' }
+{ #category : 'vm image loading' }
 ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLength [
 	"Not BB code"
 	"Load object table from VM snapshot. The length is given in 16-bit words"
@@ -1002,7 +1003,7 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	^ true
 ]
 
-{ #category : #'vm image loading' }
+{ #category : 'vm image loading' }
 ObjectMemory >> loadWithSnapshot: stream debug: onOff [
 	"Not BB code"
 
@@ -1048,7 +1049,7 @@ ObjectMemory >> loadWithSnapshot: stream debug: onOff [
 	^ true
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> locationBitsOf: objectPointer [
 	self cantBeIntegerObject: objectPointer.
 	^ wordMemory
@@ -1056,7 +1057,7 @@ ObjectMemory >> locationBitsOf: objectPointer [
 		word: ObjectTableStart + objectPointer + 1
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> locationBitsOf: objectPointer put: value [
 	self cantBeIntegerObject: objectPointer.
 	^ wordMemory
@@ -1065,7 +1066,7 @@ ObjectMemory >> locationBitsOf: objectPointer put: value [
 		put: value
 ]
 
-{ #category : #'private - marking gc' }
+{ #category : 'private - marking gc' }
 ObjectMemory >> markAccessibleObjects [
 	"invokes the marking algorithm markObjectsAccessibleFrom: for every object in the list rootObjectPointers"
 
@@ -1074,7 +1075,7 @@ ObjectMemory >> markAccessibleObjects [
 			[ :rootObjectPointer | self markObjectsAccessibleFrom: rootObjectPointer ]
 ]
 
-{ #category : #'private - marking gc' }
+{ #category : 'private - marking gc' }
 ObjectMemory >> markObjectsAccessibleFrom: rootObjectPointer [
 	"calls the same traversal routine as the reference-counting collector did. Its predicate succeeds for unmarked objects and it marks them with a count of 1 as a side effect. Its action restores the count field to 1 because the space-efficient version of the traversal routine could have changed that field to any nonzero value as a side effect."
 
@@ -1090,7 +1091,7 @@ ObjectMemory >> markObjectsAccessibleFrom: rootObjectPointer [
 		do: [ :objectPointer | "the action restores the mark to count = 1" self countBitsOf: objectPointer put: 1 ]
 ]
 
-{ #category : #'private - allocation' }
+{ #category : 'private - allocation' }
 ObjectMemory >> obtainPointer: size location: location [
 	"Obtain a free object table entry, zeroes its free entry bit as well as the rest 
 	of the first word of the entry, points the entry at the specified location, and 
@@ -1107,18 +1108,18 @@ ObjectMemory >> obtainPointer: size location: location [
 	^ objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> oddBitOf: objectPointer [
 	^ self ot: objectPointer bits: 8 to: 8
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> oddBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 8 to: 8 put: value
 
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> ot: objectPointer [
 	"Load the first word of object table entries located at the objectPointer address"
 
@@ -1128,7 +1129,7 @@ ObjectMemory >> ot: objectPointer [
 		word: ObjectTableStart + objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> ot: objectPointer bits: firstBitIndex to: lastBitIndex [
 	"Load a bitfield ofthe first word of object table entries located at the objectPointer address"
 
@@ -1140,7 +1141,7 @@ ObjectMemory >> ot: objectPointer bits: firstBitIndex to: lastBitIndex [
 		to: lastBitIndex
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> ot: objectPointer bits: firstBitIndex to: lastBitIndex put: value [
 	"Store value in bitfield of the first word of object table entries located at the objectPointer address"
 	self cantBeIntegerObject: objectPointer.
@@ -1152,7 +1153,7 @@ ObjectMemory >> ot: objectPointer bits: firstBitIndex to: lastBitIndex put: valu
 		put: value
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> ot: objectPointer put: value [
 	"Store value in the first word of object table entries located at the objectPointer address"
 
@@ -1163,24 +1164,24 @@ ObjectMemory >> ot: objectPointer put: value [
 		put: value
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> pointerBitOf: objectPointer [
 	^ self ot: objectPointer bits: 9 to: 9
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> pointerBitOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 9 to: 9 put: value
 ]
 
-{ #category : #'private - marking gc' }
+{ #category : 'private - marking gc' }
 ObjectMemory >> reclaimInaccessibleObjects [
 	self zeroReferenceCounts.
 	self markAccessibleObjects.
 	self rectifyCountsAndDeallocateGarbage
 ]
 
-{ #category : #'private - marking gc' }
+{ #category : 'private - marking gc' }
 ObjectMemory >> rectifyCountsAndDeallocateGarbage [
 	"After the marking algorithm has been executed, every non-free object table entry is examined using the subroutine rectifyCountsAndDeallocateGarbage. If the entry is unmarked, then the entry and its heap chunk are added to the appropriate free lists. If the entry is marked, then the count is decremented by one to unmark it, and the counts of all objects that it references directly are incremented."
 
@@ -1219,7 +1220,7 @@ ObjectMemory >> rectifyCountsAndDeallocateGarbage [
 	
 ]
 
-{ #category : #'private - compaction' }
+{ #category : 'private - compaction' }
 ObjectMemory >> releasePointer: objectPointer [
 	"Recycles their object table entries onto the list of free pointers"
 
@@ -1227,7 +1228,7 @@ ObjectMemory >> releasePointer: objectPointer [
 	self toFreePointerListAdd: objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> removeFromFreeChunkList: size [
 	"Remove a block of given size from free chunk list"
 
@@ -1245,7 +1246,7 @@ ObjectMemory >> removeFromFreeChunkList: size [
 	^ objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> removeFromFreePointerList [
 	"removes the first entry from the list and returns it; if the list was empty, it returns nil. The distinguished value NonPointer signifies the end of a linked list"
 
@@ -1257,14 +1258,14 @@ ObjectMemory >> removeFromFreePointerList [
 	^ objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> resetFreeChunkList: size inSegment: segment [
 	"resets the specified free-chunk list to an empty list"
 
 	self headOfFreeChunkList: size inSegment: segment put: NonPointer
 ]
 
-{ #category : #'private - compaction' }
+{ #category : 'private - compaction' }
 ObjectMemory >> reverseHeapPointersAbove: lowWaterMark [
 	"Pointers are reversed before starting to sweep through a heap segment. During compaction, instead of the usual arrangement in which the object table entry points to the header in the heap, the header points temporarily to the object table entry."
 
@@ -1281,27 +1282,27 @@ ObjectMemory >> reverseHeapPointersAbove: lowWaterMark [
 								self locationBitsOf: objectPointer put: size	"save the size" ] ] ] ]
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> segmentBitsOf: objectPointer [
 	^ self ot: objectPointer bits: 12 to: 15
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> segmentBitsOf: objectPointer put: value [
 	^ self ot: objectPointer bits: 12 to: 15 put: value
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> sizeBitsOf: objectPointer [
 	^ self heapChunkOf: objectPointer word: 0
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> sizeBitsOf: objectPointer put: value [
 	^ self heapChunkOf: objectPointer word: 0 put: value
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> spaceOccupiedBy: objectPointer [
 	| size |
 	size := self sizeBitsOf: objectPointer.
@@ -1310,7 +1311,7 @@ ObjectMemory >> spaceOccupiedBy: objectPointer [
 		ifFalse: [ ^ size + 1 ]
 ]
 
-{ #category : #'byte access' }
+{ #category : 'byte access' }
 ObjectMemory >> storeByte: byteIndex ofObject: objectPointer withValue: valueByte [
 	"Store the 8 bit numerical value valueByte in the byte numbered byteIndex of the object associated with objectPointer"
 
@@ -1320,7 +1321,7 @@ ObjectMemory >> storeByte: byteIndex ofObject: objectPointer withValue: valueByt
 		put: valueByte
 ]
 
-{ #category : #'object pointer access' }
+{ #category : 'object pointer access' }
 ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valuePointer [
 	"Store the object pointer valuePointer in the field numbered fieldIndex of the object associated with ObjectPointer"
 	| chunkIndex value |
@@ -1336,7 +1337,7 @@ ObjectMemory >> storePointer: fieldIndex ofObject: objectPointer withValue: valu
 	^ value
 ]
 
-{ #category : #'word access' }
+{ #category : 'word access' }
 ObjectMemory >> storeWord: wordIndex ofObject: objectPointer withValue: valueWord [
 	"Store the 16 bit numerical value valueWord in the byte numbered fieldIndex of the object associated with objectPointer"
 	debug ifTrue: [ 
@@ -1346,7 +1347,7 @@ ObjectMemory >> storeWord: wordIndex ofObject: objectPointer withValue: valueWor
 	^self heapChunkOf: objectPointer word: HeaderSize + wordIndex put: valueWord
 ]
 
-{ #category : #'pointer swapping' }
+{ #category : 'pointer swapping' }
 ObjectMemory >> swapPointersOf: firstPointer and: secondPointer [
 	"Make firstPointer refer to the object whose object pointer 
 	was secondPointer and make secondPointer refer to the object
@@ -1366,7 +1367,7 @@ ObjectMemory >> swapPointersOf: firstPointer and: secondPointer [
    self oddBitOf: secondPointer put: firstOddBit
 ]
 
-{ #category : #'private - compaction' }
+{ #category : 'private - compaction' }
 ObjectMemory >> sweepCurrentSegmentFrom: lowWaterMark [
 	"Swipe the current heap segment (after all preparations for compaction are complete)"
 
@@ -1396,7 +1397,7 @@ ObjectMemory >> sweepCurrentSegmentFrom: lowWaterMark [
 	^ di
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> toFreeChunkList: size add: objectPointer [
    "Add object pointer to free chunk list"
 	| segment |
@@ -1407,20 +1408,20 @@ ObjectMemory >> toFreeChunkList: size add: objectPointer [
 	self headOfFreeChunkList: size inSegment: segment put: objectPointer
 ]
 
-{ #category : #'private - object table entries' }
+{ #category : 'private - object table entries' }
 ObjectMemory >> toFreePointerListAdd: objectPointer [
 	"adds a free entry to the head of the list"
 	self locationBitsOf: objectPointer put: self headOfFreePointerList.
 	self headOfFreePointerListPut: objectPointer
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ObjectMemory >> wordMemory [
 
 	^ wordMemory
 ]
 
-{ #category : #'private - marking gc' }
+{ #category : 'private - marking gc' }
 ObjectMemory >> zeroReferenceCounts [
 	"Sets the count fields of all objects to 0 is called zeroReferenceCounts. It is superfluous to zero the count field of a free chunk or of a free entry. Nevertheless, the following version zeroes the count field of every entry, because on most computers, it takes less time to zero the first byte of an entry than it takes to test the status of that entry"
 

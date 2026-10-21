@@ -6,8 +6,8 @@ This class a number of instance variables representing features that ST80
 internal objects have in common such as object pointer, object size, etc...
 "
 Class {
-	#name : #ST80Object,
-	#superclass : #Object,
+	#name : 'ST80Object',
+	#superclass : 'Object',
 	#instVars : [
 		'oop',
 		'size',
@@ -19,25 +19,26 @@ Class {
 	#classVars : [
 		'HeaderSize'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 ST80Object class >> fromObject: objectPointer memory: memory [
 	^ self basicNew initializeFromObject: objectPointer memory: memory; yourself.
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Object >> addressOfFirstWord [
 	^  addressOfFirstWord ifNil: [ addressOfFirstWord := self memory addressOfWord: oop ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Object >> addressOfObject [
 	^  addressOfObject ifNil: [ addressOfObject := self memory addressOfObject: oop ]
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80Object >> initializeFromObject: objectPointer memory: aMemory [
 
 	oop := objectPointer.
@@ -53,22 +54,22 @@ ST80Object >> initializeFromObject: objectPointer memory: aMemory [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Object >> memory [
 	^ memory
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Object >> oop [
 	^ oop
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Object >> size [
 	^ size ifNil: [ size := self memory sizeBitsOf: oop ]
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Object >> wordLength [
 	^ wordLength ifNil: [ wordLength := self memory fetchWordLengthOf: oop ]
 ]

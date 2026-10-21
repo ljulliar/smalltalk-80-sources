@@ -1,1 +1,1 @@
-Package { #name : #'Smalltalk-80 VM' }
+Package { #name : 'Smalltalk-80 VM' }

@@ -7,18 +7,19 @@ a host native cursor object with the same size and shape that is used
 by the VM application to reflect changes in the cursor shape on screen.
 "
 Class {
-	#name : #ST80Cursor,
-	#superclass : #Cursor,
+	#name : 'ST80Cursor',
+	#superclass : 'Cursor',
 	#instVars : [
 		'oop'
 	],
 	#classVars : [
 		'ST80Cursors'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 ST80Cursor class >> fromObject: objectPointer memory: memory [
    "Return the native cursor instance if it already exists,
 	if not create it and store it in the Dictionary for future
@@ -40,7 +41,7 @@ ST80Cursor class >> fromObject: objectPointer memory: memory [
 
 ]
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80Cursor class >> initialize [ 
 
 	"Since ST80 cursors are in finite number (see BB p.398-399) store
@@ -52,20 +53,20 @@ ST80Cursor class >> initialize [
 	ST80Cursors ifNil: [ ST80Cursors := Dictionary new].
 ]
 
-{ #category : #primitives }
+{ #category : 'primitives' }
 ST80Cursor >> activateInCursorOwner: aCursorOwner [
 
 	^ aCursorOwner activateCursor: self withMask: (CursorWithMask derivedFrom: self).
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80Cursor >> initializeFromObject: objectPointer memory: memory [
 
 	oop := objectPointer.
 	ST80Cursors at: objectPointer put: self.
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Cursor >> oop [
 
 	^ oop

@@ -4,8 +4,8 @@ The Interpreter define and manage:
   - compiled methods, contexts and classes
 "
 Class {
-	#name : #Interpreter,
-	#superclass : #Object,
+	#name : 'Interpreter',
+	#superclass : 'Object',
 	#instVars : [
 		'memory',
 		'activeContext',
@@ -116,10 +116,11 @@ Class {
 		'YIndex',
 		'ZeroPointer'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 Interpreter class >> initialize [
 	"Not BB code"
 
@@ -135,7 +136,7 @@ Interpreter class >> initialize [
 	
 ]
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 Interpreter class >> withSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug [
    "the code below follows the Seaside Object initialization conventions"
 	^ self basicNew
@@ -143,7 +144,7 @@ Interpreter class >> withSnapshot: stream hal: hwAbstractionLayer fileSystem: ho
 		yourself
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> activateNewMethod [
    "The routine that activates a method creates a MethodContext and transfers the 
     receiver and arguments from the currently active context's stack to the new 
@@ -176,7 +177,7 @@ Interpreter >> activateNewMethod [
 
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> activeProcess [
    "Any routines desiring to know what the active process will be must take
    into account the newProcessWaiting and newProcess registers. Therefore,
@@ -188,7 +189,7 @@ Interpreter >> activeProcess [
                         ofObject: self schedulerPointer]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> addLastLink: aLink toList: aLinkedList [
    "Routines removeFirstLinkOfList:, addLastLink:toList: and isEmptyList: 
     are used to manipulate LinkedLists. (BB 645)"
@@ -211,7 +212,7 @@ Interpreter >> addLastLink: aLink toList: aLinkedList [
           withValue: aLinkedList
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> argumentCountOf: methodPointer [
 	"If the method header flag value is 7, the next to last literal is a header extension, 
 	which is another SmallInteger. The header extension includes two bit fields that encode
@@ -227,14 +228,14 @@ Interpreter >> argumentCountOf: methodPointer [
 		ifFalse: [ ^ self extractBits: 2 to: 6 of: (self headerExtensionOf: methodPointer) ]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> argumentCountOfBlock: blockPointer [
 	"A BlockContext stores the number of block arguments it expects in one of its fields. (BB 583)"
 
 	^ self fetchInteger: BlockArgumentCountIndex ofObject: blockPointer
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> arithmeticSelectorPrimitive [
    "A primitive routine will be accessed by a special arithmetic selector 
    only if the receiver is a SmallInteger. The actual primitive routines 
@@ -261,7 +262,7 @@ Interpreter >> arithmeticSelectorPrimitive [
 
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> asynchronousSignal: aSemaphore [
 	"The asynchronousSignal: routine adds a Semaphore to the buffer.
    The Semaphores will actually be signaled in the checkProcessSwitch
@@ -272,7 +273,7 @@ Interpreter >> asynchronousSignal: aSemaphore [
 	semaphoreList at: semaphoreIndex put: aSemaphore
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> caller [
 	"This routine fetch the caller field from contexts needed by the interpreter. Access is infrequent
 enough that it is not cached in registers. The caller is the context to be returned to when a 
@@ -281,7 +282,7 @@ BlockContext returns a value (at the end of the block) (BB 586)."
 	^ memory fetchPointer: SenderIndex ofObject: activeContext
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> checkIndexableBoundsOf: index in: array [
 	"Check the bounds on subscripting operations and to perform the subscripting
    accesses. This routine takes a one-relative index and determines whether it is a legal 
@@ -293,7 +294,7 @@ Interpreter >> checkIndexableBoundsOf: index in: array [
 	self success: index + (self fixedFieldsOf: class) <= (self lengthOf: array)
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> checkInstanceVariableBoundsOf: index in: object [
 	"check that index is within the object size range. (BB 635)"
 
@@ -303,7 +304,7 @@ Interpreter >> checkInstanceVariableBoundsOf: index in: object [
 	self success: index <= (self lengthOf: object)
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> checkProcessSwitch [
    "The checkProcessSwitch routine is called before each bytecode fetch (in 
    the interpret routine) and performs the actual process switch if one has 
@@ -332,7 +333,7 @@ Interpreter >> checkProcessSwitch [
 
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> commonSelectorPrimitive [
    "If the receiver is not a SmallInteger then this routine is used to process
    the call (BB 619)"
@@ -353,7 +354,7 @@ Interpreter >> commonSelectorPrimitive [
    self primitiveFail
 ]
 
-{ #category : #classes }
+{ #category : 'classes' }
 Interpreter >> createActualMessage [
    "The interpreter needs to do something out of the ordinary when a message is sent to an object 
 whose class and superclasses do not contain a CompiledMethod associated with the message selector. 
@@ -386,7 +387,7 @@ self push: message.
 argumentCount := 1
 ]
 
-{ #category : #'main loop' }
+{ #category : 'main loop' }
 Interpreter >> cycle [
 	"Since process switches are only allowed between bytecodes, the first action in
    the interpreter's main loop is to call a routine that switches processes if necessary. 
@@ -411,12 +412,12 @@ Interpreter >> cycle [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 Interpreter >> debug: onOff [
   debug := onOff.
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchArithmeticPrimitives [
   "There are three sets of arithmetic primitive routines, one for SmallIntegers,
   one for large integers (LargePositiveIntegers and LargeNegativeIntegers), and
@@ -430,7 +431,7 @@ Interpreter >> dispatchArithmeticPrimitives [
 
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchControlPrimitives [
    "The control primitives provide the control structures not provided by the
    bytecodes. They include support for the behavior of BlockContexts, Processes,
@@ -449,7 +450,7 @@ Interpreter >> dispatchControlPrimitives [
    primitiveIndex = 89 ifTrue: [^self primitiveFlushCache]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchFloatPrimitives [
    "Instances of Float are represented in IEEE single-precision (32-bit) format.
    This format represents a floating point quantity as a number between one and two, 
@@ -471,7 +472,7 @@ Interpreter >> dispatchFloatPrimitives [
    primitiveIndex = 54 ifTrue: [^self primitiveTimesTwoPower]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchInputOutputPrimitives [
    "The input/output primitive routines provide Smalltalk with access to the
    state of the hardware devices. Since the implementation of these routines 
@@ -497,7 +498,7 @@ Interpreter >> dispatchInputOutputPrimitives [
    primitiveIndex = 105 ifTrue: [^self primitiveStringReplace]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchIntegerPrimitives [
    "The first set of arithmetic primitive routines all pop a receiver and 
    argument off the stack and fail if they are not both SmallIntegers. The
@@ -525,7 +526,7 @@ Interpreter >> dispatchIntegerPrimitives [
    primitiveIndex = 18 ifTrue: [^self primitiveMakePoint]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchLargeIntegerPrimitives [
 	"The primitive indices 21 to 37 are the same as primitives 1 to 17 except
 	that they perform their operations on large integers (instances of 
@@ -538,7 +539,7 @@ Interpreter >> dispatchLargeIntegerPrimitives [
 	self primitiveFail
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchOnThisBytecode [
    "Not all of the bytecodes of one type are contiguous, so the main dispatch has
     seven branches each of which calls one of four routines (stackBytecode, jumpBytecode,
@@ -557,7 +558,7 @@ Interpreter >> dispatchOnThisBytecode [
    (currentBytecode between: 176 and: 255) ifTrue: [^self sendBytecode]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchPrimitives [
    "The six types of primitives in the formal specification deal with 
    arithmetic, subscripting and streaming, storage management, control structures, 
@@ -580,7 +581,7 @@ Interpreter >> dispatchPrimitives [
    primitiveIndex < 256 ifTrue: [^self dispatchPrivatePrimitives]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchPrivatePrimitives [
 	"BB p. 621"
 	"A range of primitive indices has been reserved for implementation-private primitive routines. 
@@ -591,7 +592,7 @@ Interpreter >> dispatchPrivatePrimitives [
 
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchStorageManagementPrimitives [
    "The storage management primitive routines manipulate the representation
    of objects. They include primitives for manipulating object pointers, 
@@ -612,7 +613,7 @@ Interpreter >> dispatchStorageManagementPrimitives [
    primitiveIndex = 79 ifTrue: [^self primitiveNewMethod]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchSubscriptAndStreamPrimitives [
    "Primitive routines for manipulating the indexable fields of objects both 
    directly, by subscripting, and indirectly, by streaming. These routines 
@@ -629,7 +630,7 @@ Interpreter >> dispatchSubscriptAndStreamPrimitives [
 	primitiveIndex = 67 ifTrue: [^self primitiveAtEnd]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> dispatchSystemPrimitives [
 	"BB p. 652"
 	primitiveIndex = 110 ifTrue: [^self primitiveEquivalent].
@@ -641,7 +642,7 @@ Interpreter >> dispatchSystemPrimitives [
 	primitiveIndex = 116 ifTrue: [^self primitiveSignalAtOopsLeftWordsLeft]
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> doubleExtendedSendBytecode [
    "The second form of extended send bytecode is followed by two bytes; the 
     first is the number of arguments and the second is the index of the selector 
@@ -659,7 +660,7 @@ Interpreter >> doubleExtendedSendBytecode [
         argumentCount: count
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> doubleExtendedSuperBytecode [
 	"When the compiler encounters a message to super in a symbolic method, 
     it uses the bytecode that pushes self for the receiver, but it uses an 
@@ -684,7 +685,7 @@ Interpreter >> doubleExtendedSuperBytecode [
 	self sendSelectorToClass: (self superclassOf: methodClass)
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> duplicateTopBytecode [
 	"The duplicateTopBytecode routine pushes another copy of the object pointer
     on the top of the stack. (BB 599)"
@@ -694,7 +695,7 @@ Interpreter >> duplicateTopBytecode [
 	^ self push: self stackTop
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> executeNewMethod [
    "The executeNewMethod routine calls a primitive routine if one is associated
    with the CompiledMethod. The primitiveResponse routine returns false if no 
@@ -705,7 +706,7 @@ Interpreter >> executeNewMethod [
       ifFalse: [self activateNewMethod]
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> extendedPushBytecode [
    "The extended push bytecode can perform any of the four operations on receiver variable,
    temporary frame location, literal constant, or literal variable). However, instead of a 
@@ -729,7 +730,7 @@ Interpreter >> extendedPushBytecode [
 	variableType = 3 ifTrue: [ ^ self pushLiteralVariable: variableIndex ]
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> extendedSendBytecode [
    "There are four extended-send bytecodes. The first two have the same effect
    as the literal-selector bytecodes except that the selector index and argument
@@ -743,7 +744,7 @@ Interpreter >> extendedSendBytecode [
    currentBytecode = 134 ifTrue: [^self doubleExtendedSuperBytecode]
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> extendedStoreAndPopBytecode [
 	"Stores into variables other than those accessible by the single byte versions 
    are accomplished by two extended store bytecodes. Also pop the stack (BB 600)"
@@ -752,7 +753,7 @@ Interpreter >> extendedStoreAndPopBytecode [
 	self popStackBytecode
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> extendedStoreBytecode [
 	"Stores into variables other than those accessible by the single byte versions 
    are accomplished by two extended store bytecodes. (BB 600)"
@@ -786,7 +787,7 @@ Interpreter >> extendedStoreBytecode [
 
 ]
 
-{ #category : #'field access' }
+{ #category : 'field access' }
 Interpreter >> extractBits: firstBitIndex to: lastBitIndex of: anInteger [
 	"Generic routine that extract a bit field from a integer value (BB 575)"
 
@@ -794,7 +795,7 @@ Interpreter >> extractBits: firstBitIndex to: lastBitIndex of: anInteger [
 		bitAnd: (2 raisedTo: lastBitIndex - firstBitIndex + 1) - 1
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> extractFloat: objectPointer [
    "This routine is not implemented in the BB. It builds a 32 bit
    Float from 2 ST80 16 bit words"
@@ -803,14 +804,14 @@ Interpreter >> extractFloat: objectPointer [
    	  (memory fetchWord: 0 ofObject: objectPointer)
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> failPrimitive [
    "set the state of the success flag when a primitive routine cannot complete successfully (BB 616)"
 
    success := false
 ]
 
-{ #category : #'main loop' }
+{ #category : 'main loop' }
 Interpreter >> fetchByte [
 	"Fetches the byte indicated by the active context's instruction pointer and 
     increments the instruction pointer. (BB 594)"
@@ -821,7 +822,7 @@ Interpreter >> fetchByte [
 	^ byte
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> fetchContextRegisters [
 	"The context that represents the CompiledMethod or block currently being executed is called the active context. 
 	The interpreter caches in its registers the contents of the parts of the active context it uses most often. 
@@ -850,7 +851,7 @@ Interpreter >> fetchContextRegisters [
 	stackPointer := (self stackPointerOfContext: activeContext) + TempFrameStart - 1
 ]
 
-{ #category : #'field access' }
+{ #category : 'field access' }
 Interpreter >> fetchInteger: fieldIndex ofObject: objectPointer [
 	"Stores the pointer of the SmallInteger with specified value in the specified field. 
 	The primitiveFail routine is implemented in the section on primitive routines (BB 574)"
@@ -862,7 +863,7 @@ Interpreter >> fetchInteger: fieldIndex ofObject: objectPointer [
 		ifFalse: [ ^ self primitiveFail ]
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> fieldIndexOf: methodPointer [
 	"The following routine returns the index of the field representing the instance 
 	variable to be returned in the case that the flag value is 6. (BB 579)"
@@ -870,7 +871,7 @@ Interpreter >> fieldIndexOf: methodPointer [
 	^ self extractBits: 3 to: 7 of: (self headerOf: methodPointer)
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> findNewMethodInClass: class [
 	"The interpreter uses a method cache to reduce the number of dictionary
    lookups necessary to find CompiledMethods associated with selectors. The 
@@ -895,7 +896,7 @@ Interpreter >> findNewMethodInClass: class [
 
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> firstContext [
    "When Smalltalk is started up, the initial active context is found through
    the scheduler's active Process. (BB 644)"
@@ -908,14 +909,14 @@ Interpreter >> firstContext [
            ofObject: self activeProcess
 ]
 
-{ #category : #instances }
+{ #category : 'instances' }
 Interpreter >> fixedFieldsOf: classPointer [
    "(BB 591)"
    ^ self extractBits: 4 to: 14
           of: (self instanceSpecificationOf: classPointer)
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> flagValueOf: methodPointer [
 	"The flag value is used to encode the number of arguments a CompiledMethod takes and whether or not it has an associated primitive routine.
 flag value	meaning
@@ -929,7 +930,7 @@ flag value	meaning
 	^ self extractBits: 0 to: 2 of: (self headerOf: methodPointer)
 ]
 
-{ #category : #classes }
+{ #category : 'classes' }
 Interpreter >> hash: objectPointer [
 	"The selectors are instances of Symbol, so they may be tested for equality by testing 
 their object pointers for equality. Since the object pointers of Symbols determine equality, 
@@ -941,7 +942,7 @@ han SmallIntegers are even. (BB 587)"
 	^ objectPointer bitShift: -1
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> headerExtensionOf: methodPointer [
 	"If the method header flag value is 7, the next to last literal is a header extension, 
 	which is another SmallInteger. The header extension includes two bit fields that encode
@@ -952,13 +953,13 @@ Interpreter >> headerExtensionOf: methodPointer [
 	^ self literal: literalCount - 2 ofMethod: methodPointer
 ]
 
-{ #category : #'compiled method access' }
+{ #category : 'compiled method access' }
 Interpreter >> headerOf: methodPointer [
 	"Get the header field of CompiledMethod data structure (BB 577)"
 	^ memory fetchPointer: HeaderIndex ofObject: methodPointer
 ]
 
-{ #category : #'field access' }
+{ #category : 'field access' }
 Interpreter >> highByteOf: anInteger [
 	"Extract high byte value from integer. (Note: the high-order bit with index 0 and 
 	 the low-order bit with index 15) (BB 575)"
@@ -966,21 +967,21 @@ Interpreter >> highByteOf: anInteger [
 	^ self extractBits: 0 to: 7 of: anInteger
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> initPrimitive [
    "initialize the state of the success flag before a primitive routine runs (BB 616)"
 
    success := true
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> initialInstructionPointerOfMethod: methodPointer [
 	"Returns the byte index of the first bytecode of a CompiledMethod. (BB 578)"
 
 	^ ((self literalCountOf: methodPointer) + LiteralStart) * 2 + 1
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeAssociationIndex [
 	"Associations are objects with two fields, one for a name and one for a value. 
  They are used to implement shared variables (global variables, class variables, 
@@ -990,14 +991,14 @@ Interpreter >> initializeAssociationIndex [
 	ValueIndex := 1
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeCharacterIndex [
    "Index where the value of the character field in Character object is placed (BB 630)"
 
    CharacterValueIndex := 0
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeClassIndices [
 "The interpreter finds the appropriate CompiledMethod to execute in response to a message 
 by searching a message dictionary. The message dictionary is found in the class of the message 
@@ -1013,7 +1014,7 @@ message dictionary is shown in Figure 27.7 p 587 (BB 587)"
 	SelectorStart := 2
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeClassOopsWith: stream [
 	"Not BB code"
    "Load method symbol table from stream"
@@ -1037,7 +1038,7 @@ Interpreter >> initializeClassOopsWith: stream [
 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeContextIndices [
 	"A BlockContext represents a block encountered in a CompiledMethod. 
 	A BlockContext refers to the MethodContext whose CompiledMethod contained the block 
@@ -1060,7 +1061,7 @@ Interpreter >> initializeContextIndices [
 	HomeIndex := 5
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeGuaranteedPointers [
 	"Definition of Object pointers known to the interpreter. It comes from the Blue Book p 576
 	 with errata from the original Xerox ST-80 Manual p 7 (BB 576)"
@@ -1097,7 +1098,7 @@ Interpreter >> initializeGuaranteedPointers [
 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeMessageIndices [
 	"initializes the indices used to access fields of a Message (BB 590)"
 
@@ -1106,7 +1107,7 @@ Interpreter >> initializeMessageIndices [
 	MessageSize := 2
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeMethodCache [
    "Initialize the method cache (BB 605)"
 
@@ -1114,7 +1115,7 @@ Interpreter >> initializeMethodCache [
    methodCache := Array new: methodCacheSize
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeMethodIndices [
 	"Indices pointing to fields of the CompiledMethod data structure. Figure 27.5 p 581 
 	of the Blue Book shows a MethodContext and its CompiledMethod (BB 577)"
@@ -1123,7 +1124,7 @@ Interpreter >> initializeMethodIndices [
 	LiteralStart := 1
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeMethodOopsWith: stream [
 	"Not BB code"
    "Load method symbol table from stream"
@@ -1148,7 +1149,7 @@ Interpreter >> initializeMethodOopsWith: stream [
 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeOtherConstants [
 	"Not BB code"
 	"Constants that are needed by the implementation specific code"
@@ -1161,7 +1162,7 @@ Interpreter >> initializeOtherConstants [
 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializePointIndices [
    "initialize indices of the Point Class"
     XIndex := 0.
@@ -1169,7 +1170,7 @@ Interpreter >> initializePointIndices [
     ClassPointSize := 2
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeSchedulerIndices [
 	"The next four primitive routines (for primitive indices 85 through 88) 
    are used for communication and scheduling of independent processes. The 
@@ -1194,7 +1195,7 @@ Interpreter >> initializeSchedulerIndices [
 
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeSmallIntegers [
 	"SmallIntegers definition (BB 575)"
 
@@ -1204,7 +1205,7 @@ Interpreter >> initializeSmallIntegers [
 	TwoPointer  := 5
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeStreamIndices [
 	"Indices to the Stream instance variables"
 
@@ -1214,7 +1215,7 @@ Interpreter >> initializeStreamIndices [
 	StreamWriteLimitIndex := 3
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: onOff [
    "Not BB code"
    "Initialize the Interpreter"
@@ -1275,7 +1276,7 @@ Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem
 	
 ]
 
-{ #category : #instances }
+{ #category : 'instances' }
 Interpreter >> instanceSpecificationOf: classPointer [
 	"The instance specification field of a class contains a SmallInteger pointer that
  encodes the following four pieces of information:
@@ -1292,7 +1293,7 @@ they will have indexable fields and no fixed fields (BB 590)"
 	^ memory fetchPointer: InstanceSpecificationIndex ofObject: classPointer
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> instructionPointerOfContext: contextPointer [
 	"Get the instruction pointer field of the home of a Block Context 
 	(see Fig.27.6 p 582 of the Blue Book) (BB 582)"
@@ -1300,13 +1301,13 @@ Interpreter >> instructionPointerOfContext: contextPointer [
 	^ self fetchInteger: InstructionPointerIndex ofObject: contextPointer
 ]
 
-{ #category : #'main loop' }
+{ #category : 'main loop' }
 Interpreter >> interpret [
 	"Never ending interpreter loop (BB 594)"
 	[ true ] whileTrue: [ self cycle. "Processor yield" ]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> isBlockContext: contextPointer [
 	"Note that the receiver and method are fetched from the homeContext and the instructionPointer and 
 stackPointer are fetched from the activeContext. The interpreter tells the difference between MethodContexts
@@ -1321,7 +1322,7 @@ subclasses of MethodContext and BlockContext. (BB 584)"
 	^ memory isIntegerObject: methodOrArguments
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> isEmptyList: aLinkedList [
    "Routines removeFirstLinkOfList:, addLastLink:toList: and isEmptyList: 
     are used to manipulate LinkedLists. (BB 645)"
@@ -1330,7 +1331,7 @@ Interpreter >> isEmptyList: aLinkedList [
             ofObject: aLinkedList) = NilPointer
 ]
 
-{ #category : #instances }
+{ #category : 'instances' }
 Interpreter >> isIndexable: classPointer [
    "(BB 591)"
    | indexableFlag |
@@ -1339,7 +1340,7 @@ Interpreter >> isIndexable: classPointer [
    ^ indexableFlag = 1
 ]
 
-{ #category : #instances }
+{ #category : 'instances' }
 Interpreter >> isPointers: classPointer [
    "(BB 591)"
 	| pointersFlag |
@@ -1347,7 +1348,7 @@ Interpreter >> isPointers: classPointer [
 	^ pointersFlag = 1
 ]
 
-{ #category : #instances }
+{ #category : 'instances' }
 Interpreter >> isWords: classPointer [
    "(BB 591)"
 	| wordsFlag |
@@ -1356,14 +1357,14 @@ Interpreter >> isWords: classPointer [
 	^ wordsFlag = 1
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> jump: offset [
    "The jump bytecodes use the jump: routine to actually change the bytecode index. (BB 602)"
 
    instructionPointer := instructionPointer + offset
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> jumpBytecode [
    "The jump bytecodes change the active context's instruction pointer by a specified
    amount. Unconditional jumps change the instruction pointer whenever they are encountered. 
@@ -1381,7 +1382,7 @@ Interpreter >> jumpBytecode [
    ifTrue: [^self longConditionalJump]
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> jumpIf: condition by: offset [
    "The conditional jumps use this routine to test the top of the stack and
    decide whether to perform the jump. The top of stack is discarded after it is 
@@ -1396,7 +1397,7 @@ Interpreter >> jumpIf: condition by: offset [
                           self sendMustBeBoolean]]
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> largeContextFlagOf: methodPointer [
 	"The large context flag indicates which of two sizes of MethodContext are needed. The flag 
 	indicates whether the sum of the maximum stack depth and the number of temporary variables 
@@ -1406,7 +1407,7 @@ Interpreter >> largeContextFlagOf: methodPointer [
 	^ self extractBits: 8 to: 8 of: (self headerOf: methodPointer)
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> lengthOf: array [
 	"Length of the array (number of elements). It determines whether the object 
 	being indexed contains pointers, 16-bit integer values, or 8-bit integer 
@@ -1417,7 +1418,7 @@ Interpreter >> lengthOf: array [
 		ifFalse: [ ^ memory fetchByteLengthOf: array ]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> literal: offset [
 	"This routine fetch the literals base field  from contexts needed by the interpreter. Access is infrequent
 enough that it is not cached in registersThis routine provides convenient access to the literals of the
@@ -1426,7 +1427,7 @@ enough that it is not cached in registersThis routine provides convenient access
 	^ self literal: offset ofMethod: method
 ]
 
-{ #category : #'compiled method access' }
+{ #category : 'compiled method access' }
 Interpreter >> literal: offset ofMethod: methodPointer [
 	"The literal frame contains pointers to objects referred to by the bytecodes. These 
 	include the selectors of messages that the method sends, and shared variables and 
@@ -1435,7 +1436,7 @@ Interpreter >> literal: offset ofMethod: methodPointer [
 	^ memory fetchPointer: offset + LiteralStart ofObject: methodPointer
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> literalCountOf: methodPointer [
 	"The literal count indicates the size of the CompiledMethod's literal frame. This, in turn, 
 	indicates where the CompiledMethod's bytecodes start. (BB 578)"
@@ -1443,14 +1444,14 @@ Interpreter >> literalCountOf: methodPointer [
 	^ self literalCountOfHeader: (self headerOf: methodPointer)
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> literalCountOfHeader: headerPointer [
 	"Extract the literal count header from the Header field (bits 9 to 14). (BB 578)"
 
 	^ self extractBits: 9 to: 14 of: headerPointer
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> longConditionalJump [
 	"Half of the long conditional jumps perform the jump if the top of the stack is false while the other half perform the jump if it is true. The low order two bits of the bytecode become the high order two bits of a 10-bit unsigned displacement. The byte following the jump provides the low order eight bits of the displacement. So long conditional jumps can jump up to 1023 forward. (BB 603)"
 
@@ -1478,7 +1479,7 @@ Interpreter >> longConditionalJump [
 			              by: offset ]
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> longUnconditionalJump [
    "The eight long unconditional jumps are followed by another byte. The low order three 
    bits of the jump bytecode provide the high order three bits of an 11-bit twos complement
@@ -1496,7 +1497,7 @@ Interpreter >> longUnconditionalJump [
 	self jump: offset
 ]
 
-{ #category : #classes }
+{ #category : 'classes' }
 Interpreter >> lookupMethodInClass: class [
 	"find the method a class associates with a selector. If the selector is not found in the
 initial class's dictionary, it is looked up in the next class on the superclass chain. 
@@ -1517,7 +1518,7 @@ chain is exhausted. (BB 589)"
 	^ self lookupMethodInClass: class
 ]
 
-{ #category : #classes }
+{ #category : 'classes' }
 Interpreter >> lookupMethodInDictionary: dictionary [
 	"The interpreter uses several registers to cache the state of the message lookup process.
 
@@ -1549,7 +1550,7 @@ Interpreter >> lookupMethodInDictionary: dictionary [
 					          index := SelectorStart ] ]
 ]
 
-{ #category : #'field access' }
+{ #category : 'field access' }
 Interpreter >> lowByteOf: anInteger [
 	"Extract high byte value from integer. (Note: the high-order bit with index 0 
 	 and the low-order bit with index 15) (BB 575)"
@@ -1557,7 +1558,7 @@ Interpreter >> lowByteOf: anInteger [
 	^ self extractBits: 8 to: 15 of: anInteger
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 Interpreter >> memory [
 	"Not BB code"
 	"Accessor used by the VM image loader"
@@ -1565,7 +1566,7 @@ Interpreter >> memory [
 	^ memory
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> methodClassOf: methodPointer [
    "Any CompiledMethod that sends a superclass message (i.e., a message to super) or 
     contains a header extension, will have as its last literal an Association whose 
@@ -1579,7 +1580,7 @@ association := self literal: literalCount - 1
     ofObject: association
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> newActiveContext: aContext [
 	"The active context register must count as a reference to the part of the object memory that 
 deallocates unreferenced objects. If the object memory maintains dynamic reference counts, 
@@ -1592,7 +1593,7 @@ the routine to change active contexts must perform the appropriate reference cou
 	self fetchContextRegisters
 ]
 
-{ #category : #'return bytecodes' }
+{ #category : 'return bytecodes' }
 Interpreter >> nilContextFields [
    "Nilify context fields"
 
@@ -1604,7 +1605,7 @@ Interpreter >> nilContextFields [
           withValue: NilPointer
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> objectPointerCountOf: methodPointer [
 	"The object pointer count indicates the total number of object pointers in a 
 CompiledMethod, including the header and literal frame. (BB 578)"
@@ -1612,14 +1613,14 @@ CompiledMethod, including the header and literal frame. (BB 578)"
 	^ (self literalCountOf: methodPointer) + LiteralStart
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> pop: number [
 	"Decrease stack pointer by number (BB 585)"
 
 	stackPointer := stackPointer - number
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> popFloat [
    "This routine is not implemented in the BB. It is needed to pop a Float
    object from the stack"
@@ -1631,7 +1632,7 @@ Interpreter >> popFloat [
       ifTrue: [^ Float fromIEEE32Bit: (self extractFloat: objectPointer)]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> popInteger [
    "Many of the primitives manipulate integer quantities, so the interpreter 
    includes several routines that perform common functions. The popInteger 
@@ -1651,7 +1652,7 @@ Interpreter >> popInteger [
 
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> popStack [
 	"pop the first object from the stack of the active context (BB 585)"
 
@@ -1661,7 +1662,7 @@ Interpreter >> popStack [
 	^ stackTop
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> popStackBytecode [
    "Removes the top object pointer from the stack without doing anything else with it (BB 601)"
 	debug ifTrue: [ 
@@ -1670,7 +1671,7 @@ Interpreter >> popStackBytecode [
    self popStack
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> positive16BitIntegerFor: integerValue [
 	"Since the largest indexable collections may have 65534 indexable elements, 
    and SmallIntegers can only represent values up to 16383, primitive routines 
@@ -1697,7 +1698,7 @@ Interpreter >> positive16BitIntegerFor: integerValue [
 	^ newLargeInteger
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> positive16BitValueOf: integerPointer [
 	"Since the largest indexable collections may have 65534 indexable elements, 
    and SmallIntegers can only represent values up to 16383, primitive routines 
@@ -1717,7 +1718,7 @@ Interpreter >> positive16BitValueOf: integerPointer [
 	^ value
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> positive32BitIntegerFor: integerValue [
 	"Since the largest indexable collections may have 65534 indexable elements,
    and SmallIntegers can only represent values up to 16383, primitive routines 
@@ -1750,7 +1751,7 @@ Interpreter >> positive32BitIntegerFor: integerValue [
 	^ newLargeInteger
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> positive32BitValueOf: integerPointer [
 	"Not BB code.
 	This message doesn't exist in the BB or in the Smalltalk source code
@@ -1772,7 +1773,7 @@ Interpreter >> positive32BitValueOf: integerPointer [
 	^ value
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveAdd [
 	"Primitive add operation (BB 622)"
 
@@ -1787,7 +1788,7 @@ Interpreter >> primitiveAdd [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveAsFloat [
    "Converts its SmallInteger receiver into a Float (BB 626)
    This routine first convert the receiver to a Float the size of the
@@ -1802,7 +1803,7 @@ Interpreter >> primitiveAsFloat [
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveAsObject [
 	"The primitiveAsObject routine performs the inverse operation of primitiveAsOop.
    It only works for SmallInteger receivers (it is associated with the asObject 
@@ -1813,12 +1814,13 @@ Interpreter >> primitiveAsObject [
 	thisReceiver := self popStack.
 	newOop := thisReceiver bitAnd: 16rFFFE.
 	self success: (memory isIntegerObject: thisReceiver).
+	self success: (memory hasObject: newOop).
 	self success
 		ifTrue: [ self push: newOop ]
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveAsOop [
 	"The primitiveAsOop routine produces a SmallInteger whose value is half 
    of the receiver's object pointer (interpreting object pointers as 16-bit 
@@ -1836,7 +1838,7 @@ Interpreter >> primitiveAsOop [
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveAt [
    "The primitiveAt simply fetch one of the indexable fields of the receiver. 
    It fails if the index is not a SmallInteger or if it is out of bounds. (BB 628)"
@@ -1856,7 +1858,7 @@ Interpreter >> primitiveAt [
       ifFalse: [self unPop: 2]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveAtEnd [
 	"The primitiveAtEnd routine is an optional primitive version of the Smalltalk
    code for the atEnd message to streams. This routine only works if the object 
@@ -1877,7 +1879,7 @@ Interpreter >> primitiveAtEnd [
 		ifFalse: [self unPop: 1]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveAtPut [
    "This routine simply store one of the indexable fields of the receiver. It fails
    if the receiver is not a pointer type and the second argument is not an 8-bit 
@@ -1899,7 +1901,7 @@ Interpreter >> primitiveAtPut [
       ifFalse: [self unPop: 3]
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveBeCursor [
 	"Not BB code - This primitive is implementation dependent
 	From BB p. 651
@@ -1932,7 +1934,7 @@ Interpreter >> primitiveBeCursor [
 			]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveBeDisplay [
 	"Not BB code - This primitive is implementation dependent
 	From BB p. 651
@@ -1971,7 +1973,7 @@ Interpreter >> primitiveBeDisplay [
 
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveBecome [
 	"The primitiveBecome routine swaps the instance pointers of the receiver
    and argument. This means that all objects that used to point to the receiver
@@ -1988,7 +1990,7 @@ Interpreter >> primitiveBecome [
 		ifFalse: [self unPop: 2]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveBitAnd [
 	"Bit and of receiver and argument (BB 624)"
 
@@ -2002,7 +2004,7 @@ Interpreter >> primitiveBitAnd [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveBitOr [
 	"Bit or of receiver and argument (BB 624)"
 
@@ -2016,7 +2018,7 @@ Interpreter >> primitiveBitOr [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveBitShift [
 	"The primitive routine for shifting (associated with the selector bitShift:) 
    returns a SmallInteger whose value represented in two's-complement is the 
@@ -2037,7 +2039,7 @@ Interpreter >> primitiveBitShift [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveBitXor [
 	"Bit xor of receiver and argument (BB 624)"
 
@@ -2051,7 +2053,7 @@ Interpreter >> primitiveBitXor [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveBlockCopy [
 	"The primitiveBlockCopy routine is associated with the blockCopy: message in 
    both BlockContext and MethodContext. This message is only produced by the compiler. 
@@ -2088,7 +2090,7 @@ Interpreter >> primitiveBlockCopy [
 	self push: newContext
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveClass [
 	"The primitiveClass routine is associated with the class message
 	in Object. It returns the object pointer of the receiver's class. (BB 653)"
@@ -2097,7 +2099,7 @@ Interpreter >> primitiveClass [
 	self push: (memory fetchClassOf: instance)
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveCopyBits [
 
 	| bitBltPointer bitBlt updatedRect |
@@ -2128,14 +2130,14 @@ Interpreter >> primitiveCopyBits [
 
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveCoreLeft [
 	"BB p. 653"
 	self pop: 1. "discard receiver"
 	self push: (self positive32BitIntegerFor: memory freeWordsLeft).
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveCursorLink [
 	"Cause the cursor to track the pointing device location if the argument is true.
    Decouple the cursor from the pointing device if the argument is false. (BB 651)"	
@@ -2146,7 +2148,7 @@ Interpreter >> primitiveCursorLink [
 	hal cursorLink: (flag class = TruePointer)
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveCursorLocPut [
 	"Move the cursor to the screen location specified by the argument. Fail if
    the argument is not a Point. (BB 651)"	
@@ -2163,7 +2165,7 @@ Interpreter >> primitiveCursorLocPut [
 
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveDiv [
 	"There are two primitive routines for rounding division (associated with 
 	 the selectors // and quo:). The result of // is always rounded down (toward 
@@ -2181,7 +2183,7 @@ Interpreter >> primitiveDiv [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveDivide [
 	"The primitive routine for the modulo function (associated with the 
 	selector \\) gives the remainder of a division where the quotient is 
@@ -2201,7 +2203,7 @@ Interpreter >> primitiveDivide [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveDrawLoop [
 	"BB 652 The primitiveDrawLoop routine is an optional primitive associated
    with the drawLoopX:Y: message in BitBIt. If implemented line drawing will 
@@ -2209,7 +2211,7 @@ Interpreter >> primitiveDrawLoop [
 	self primitiveFail.
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveEqual [
 	"Test two objects equality (=) (BB 623)"
 
@@ -2223,7 +2225,7 @@ Interpreter >> primitiveEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveEquivalent [
 	"The primitiveEquivalent routine is associated with the = message 
 	in Object. It returns true if the receiver and argument are the 
@@ -2236,26 +2238,26 @@ Interpreter >> primitiveEquivalent [
 		ifFalse: [self push: FalsePointer]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveExitToDebugger [
 	"BB p. 653"
 	Exception signal: 'NOT IMPLEMENTED YET !!'
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveExponent [
    "Returns the exponent of the receiver (optional) (BB 626)"
 
    ^ self primitiveFail 
 ]
 
-{ #category : #'primitive failure' }
+{ #category : 'primitive failure' }
 Interpreter >> primitiveFail [
 	"BB code p. 616"
 	success := false
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatAdd [
 	"Primitive float add operation (BB 626)"
 
@@ -2268,7 +2270,7 @@ Interpreter >> primitiveFloatAdd [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatDivide [
 	"This routine is not implemented in the BB. it divides the float
 	receiver by the float argument (BB 626)"
@@ -2283,7 +2285,7 @@ Interpreter >> primitiveFloatDivide [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatEqual [
 	"Primitive float less or equal operation (BB 626)"
 
@@ -2297,7 +2299,7 @@ Interpreter >> primitiveFloatEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatGreaterOrEqual [
 	"Primitive float less or equal operation (BB 626)"
 
@@ -2311,7 +2313,7 @@ Interpreter >> primitiveFloatGreaterOrEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatGreaterThan [
 	"Primitive float less than operation (BB 626)"
 
@@ -2325,7 +2327,7 @@ Interpreter >> primitiveFloatGreaterThan [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatLessOrEqual [
 	"Primitive float less or equal operation (BB 626)"
 
@@ -2339,7 +2341,7 @@ Interpreter >> primitiveFloatLessOrEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatLessThan [
 	"Primitive float less than operation (BB 626)"
 
@@ -2353,7 +2355,7 @@ Interpreter >> primitiveFloatLessThan [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatMultiply [
 	"Primitive float add operation (BB 626)"
 
@@ -2367,7 +2369,7 @@ Interpreter >> primitiveFloatMultiply [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatNotEqual [
 	"Primitive float less or equal operation (BB 626)"
 
@@ -2381,7 +2383,7 @@ Interpreter >> primitiveFloatNotEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFloatSubstract [
 	"Primitive float substract operation (BB 626)"
 
@@ -2394,7 +2396,7 @@ Interpreter >> primitiveFloatSubstract [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveFlushCache [
    "The primitiveFlushCache routine removes the contents of the method cache.
    Implementations that do not use a method cache can treat this as a no-op.
@@ -2403,7 +2405,7 @@ Interpreter >> primitiveFlushCache [
    self initializeMethodCache
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveFractionalPart [
 	"Primitive float fractional part operation (BB 626)"
 
@@ -2415,7 +2417,7 @@ Interpreter >> primitiveFractionalPart [
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveGreaterOrEqual [
 	"Test if receiver >= argument (BB 623)"
 
@@ -2429,7 +2431,7 @@ Interpreter >> primitiveGreaterOrEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveGreaterThan [
 	"Test if receiver > argument (BB 623)"
 
@@ -2443,7 +2445,7 @@ Interpreter >> primitiveGreaterThan [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> primitiveIndexOf: methodPointer [
 	"If the method header flag value is 7, the next to last literal is a header extension, 
 	which is another SmallInteger. The header extension includes two bit fields that encode 
@@ -2458,7 +2460,7 @@ Interpreter >> primitiveIndexOf: methodPointer [
 		ifFalse: [ ^ 0 ]
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveInputSemaphore [
 	"Initialize the Semaphore to be signalled whenever an input event occurs.
    The semaphore will be signaled once for every word placed in the input 
@@ -2476,7 +2478,7 @@ Interpreter >> primitiveInputSemaphore [
 	
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveInputWord [
 	"Get the next word from the input buffer and remove the word from the
    buffer. This message should be sent just after the input semaphore
@@ -2493,7 +2495,7 @@ Interpreter >> primitiveInputWord [
 		ifFalse: [ self primitiveFail ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveInstVarAt [
    "The primitiveInstVarAt routine is associated with the instVarAt: message
    in Object. They are similar to primitiveAt except that the numbering of 
@@ -2512,7 +2514,7 @@ Interpreter >> primitiveInstVarAt [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveInstVarAtPut [
 	"The primitiveInstVarAtPut routine is associated with the instVarAt:put: message
    in Object. They are similar to primitiveAtPut except that the numbering of 
@@ -2534,7 +2536,7 @@ Interpreter >> primitiveInstVarAtPut [
 		ifFalse: [self unPop: 3]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveLessOrEqual [
 	"Test if receiver <= argument (BB 623)"
 
@@ -2548,7 +2550,7 @@ Interpreter >> primitiveLessOrEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveLessThan [
 	"Test if receiver < argument (BB 623)"
 
@@ -2562,7 +2564,7 @@ Interpreter >> primitiveLessThan [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveMakePoint [
 	"The primitive routine associated with the selector @ returns a new Point 
 	whose x value is the receiver and whose y value is the argument. (BB 625)"
@@ -2601,7 +2603,7 @@ Interpreter >> primitiveMakePoint [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveMod [
 	"The primitive routine for the modulo function (associated with the 
    selector \\) gives the remainder of a division where the quotient is always
@@ -2619,7 +2621,7 @@ Interpreter >> primitiveMod [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveMousePoint [
 	"The primitiveMousePoint routine allows the location of the pointing device
 	 to be polled. It allocates a new Point and stores the location of the 
@@ -2641,7 +2643,7 @@ Interpreter >> primitiveMousePoint [
 			]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveMultiply [
 	"Primitive multiply operation (BB 622)"
 
@@ -2656,7 +2658,7 @@ Interpreter >> primitiveMultiply [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveNew [
 	"The primitiveNew routine creates a new instance of the receiver (a class)
    without indexable fields. The primitive fails if the class is indexable. (BB 634)"
@@ -2672,7 +2674,7 @@ Interpreter >> primitiveNew [
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveNewMethod [
 	"The primitiveNewMethod routine is associated with the newMethod:header: message
    in CompiledMethod class. Instances of CompiledMethod are created with a special 
@@ -2700,7 +2702,7 @@ Interpreter >> primitiveNewMethod [
 	self push: newMethod 
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveNewWithArg [
 	"The primitiveNewWithArg routine creates a new instance of the receiver 
    (a class) with the number of indexable fields specified by the integer 
@@ -2723,7 +2725,7 @@ Interpreter >> primitiveNewWithArg [
 		ifFalse: [self unPop: 2]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveNext [
    "The primitiveNext routine is an optional primitive version of the Smalltalk
    code for the next message to streams. This routine only works if the object 
@@ -2761,7 +2763,7 @@ Interpreter >> primitiveNext [
      ifFalse: [self unPop: 1]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveNextInstance [
 	"The primitiveSomeInstance and primitiveNextInstance routines allow for
    the enumeration of the instances of a class. They rely on the ability 
@@ -2782,7 +2784,7 @@ Interpreter >> primitiveNextInstance [
 		ifFalse: [ self push: instance ]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveNextPut [
 	"The primitiveNextPut routine is an optional primitive version of the Smalltalk
    code for the nextPut: message to streams. This routine only works if the object 
@@ -2815,7 +2817,7 @@ Interpreter >> primitiveNextPut [
 		ifFalse: [self unPop: 2]
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveNotEqual [
 	"Test two objects inequality (~=) (BB 623)"
 
@@ -2829,7 +2831,7 @@ Interpreter >> primitiveNotEqual [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveObjectAt [
 	"The primitiveObjectAt routine is associated with the objectAt: message 
    in CompiledMethod. It provides access to the object pointer fields of the
@@ -2849,7 +2851,7 @@ Interpreter >> primitiveObjectAt [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveObjectAtPut [
 	"The primitiveObjectAtPut routine is associated with the objectAt: message 
    in CompiledMethod. It provides access to the object pointer fields of the
@@ -2872,14 +2874,14 @@ Interpreter >> primitiveObjectAtPut [
 		ifFalse: [ self unPop: 3 ]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveOopsLeft [
 	"BB p. 653"
 	self pop: 1. "discard receiver"
 	self push: (self positive16BitIntegerFor: memory freeOopsLeft).
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitivePerform [
 	"The primitivePerform routine is associated with all 'perform' messages 
    in Object (perform:, perform:with:, perform:with:with:, and so on). It 
@@ -2910,7 +2912,7 @@ Interpreter >> primitivePerform [
 		ifFalse: [ messageSelector := performSelector ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitivePerformWithArgs [
 	"The primitivePerformWithArgs routine is associated with the performWithArguments:
    messages in Object. It is basically the same as the primitivePerform routine except
@@ -2946,7 +2948,7 @@ Interpreter >> primitivePerformWithArgs [
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveQuit [
 	"The primitiveQuit routine exits to another operating
 	system for the host machine, if one exists. BB p. 653"
@@ -2955,7 +2957,7 @@ Interpreter >> primitiveQuit [
 	hal quit.
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveQuo [
 	"The result of quo: is truncated (rounded toward zero). (BB 622)"
 
@@ -2971,7 +2973,7 @@ Interpreter >> primitiveQuo [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveResponse [
    "The presence of a primitive is detected by the primitiveResponse routine
     called in executeNewMethod. The primitiveResponse routine is similar to 
@@ -2992,7 +2994,7 @@ Interpreter >> primitiveResponse [
              ^ self success]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveResume [
    "The primitiveResume routine is associated with the resume message in 
     Process. It simply calls the resume: routine with the receiver as 
@@ -3001,7 +3003,7 @@ Interpreter >> primitiveResume [
    self resume: self stackTop
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveSampleInterval [
 	"Set the minimum time span between events generated by the pionting
 	device. The argument is a SmallInteger representing the number 
@@ -3015,7 +3017,7 @@ Interpreter >> primitiveSampleInterval [
 	   ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveScanCharacters [
    "TODO: Do not implement native implementation for now"
 	self primitiveFail.
@@ -3033,7 +3035,7 @@ Interpreter >> primitiveScanCharacters [
 "
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveSignal [
    "The primitiveSignal routine is associated with the signal message in 
    Semaphore. Since it is called in the process of interpreting a bytecode, 
@@ -3044,7 +3046,7 @@ Interpreter >> primitiveSignal [
    self synchronousSignal: self stackTop
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveSignalAtOopsLeftWordsLeft [
 	"BB p. 653"
 	"From the Smalltalk 80 sources file:
@@ -3074,7 +3076,7 @@ Interpreter >> primitiveSignalAtOopsLeftWordsLeft [
 	
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveSignalAtTick [
 	" The primitiveSignalAtTick routine is associated with the signal:atTick:
      messages in ProcessorScheduler. His message takes a Semaphore as the first
@@ -3121,7 +3123,7 @@ Interpreter >> primitiveSignalAtTick [
 		]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveSize [
    "The primitiveSize routine returns the number of indexable fields the receiver 
    has (i.e., the largest legal subscript). (BB 629)"
@@ -3138,7 +3140,7 @@ Interpreter >> primitiveSize [
       ifFalse: [self unPop: 1]
 ]
 
-{ #category : #'storage management primitives' }
+{ #category : 'storage management primitives' }
 Interpreter >> primitiveSomeInstance [
 	"The primitiveSomeInstance and primitiveNextInstance routines allow for
    the enumeration of the instances of a class. They rely on the ability 
@@ -3159,7 +3161,7 @@ Interpreter >> primitiveSomeInstance [
 		ifFalse: [ self push: instance ]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveStringAt [
    "The primitiveStringAt routine is a special response to the at: message 
    by instances of String. A String actually stores 8-bit numbers in byte-indexable
@@ -3187,7 +3189,7 @@ Interpreter >> primitiveStringAt [
       ifFalse: [self unPop: 2]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> primitiveStringAtPut [
    "The primitiveStringAtPut routine is a special response to the at:put: message 
    by instances of String. A String actually stores 8-bit numbers in byte-indexable
@@ -3216,13 +3218,13 @@ Interpreter >> primitiveStringAtPut [
       ifFalse: [self unPop: 3]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> primitiveStringReplace [
 	"BB 648 undocumented"
 	self primitiveFail.
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveSubtract [
 	"Primitive substract operation (BB 622)"
 
@@ -3237,7 +3239,7 @@ Interpreter >> primitiveSubtract [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveSuspend [
    "The primitiveSuspend routine is associated with the suspend message in 
    Process. The primitiveSuspend routine suspends the receiver if it is the 
@@ -3251,7 +3253,7 @@ Interpreter >> primitiveSuspend [
                self suspendActive]
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveTickWordsInto [
 	"The primitiveTickWordslnto routine stores the number of ticks 
 	of the millisecond clock (since it last was reset or rolled overUptime."
@@ -3267,7 +3269,7 @@ Interpreter >> primitiveTickWordsInto [
 	memory storeByte: 3 ofObject: byteIndexObject withValue: ((time >> 24) & 16rFF).
 ]
 
-{ #category : #'io primitives' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveTimeWordsInto [
 	"The primitiveTimeWordslnto routine stores the
 	number of seconds since the midnight previous to 
@@ -3285,7 +3287,7 @@ Interpreter >> primitiveTimeWordsInto [
 	memory storeByte: 3 ofObject: byteIndexObject withValue: ((time >> 24) & 16rFF).
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveTimesTwoPower [
    "Increases the exponent of the receiver by an amount specified by the
    argument (optional) (BB 626)"
@@ -3293,7 +3295,7 @@ Interpreter >> primitiveTimesTwoPower [
    ^ self primitiveFail 
 ]
 
-{ #category : #'arithmetic primitives' }
+{ #category : 'arithmetic primitives' }
 Interpreter >> primitiveTruncated [
 	"Primitive float truncate operation (BB 626)"
 
@@ -3307,7 +3309,7 @@ Interpreter >> primitiveTruncated [
 		ifFalse: [ self unPop: 1 ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveValue [
 	"The primitiveValue routine is associated with all 'value' messages in
    BlockContext (value, value:, value:value:, and so on). It checks that 
@@ -3342,7 +3344,7 @@ Interpreter >> primitiveValue [
 			      self newActiveContext: blockContext ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveValueWithArgs [
 	"The primitiveValueWithArgs routine is associated with the valueWithArguments:
    messages in BlockContext. It is basically the same as the primitiveValue 
@@ -3379,7 +3381,7 @@ Interpreter >> primitiveValueWithArgs [
 		ifFalse: [ self unPop: 2 ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveWait [
    "The primitiveWait routine is associated with the wait message in Semaphore. 
    If the receiver has an excess signal count greater than 0, primitiveWait 
@@ -3399,7 +3401,7 @@ Interpreter >> primitiveWait [
                 self suspendActive]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> push: object [
 	"push an object on the stack of the active context (BB 585)"
 
@@ -3410,7 +3412,7 @@ Interpreter >> push: object [
 		withValue: object
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushActiveContextBytecode [
 	"Push a pointer to the active context itself. This corresponds to the use 
    of thisContext in a Smalltalk method. (BB 600)"
@@ -3420,7 +3422,7 @@ Interpreter >> pushActiveContextBytecode [
 	^ self push: activeContext
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushConstantBytecode [
    "The pushConstantBytecode routine pushes one of seven constant object 
    pointers (true, false, nil, -1, 0, 1, or 2). (BB 600)"
@@ -3438,7 +3440,7 @@ Interpreter >> pushConstantBytecode [
    currentBytecode = 119 ifTrue: [^self push: TwoPointer]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> pushFloat: floatValue [
    "This routine is not implemented in the BB. It is needed to push a 32 bit
     Float on the stack (see primitiveAsFloat)"
@@ -3452,7 +3454,7 @@ Interpreter >> pushFloat: floatValue [
 	self push: objectPointer 
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> pushInteger: integerValue [
    "Recall that the fetchInteger:ofObject: routine signaled a primitive 
    failure if the indicated field did not contain a SmallInteger. The 
@@ -3462,14 +3464,14 @@ Interpreter >> pushInteger: integerValue [
    self push: (memory integerObjectOf: integerValue)
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushLiteralConstant: literalIndex [
 	"Push temporary variable at temporary index on stack (BB 598)"
 
 	self push: (self literal: literalIndex)
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushLiteralConstantBytecode [
 	"Push Litteral constant from bytecode on stack (BB 598)"
 
@@ -3481,7 +3483,7 @@ Interpreter >> pushLiteralConstantBytecode [
 	self pushLiteralConstant: fieldIndex
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushLiteralVariable: literalIndex [
 	"Push literal variable at literal index on stack (BB 599)"
 
@@ -3490,7 +3492,7 @@ Interpreter >> pushLiteralVariable: literalIndex [
 	self push: (memory fetchPointer: ValueIndex ofObject: association)
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushLiteralVariableBytecode [
 	"Push Litteral variable from bytecode on stack (BB 598)"
 
@@ -3502,7 +3504,7 @@ Interpreter >> pushLiteralVariableBytecode [
 	self pushLiteralVariable: fieldIndex
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushReceiverBytecode [
 	"This routine pushes a pointer to the active context's receiver. 
    This corresponds to the use of self or super in a Smalltalk method. (BB 599)"
@@ -3512,7 +3514,7 @@ Interpreter >> pushReceiverBytecode [
 	^ self push: receiver
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushReceiverVariable: fieldIndex [
    "Push receiver variable at field index on stack (BB 598)"
 
@@ -3520,7 +3522,7 @@ Interpreter >> pushReceiverVariable: fieldIndex [
                      ofObject: receiver)
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushReceiverVariableBytecode [
    "Push receiver variable from bytecode on stack (BB 598)"
 
@@ -3533,14 +3535,14 @@ Interpreter >> pushReceiverVariableBytecode [
 	self pushReceiverVariable: fieldIndex
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushTemporaryVariable: temporaryIndex [
    "Push temporary variable at temporary index on stack (BB 598)"
 
    self push: (self temporary: temporaryIndex)
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> pushTemporaryVariableBytecode [
 	"Push temporary variable from bytecode on stack (BB 598)"
 
@@ -3552,7 +3554,7 @@ Interpreter >> pushTemporaryVariableBytecode [
 	self pushTemporaryVariable: fieldIndex
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> quickInstanceLoad [
 	"Returns an instance variable of the receiver (BB 620)"
 
@@ -3562,14 +3564,14 @@ Interpreter >> quickInstanceLoad [
 	self push: (memory fetchPointer: fieldIndex ofObject: thisReceiver)
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> quickReturnSelf [
    "Returning self is a no-op as far as the interpreter is concerned since 
     self's object pointer occupies the same place on the stack as the message
     receiver that it should occupy as the message response. (BB 620)"
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> removeFirstLinkOfList: aLinkedList [
    "If the object memory automatically deallocates objects on the basis of 
    reference counting, special consideration must be given to reference counting 
@@ -3624,7 +3626,7 @@ Interpreter >> removeFirstLinkOfList: aLinkedList [
    ^firstLink
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> resume: aProcess [
    "Resume given process (BB 646)"
 
@@ -3640,7 +3642,7 @@ Interpreter >> resume: aProcess [
       ifFalse: [self sleep: aProcess]
 ]
 
-{ #category : #'return bytecodes' }
+{ #category : 'return bytecodes' }
 Interpreter >> returnBytecode [
 	"There are six bytecodes that return control and a value from a context; 
    five return the value of a message (invoked explicitly by ""^"" or implicitly 
@@ -3685,7 +3687,7 @@ Interpreter >> returnBytecode [
 		ifTrue: [ ^ self returnValue: self popStack to: self caller ]
 ]
 
-{ #category : #'return bytecodes' }
+{ #category : 'return bytecodes' }
 Interpreter >> returnToActiveContext: aContext [
    "This routine prevents the deallocation of the result being returned by 
    raising the reference count until it is pushed on the new stack. It could 
@@ -3702,7 +3704,7 @@ Interpreter >> returnToActiveContext: aContext [
    self fetchContextRegisters
 ]
 
-{ #category : #'return bytecodes' }
+{ #category : 'return bytecodes' }
 Interpreter >> returnValue: resultPointer to: contextPointer [
 	"There are three situations in which the simple return routine is too 
    simple to work correctly:
@@ -3742,7 +3744,7 @@ Interpreter >> returnValue: resultPointer to: contextPointer [
 	memory decreaseReferencesTo: resultPointer
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> schedulerPointer [
    "The instance of ProcessorScheduler responsible for scheduling the actual
    processor needs to be known globally so that the primitives will know where
@@ -3755,7 +3757,7 @@ Interpreter >> schedulerPointer [
       ofObject: SchedulerAssociationPointer
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> sendBytecode [
    "The send bytecodes cause a message to be sent. The object pointers for 
    the receiver and the arguments of the message are found on the active 
@@ -3771,7 +3773,7 @@ Interpreter >> sendBytecode [
    ifTrue: [^self sendLiteralSelectorBytecode]
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> sendLiteralSelectorBytecode [
 	"The literal-selector bytecodes are single bytes that can specify 0, 1, 
     or 2 arguments and a selector in any one of the first 16 locations of 
@@ -3793,7 +3795,7 @@ Interpreter >> sendLiteralSelectorBytecode [
 		  argumentCount: argCount
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> sendMustBeBoolean [
    "The conditional jumps are used in the compiled form of messages to booleans (e.g., ifTrue: 
    and whileFalse:). If the top of the stack at the time of a conditional jump is not true or
@@ -3805,7 +3807,7 @@ Interpreter >> sendMustBeBoolean [
         argumentCount: 0
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> sendSelector: selector argumentCount: count [
    "Most of the send bytecodes call the sendSelector:argumentCount: routine
     after determining the appropriate selector and argument count. This 
@@ -3826,14 +3828,14 @@ Interpreter >> sendSelector: selector argumentCount: count [
 
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> sendSelectorToClass: classPointer [
    "Find and execute a method in the class pointed to by ClassPointer (BB 604)"
    self findNewMethodInClass: classPointer.
    self executeNewMethod
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> sendSpecialSelectorBytecode [
 	"The set of special selectors can be used in a message without being 
    included in the literal frame. An Array in the object memory contains 
@@ -3867,7 +3869,7 @@ Interpreter >> sendSpecialSelectorBytecode [
 			self sendSelector: selector argumentCount: count ]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> sender [
 	"This routine fetch the sender field from contexts needed by the interpreter. Access is infrequent
 enough that it is not cached in registers. The sender is the context to be returned to when 
@@ -3878,7 +3880,7 @@ a CompiledMethod returns a value (either because of a ""^"" or at the end of the
 	^ memory fetchPointer: SenderIndex ofObject: homeContext
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> shortConditionalJump [
 	"The eight short conditional jumps advance the instruction pointer by 1 
    through 8 if the top of the stack is false. 
@@ -3896,7 +3898,7 @@ Interpreter >> shortConditionalJump [
 	self jumpIf: FalsePointer by: offset + 1
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> shortUnconditionalJump [
 	"The eight short unconditional jumps advance the instruction pointer by 1 through 8. (BB 602)"
 
@@ -3908,7 +3910,7 @@ Interpreter >> shortUnconditionalJump [
 	self jump: offset + 1
 ]
 
-{ #category : #'return bytecodes' }
+{ #category : 'return bytecodes' }
 Interpreter >> simpleReturnValue: resultPointer to: contextPointer [
    "The simple way to return a value to a context would be to simply make it 
    the active context and push the value on its stack. (BB 609)"
@@ -3917,7 +3919,7 @@ Interpreter >> simpleReturnValue: resultPointer to: contextPointer [
    self push: resultPointer
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> singleExtendedSendBytecode [
   "The first form of extended send is followed by a single byte specifying 
   the number of arguments in its high order three bits and selector index 
@@ -3938,7 +3940,7 @@ Interpreter >> singleExtendedSendBytecode [
       argumentCount: argCount
 ]
 
-{ #category : #'send bytecodes' }
+{ #category : 'send bytecodes' }
 Interpreter >> singleExtendedSuperBytecode [
 	"When the compiler encounters a message to super in a symbolic method, 
     it uses the bytecode that pushes self for the receiver, but it uses an 
@@ -3967,7 +3969,7 @@ Interpreter >> singleExtendedSuperBytecode [
 	self sendSelectorToClass: (self superclassOf: methodClass)
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> sleep: aProcess [
    "Add links to the ProcessorScheduler's LinkedLists of quiescent Processes. (BB 646)"
 
@@ -3982,7 +3984,7 @@ Interpreter >> sleep: aProcess [
         toList: processList
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> specialSelectorPrimitiveResponse [
 	"The first path to a primitive routine was represented by the call on 
    specialSelectorPrimitiveResponse in the sendSpecialSelectorBytecode routine.
@@ -4000,7 +4002,7 @@ Interpreter >> specialSelectorPrimitiveResponse [
 	^ self success
 ]
 
-{ #category : #'bytecode dispatch' }
+{ #category : 'bytecode dispatch' }
 Interpreter >> stackBytecode [
 	"This routine dispatches to the appropriate stack management routine
     for the current bytecode (BB 597)"
@@ -4035,7 +4037,7 @@ Interpreter >> stackBytecode [
 		ifTrue: [ ^ self pushActiveContextBytecode ]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> stackPointerOfContext: contextPointer [
 	"Access the stack pointer field of the home of a Block Context (see Fig.27.6 p 582 of the Blue Book)
 	(BB 582)"
@@ -4043,21 +4045,21 @@ Interpreter >> stackPointerOfContext: contextPointer [
 	^ self fetchInteger: StackPointerIndex ofObject: contextPointer
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> stackTop [
 	"Returns the value of the pointer at the top of the stack of the active context (BB 585)"
 
 	^ memory fetchPointer: stackPointer ofObject: activeContext
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> stackValue: offset [
 	"Returns the value of the pointer at the top of the stack minus the offset of the active context (BB 585)"
 
 	^ memory fetchPointer: stackPointer - offset ofObject: activeContext
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> storeAndPopReceiverVariableBytecode [
    "The store bytecodes transfer references in the opposite direction from the push 
    bytecodes; from the top of the stack to the receiver's instance variables, the temporary 
@@ -4076,7 +4078,7 @@ Interpreter >> storeAndPopReceiverVariableBytecode [
           withValue: self popStack
 ]
 
-{ #category : #'stack bytecodes' }
+{ #category : 'stack bytecodes' }
 Interpreter >> storeAndPopTemporaryVariableBytecode [
 	"The store bytecodes transfer references in the opposite direction from the push 
    bytecodes; from the top of the stack to the receiver's instance variables, the temporary 
@@ -4095,7 +4097,7 @@ Interpreter >> storeAndPopTemporaryVariableBytecode [
           withValue: self popStack
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> storeContextRegisters [
 	"Before a new context becomes the active context, the values of the instruction pointer and 
 	stack pointer must be stored into the active context with the following routine. (BB 584)"
@@ -4108,7 +4110,7 @@ Interpreter >> storeContextRegisters [
 		inContext: activeContext
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> storeInstructionPointerValue: value inContext: contextPointer [
    "Set the instruction pointer field of the home of a Block Context (see Fig.27.6 p 582 of the Blue Book)
     (BB 582)"
@@ -4122,7 +4124,7 @@ Interpreter >> storeInstructionPointerValue: value inContext: contextPointer [
 		withValue: value
 ]
 
-{ #category : #'field access' }
+{ #category : 'field access' }
 Interpreter >> storeInteger: fieldIndex ofObject: objectPointer withValue: integerValue [
 	"stores the pointer of the SmallInteger with specified value in the specified field (BB 574)"
 
@@ -4143,7 +4145,7 @@ Interpreter >> storeInteger: fieldIndex ofObject: objectPointer withValue: integ
 		ifFalse: [ ^ self primitiveFail ]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> storeStackPointerValue: value inContext: contextPointer [
 	"Set the stack pointer field of the home of a Block Context (see Fig.27.6 p 582 of the Blue Book)
 	(BB 583)"
@@ -4154,7 +4156,7 @@ Interpreter >> storeStackPointerValue: value inContext: contextPointer [
 		withValue: value
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> subscript: array with: index [
    "Get value at index in array. Note: this routine assume that the number
    of fixed fields has been added into the index, so they use it as a 
@@ -4174,7 +4176,7 @@ Interpreter >> subscript: array with: index [
 					^memory integerObjectOf: value]
 ]
 
-{ #category : #'array stream primitives' }
+{ #category : 'array stream primitives' }
 Interpreter >> subscript: array with: index storing: value [
    "Set value at index in array. Note: this routine assume that the number
    of fixed fields has been added into the index, so they use it as a 
@@ -4199,27 +4201,27 @@ Interpreter >> subscript: array with: index storing: value [
                             withValue: (self lowByteOf: (memory integerValueOf: value))]]
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> success [
    "test the state of the primitive success register (BB 616)"
    ^ success
 ]
 
-{ #category : #'primitive methods' }
+{ #category : 'primitive methods' }
 Interpreter >> success: successValue [
    "set the state of the primitive success register (BB 616)"
 
    success := successValue & success
 ]
 
-{ #category : #classes }
+{ #category : 'classes' }
 Interpreter >> superclassOf: classPointer [
 	"get the value of the super class given a class pointer (BB 589)"
 
 	^ memory fetchPointer: SuperclassIndex ofObject: classPointer
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> suspendActive [
    "Suspend active process (BB 646)"
 
@@ -4233,7 +4235,7 @@ Interpreter >> suspendActive [
 	memory decreaseReferencesTo: aProcess.
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> synchronousSignal: aSemaphore [
    "The Semaphores will actually be signaled in the checkProcessSwitch 
    routine which calls the synchronousSignal: routine once for each Semaphore 
@@ -4260,7 +4262,7 @@ Interpreter >> synchronousSignal: aSemaphore [
 			]
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> temporary: offset [
 	"This routine fetch the temporaries base field  from contexts needed by the interpreter. Access is infrequent
 enough that it is not cached in registers. Since temporaries referenced in a block are the 
@@ -4270,7 +4272,7 @@ from the home context. (BB 586)"
 	^ memory fetchPointer: offset + TempFrameStart ofObject: homeContext
 ]
 
-{ #category : #'compiled method header access' }
+{ #category : 'compiled method header access' }
 Interpreter >> temporaryCountof: methodPointer [
    "Temporary count field is encoded in bit 3 to 7 of the Header field. The temporary 
     count indicates the number of temporary variables used by the CompiledMethod. 
@@ -4278,7 +4280,7 @@ Interpreter >> temporaryCountof: methodPointer [
 	^ self extractBits: 3 to: 7 of: (self headerOf: methodPointer)
 ]
 
-{ #category : #'field access' }
+{ #category : 'field access' }
 Interpreter >> transfer: count fromIndex: firstFrom ofObject: fromOop toIndex: firstTo ofObject: toOop [
 	"Transfers several pointers from one object to another. It takes the number of pointers
 	to transfer, and the initial field index and object pointer of the source and destination
@@ -4296,7 +4298,7 @@ Interpreter >> transfer: count fromIndex: firstFrom ofObject: fromOop toIndex: f
 		  toIndex := toIndex + 1 ]
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> transferTo: aProcess [
    "The transferTo: routine is used whenever the need to switch processes is 
    detected. It sets the newProcessWaiting and newProcess registers. (BB 643)"
@@ -4312,14 +4314,14 @@ Interpreter >> transferTo: aProcess [
 	memory increaseReferencesTo: newProcess
 ]
 
-{ #category : #contexts }
+{ #category : 'contexts' }
 Interpreter >> unPop: number [
 	"Increase stack pointer by number (BB 585)"
 
 	stackPointer := stackPointer + number
 ]
 
-{ #category : #'control primitives' }
+{ #category : 'control primitives' }
 Interpreter >> wakeHighestPriority [
    "Remove links from the ProcessorScheduler's LinkedLists of quiescent Processes. (BB 645)"
 

@@ -2,8 +2,8 @@
 Faster Native implementation of ST80 CharacterScan
 "
 Class {
-	#name : #ST80CharacterScanner,
-	#superclass : #ST80BitBlt,
+	#name : 'ST80CharacterScanner',
+	#superclass : 'ST80BitBlt',
 	#instVars : [
 		'lastIndex',
 		'text',
@@ -31,10 +31,11 @@ Class {
 		'TextStyleIndex',
 		'XTableIndexIndex'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80CharacterScanner class >> initialize [
 	"Initialize constants needed by Character Scanner"
 	LastIndexIndex := 14.
@@ -58,14 +59,14 @@ ST80CharacterScanner class >> initialize [
    CrossedX := 258.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 ST80CharacterScanner class >> scannerPointer: scannerPointer memory: memory [
   	^ self basicNew
 		  initializeWithBitBltPointer: scannerPointer memory: memory;
 		  yourself
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80CharacterScanner >> initializeWithScannerPointer: sp memory: m [
 
 	"Make sure class variables ar initialized"
@@ -78,7 +79,7 @@ ST80CharacterScanner >> initializeWithScannerPointer: sp memory: m [
 	stopConditions := self memory fetchPointer: StopConditionsIndex ofObject: sp
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 ST80CharacterScanner >> scanCharactersFrom: startIndex to: stopIndex in: sourceString rightX: rightX stopConditions: stops displaying: display [
 	"This code from dbanay implementation. I wasn't able to find it in
 	the 1983 bluebook Edition"

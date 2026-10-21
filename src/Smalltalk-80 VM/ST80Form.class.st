@@ -3,8 +3,8 @@ This a proxy class to build an object representation of the Form
 instances that the BitBlt operations receive as arguments
 "
 Class {
-	#name : #ST80Form,
-	#superclass : #ST80Object,
+	#name : 'ST80Form',
+	#superclass : 'ST80Object',
 	#instVars : [
 		'bits',
 		'width',
@@ -17,10 +17,11 @@ Class {
 		'OffsetInForm',
 		'WidthInForm'
 	],
-	#category : #'Smalltalk-80 VM'
+	#category : 'Smalltalk-80 VM',
+	#package : 'Smalltalk-80 VM'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 ST80Form class >> fromObject: objectPointer memory: memory [
    "the code below follows the Seaside Object initialization conventions"
 	^ (super fromObject: objectPointer memory: memory) 
@@ -28,7 +29,7 @@ ST80Form class >> fromObject: objectPointer memory: memory [
 		yourself
 ]
 
-{ #category : #'class initialization' }
+{ #category : 'class initialization' }
 ST80Form class >> initialize [
 	BitsInForm    := 0.
 	WidthInForm   := 1.
@@ -36,7 +37,7 @@ ST80Form class >> initialize [
 	OffsetInForm  := 3.
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80Form >> asNativeFormCropped: rectangle [
 	"Create a host native form from an area of the ST80 Form (self)
 	 limited to the cropping rectangle"
@@ -63,30 +64,30 @@ ST80Form >> asNativeFormCropped: rectangle [
 	^ nativeForm 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> bits [
 
 	^ bits
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> bitsSize [
 
 	^ width + 15 // 16 * height
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> extent [
 	^ width @ height
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> height [
 
 	^ height
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 ST80Form >> initializeFromObject: objectPointer memory: objectMemory [ 
 	"initialize a proxy Form object based on the
 	attributes of the Form coming from the ST80 VM"
@@ -99,20 +100,20 @@ ST80Form >> initializeFromObject: objectPointer memory: objectMemory [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> offset [
 	"Return a native point for the offset as the offset instance
 	variable is a ST80Point proxy object"
 	^ offset point.
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> width [
 
 	^ width
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 ST80Form >> wordCount [
 	"Not BB code"
 	^ (width + 15) // 16 * height.
