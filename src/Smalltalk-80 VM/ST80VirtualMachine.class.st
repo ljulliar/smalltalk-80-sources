@@ -78,17 +78,23 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 	Smalltalk at: #Sensor put: ST80Sensor.
 	
 	"Check image path and image file exist"
-	"TODO: use snapshot.im first if it exists (image snapshot created
-	by the ST-80 VM"
    (imagePathRef := imagePath asFileReference) exists
 		ifFalse: [ 
 			Transcript show: 'ERROR: Path to image folder incorrect. Exiting'; cr.
 			self terminate 
 		].
 	vmImagePath := imagePathRef.
-	
-	" Replace the directory below with your own"
-	vmImageFile := imagePathRef / 'Smalltalk-80.image'.
+
+	"Load snapshot.im if it exists (saved by primitiveSnapshot), otherwise
+	fall back to the original Smalltalk-80.image. To force a fresh start,
+	simply delete snapshot.im from the assets directory."
+	vmImageFile := (imagePathRef / 'snapshot.im') exists
+		ifTrue:  [
+			Transcript show: 'Loading snapshot: snapshot.im'; cr.
+			imagePathRef / 'snapshot.im' ]
+		ifFalse: [
+			Transcript show: 'Loading original image: Smalltalk-80.image'; cr.
+			imagePathRef / 'Smalltalk-80.image' ].
 	vmSourcesFile := imagePathRef / 'Smalltalk-80.sources'.
 	vmChangesFile := imagePathRef /  'Smalltalk-80.changes'.
 	vmClassOopsFile := imagePathRef / 'class.oops'.
