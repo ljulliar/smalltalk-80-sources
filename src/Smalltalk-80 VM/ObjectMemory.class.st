@@ -909,12 +909,12 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	
 	"Add any free space remaining in segments to the list of free chunks"
 	"Note: there is no need to scan the object table for free chunks entry
-	as the Xerox Virtuel Image Booklet p. 3 says that no free chunks are stored
+	as the Xerox Virtual Image Booklet p. 3 says that no free chunks are stored
 	in the VM snapshot"
 	self freeWordsLeft: 0. "Not BB code"
 	FirstHeapSegment to: LastHeapSegment do: [ :s |
 		remainingSpaceInSegment := heapSpaceRemaining at: (s - FirstHeapSegment + 1).
-    self freeWordsLeft: (self freeWordsLeft + (self spaceOccupiedBy: objectPointer)). "Not BB code"
+		self freeWordsLeft: (self freeWordsLeft + remainingSpaceInSegment). "Not BB code"
 		remainingSpaceInSegment >= HeaderSize ifTrue: [ 
 			"offset in segment where free chunk starts"
 			offset := HeapSpaceStop - remainingSpaceInSegment + 1. 
