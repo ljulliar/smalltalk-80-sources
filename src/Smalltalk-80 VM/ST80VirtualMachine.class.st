@@ -74,6 +74,9 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 	"Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
 	Logger truncate."
 	
+	"Register the ST80Sensor class as a synonym for the guest VM Sensor class (BB 661)"
+	Smalltalk at: #Sensor put: ST80Sensor.
+	
 	"Check image path and image file exist"
 	"TODO: use snapshot.im first if it exists (image snapshot created
 	by the ST-80 VM"
