@@ -583,13 +583,18 @@ Interpreter >> dispatchPrimitives [
 
 { #category : 'bytecode dispatch' }
 Interpreter >> dispatchPrivatePrimitives [
-	"BB p. 621"
-	"A range of primitive indices has been reserved for implementation-private primitive routines. 
-	They may be Arithmetic Primitives assigned any meaning, but cannot be depended upon from
-	interpreter to interpreter. Since these are not part of the specification, they cannot
-	be described here."
-	"NO PRIAVTE PRIMITIVE IMPLEMENTED FOR NOW"
-
+	"BB p. 621 - Implementation-private primitives.
+	We follow dbanay's numbering convention for the file system primitives:
+	  128 - primitiveBeSnapshotFile  (set the snapshot file name)
+	  130 - primitivePosixFileOperation  (file read/write/open/close/size/truncate)
+	  131 - primitivePosixDirectoryOperation  (create/delete/rename/enumerate files)
+	  132 - primitivePosixLastError  (retrieve last OS error code)
+	  133 - primitivePosixErrorString  (retrieve error string for a code)"
+	primitiveIndex = 128 ifTrue: [ ^ self primitiveBeSnapshotFile ].
+	primitiveIndex = 130 ifTrue: [ ^ self primitivePosixFileOperation ].
+	primitiveIndex = 131 ifTrue: [ ^ self primitivePosixDirectoryOperation ].
+	primitiveIndex = 132 ifTrue: [ ^ self primitivePosixLastError ].
+	primitiveIndex = 133 ifTrue: [ ^ self primitivePosixErrorString ]
 ]
 
 { #category : 'bytecode dispatch' }
@@ -1771,6 +1776,265 @@ Interpreter >> positive32BitValueOf: integerPointer [
 	bytes > 2 ifTrue: [ value := value bitOr: (memory fetchByte: 1 ofObject: integerPointer) << 16].
 	bytes > 3 ifTrue: [ value := value bitOr: (memory fetchByte: 0 ofObject: integerPointer) << 24].
 	^ value
+]
+{ #category : 'private - file primitives' }
+Interpreter >> stringFromST80Object: stringOrSymbolPointer [
+	"Convert an ST80 String or Symbol object pointer to a Pharo native String.
+	Equivalent to dbanay's stringFromObject(). (Not BB code)"
+	| len s |
+	len := memory fetchByteLengthOf: stringOrSymbolPointer.
+	s := String new: len.
+	1 to: len do: [ :i |
+		s at: i put: (Character value: (memory fetchByte: i - 1 ofObject: stringOrSymbolPointer)) ].
+	^ s
+]
+
+{ #category : 'private - file primitives' }
+Interpreter >> st80StringObjectFor: aString [
+	"Create a new ST80 String object in the VM object memory from a Pharo native String.
+	Equivalent to dbanay's stringObjectFor(). (Not BB code)"
+	| len objectPointer |
+	aString isNil ifTrue: [ ^ NilPointer ].
+	len := aString size.
+	objectPointer := memory instantiateClass: ClassStringPointer withBytes: len.
+	1 to: len do: [ :i |
+		memory storeByte: i - 1 ofObject: objectPointer withValue: (aString at: i) asciiValue ].
+	^ objectPointer
+]
+
+{ #category : 'private - file primitives' }
+Interpreter >> primitiveBeSnapshotFile [
+	"Private primitive 128.
+	Set the snapshot file name from the fileName field of the File object at the top of stack.
+	The snapshot file is stored relative to the root directory managed by ST80FileSystem.
+	The fileName field is at index 1 in the PosixFile object (dbanay FileNameIndex = 1).
+	Equivalent to dbanay's primitiveBeSnapshotFile(). (Not BB code)"
+	| fileObjectPointer fileNamePointer fileName |
+	fileObjectPointer := self stackTop.
+	fileNamePointer := memory fetchPointer: 1 ofObject: fileObjectPointer.
+	fileName := self stringFromST80Object: fileNamePointer.
+	fileSystem snapshotFileName: fileName.
+	Logger << 'primitiveBeSnapshotFile: snapshot file set to ' << fileName; cr.
+]
+
+{ #category : 'private - file primitives' }
+Interpreter >> primitivePosixLastError [
+	"Private primitive 132.
+	Return the last OS error code from the file system.
+	Stack: receiver (popped). Pushes the integer error code.
+	Equivalent to dbanay's primitivePosixLastErrorOperation(). (Not BB code)"
+	self popStack. "pop receiver"
+	self pushInteger: fileSystem lastError
+]
+
+{ #category : 'private - file primitives' }
+Interpreter >> primitivePosixErrorString [
+	"Private primitive 133.
+	Return an ST80 String describing the error for the given integer code.
+	Stack: code (Integer), receiver. Pushes the error String object.
+	Equivalent to dbanay's primitivePosixErrorStringOperation(). (Not BB code)"
+	| code |
+	code := self popInteger.
+	self popStack. "pop receiver"
+	self success
+		ifTrue: [ self push: (self st80StringObjectFor: (fileSystem errorText: code)) ]
+		ifFalse: [ self unPop: 2 ]
+]
+
+{ #category : 'private - file primitives' }
+Interpreter >> primitivePosixFileOperation [
+	"Private primitive 130. Multiplex file I/O operations for the ST80 PosixFile class.
+	Stack (top to bottom): page, name, code (Integer), file (receiver).
+	Codes (matching dbanay):
+	  0=Read page  1=Write page  2=Truncate  3=File size  4=Open file  5=Close file
+	PosixFile fields: DescriptorIndex=8. PosixFilePage fields: PageNumberIndex=3,
+	PageInPageIndex=1 (ByteArray), BytesInPageIndex=4. PageSize=512 bytes.
+	(Not BB code)"
+	| page name code file DescriptorIndex PageNumberIndex PageInPageIndex BytesInPageIndex PageSize pageBuffer |
+	page := self popStack.
+	name := self popStack.
+	code := self popInteger.
+	file := self popStack.
+	DescriptorIndex  := 8.
+	PageNumberIndex  := 3.
+	PageInPageIndex  := 1.
+	BytesInPageIndex := 4.
+	PageSize := 512.
+	pageBuffer := ByteArray new: PageSize.
+	self success: (code >= 0 and: [ code <= 5 ]).
+	self success: (file ~= NilPointer).
+	self success ifFalse: [ self unPop: 4. ^ self ].
+
+	code = 0 ifTrue: [ "Read page"
+		self success: ((memory fetchPointer: DescriptorIndex ofObject: file) ~= NilPointer).
+		self success: (page ~= NilPointer).
+		self success ifTrue: [
+			| fd pageNumber byteArray position bytesRead |
+			fd := self positive32BitValueOf: (memory fetchPointer: DescriptorIndex ofObject: file).
+			pageNumber := self fetchInteger: PageNumberIndex ofObject: page.
+			byteArray := memory fetchPointer: PageInPageIndex ofObject: page.
+			position := (pageNumber - 1) * PageSize.
+			(fileSystem seekTo: fd position: position) = position ifFalse: [
+				self push: FalsePointer. ^ self ].
+			bytesRead := fileSystem read: fd into: pageBuffer count: PageSize.
+			bytesRead < 0 ifTrue: [ self push: FalsePointer. ^ self ].
+			1 to: bytesRead do: [ :i |
+				memory storeByte: i - 1 ofObject: byteArray withValue: (pageBuffer at: i) ].
+			self storeInteger: BytesInPageIndex ofObject: page withValue: bytesRead.
+			self push: TruePointer ]
+		ifFalse: [ self unPop: 4 ]. ^ self ].
+
+	code = 1 ifTrue: [ "Write page"
+		self success: ((memory fetchPointer: DescriptorIndex ofObject: file) ~= NilPointer).
+		self success: (page ~= NilPointer).
+		self success ifTrue: [
+			| fd pageNumber byteArray position bytesInPage |
+			fd := self positive32BitValueOf: (memory fetchPointer: DescriptorIndex ofObject: file).
+			pageNumber := self fetchInteger: PageNumberIndex ofObject: page.
+			byteArray := memory fetchPointer: PageInPageIndex ofObject: page.
+			position := (pageNumber - 1) * PageSize.
+			(fileSystem seekTo: fd position: position) = position ifFalse: [
+				self push: FalsePointer. ^ self ].
+			bytesInPage := self fetchInteger: BytesInPageIndex ofObject: page.
+			1 to: bytesInPage do: [ :i |
+				pageBuffer at: i put: (memory fetchByte: i - 1 ofObject: byteArray) ].
+			(fileSystem write: fd from: pageBuffer count: bytesInPage) = bytesInPage
+				ifTrue:  [ self push: TruePointer ]
+				ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 4 ]. ^ self ].
+
+	code = 2 ifTrue: [ "Truncate to page"
+		self success: ((memory fetchPointer: DescriptorIndex ofObject: file) ~= NilPointer).
+		self success: (page ~= NilPointer).
+		self success ifTrue: [
+			| fd pageNumber bytesInPage newSize |
+			fd := self positive32BitValueOf: (memory fetchPointer: DescriptorIndex ofObject: file).
+			pageNumber := self fetchInteger: PageNumberIndex ofObject: page.
+			bytesInPage := self fetchInteger: BytesInPageIndex ofObject: page.
+			newSize := (pageNumber - 1) * PageSize + bytesInPage.
+			(fileSystem truncateTo: fd length: newSize)
+				ifTrue:  [ self push: TruePointer ]
+				ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 4 ]. ^ self ].
+
+	code = 3 ifTrue: [ "File size"
+		self success: ((memory fetchPointer: DescriptorIndex ofObject: file) ~= NilPointer).
+		self success ifTrue: [
+			| fd size |
+			fd := self positive32BitValueOf: (memory fetchPointer: DescriptorIndex ofObject: file).
+			size := fileSystem fileSize: fd.
+			size >= 0
+				ifTrue:  [ self push: (self positive32BitIntegerFor: size) ]
+				ifFalse: [ self push: NilPointer ] ]
+		ifFalse: [ self unPop: 4 ]. ^ self ].
+
+	code = 4 ifTrue: [ "Open file"
+		self success: ((memory fetchClassOf: name) = ClassStringPointer).
+		self success ifTrue: [
+			| fileName fd |
+			fileName := self stringFromST80Object: name.
+			fd := fileSystem openFile: fileName.
+			fd >= 0
+				ifTrue: [
+					memory storePointer: DescriptorIndex
+						ofObject: file
+						withValue: (self positive32BitIntegerFor: fd).
+					self push: TruePointer ]
+				ifFalse: [ self push: FalsePointer ] ]
+		ifFalse: [ self unPop: 4 ]. ^ self ].
+
+	code = 5 ifTrue: [ "Close file"
+		| fd result |
+		fd := self positive32BitValueOf: (memory fetchPointer: DescriptorIndex ofObject: file).
+		result := fileSystem closeFile: fd.
+		memory storePointer: DescriptorIndex ofObject: file withValue: NilPointer.
+		result >= 0
+			ifTrue:  [ self push: TruePointer ]
+			ifFalse: [ self push: FalsePointer ] ]
+]
+
+{ #category : 'private - file primitives' }
+Interpreter >> primitivePosixDirectoryOperation [
+	"Private primitive 131. Multiplex directory operations for the ST80 PosixFileDirectory class.
+	Stack (top to bottom): arg2, arg1, code (Integer), receiver.
+	Codes (matching dbanay):
+	  0=Create file (arg1=name; returns fd or nil)
+	  1=Delete file (arg1=name; returns true/false)
+	  2=Rename file (arg1=newName, arg2=PosixFile; returns true/false)
+	  3=Enumerate   (returns Array of filename Strings)
+	PosixFile fields: DescriptorIndex=8, FileNameIndex=1. (Not BB code)"
+	| arg2 arg1 code DescriptorIndex FilenameIndex |
+	arg2 := self popStack.
+	arg1 := self popStack.
+	code := self popInteger.
+	self popStack. "pop receiver"
+	DescriptorIndex := 8.
+	FilenameIndex := 1.
+	self success: (code >= 0 and: [ code <= 3 ]).
+	self success: (arg1 = NilPointer or: [ (memory fetchClassOf: arg1) = ClassStringPointer ]).
+	self success ifFalse: [ self unPop: 4. ^ self ].
+
+	code = 0 ifTrue: [ "Create file"
+		| s fd |
+		s := self stringFromST80Object: arg1.
+		fd := fileSystem createFile: s.
+		fd >= 0
+			ifTrue:  [ self push: (self positive32BitIntegerFor: fd) ]
+			ifFalse: [ self push: NilPointer ]. ^ self ].
+
+	code = 1 ifTrue: [ "Delete file"
+		| s |
+		s := self stringFromST80Object: arg1.
+		(fileSystem deleteFile: s)
+			ifTrue:  [ self push: TruePointer ]
+			ifFalse: [ self push: FalsePointer ]. ^ self ].
+
+	code = 2 ifTrue: [ "Rename file"
+		| file newName oldName wasOpen oldPos fd |
+		file := arg2.
+		newName := self stringFromST80Object: arg1.
+		oldName := self stringFromST80Object:
+			(memory fetchPointer: FilenameIndex ofObject: file).
+		wasOpen := (memory fetchPointer: DescriptorIndex ofObject: file) ~= NilPointer.
+		wasOpen ifTrue: [
+			fd := self positive32BitValueOf: (memory fetchPointer: DescriptorIndex ofObject: file).
+			oldPos := fileSystem tell: fd.
+			fileSystem closeFile: fd ].
+		(fileSystem renameFile: oldName to: newName)
+			ifTrue: [
+				wasOpen ifTrue: [
+					fd := fileSystem openFile: newName.
+					fd >= 0
+						ifTrue: [
+							memory storePointer: DescriptorIndex ofObject: file
+								withValue: (self positive32BitIntegerFor: fd).
+							fileSystem seekTo: fd position: oldPos ]
+						ifFalse: [
+							memory storePointer: DescriptorIndex ofObject: file withValue: NilPointer ] ].
+				memory storePointer: FilenameIndex ofObject: file withValue: arg1.
+				self push: TruePointer ]
+			ifFalse: [
+				wasOpen ifTrue: [
+					fd := fileSystem openFile: oldName.
+					fd >= 0
+						ifTrue: [
+							memory storePointer: DescriptorIndex ofObject: file
+								withValue: (self positive32BitIntegerFor: fd).
+							fileSystem seekTo: fd position: oldPos ]
+						ifFalse: [
+							memory storePointer: DescriptorIndex ofObject: file withValue: NilPointer ] ].
+				self push: FalsePointer ]. ^ self ].
+
+	code = 3 ifTrue: [ "Enumerate files"
+		| names array i |
+		names := OrderedCollection new.
+		fileSystem enumerateFilesDo: [ :each | names add: each ].
+		array := memory instantiateClass: ClassArrayPointer withPointers: names size.
+		self push: array. "Push first so GC has a reference during string allocation"
+		i := 0.
+		names do: [ :each |
+			memory storePointer: i ofObject: array withValue: (self st80StringObjectFor: each).
+			i := i + 1 ] ]
 ]
 
 { #category : 'arithmetic primitives' }

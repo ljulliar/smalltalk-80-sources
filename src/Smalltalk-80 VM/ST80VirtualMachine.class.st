@@ -95,7 +95,7 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 	
 	"Open snapshot stream"
 	hal := ST80HardwareAbstractionLayer withVM: self.
-	fs := ST80FileSystem new.
+	fs := ST80FileSystem withRoot: imagePathRef.
 	snapshot := vmImageFile asFileReference binaryReadStream.
 	interpreter := Interpreter withSnapshot: snapshot 
 						hal: hal fileSystem: fs
