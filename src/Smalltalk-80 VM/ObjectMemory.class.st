@@ -1427,3 +1427,156 @@ ObjectMemory >> zeroReferenceCounts [
 
 	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | self countBitsOf: objectPointer put: 0 ]
 ]
+
+{ #category : 'vm image saving' }
+ObjectMemory class >> writeUInt16: anInteger to: stream [
+	"Write a 16-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
+	stream nextPut: (anInteger bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 8) bitAnd: 16rFF)
+]
+
+{ #category : 'vm image saving' }
+ObjectMemory class >> writeUInt32: anInteger to: stream [
+	"Write a 32-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
+	stream nextPut: (anInteger bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 8)  bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 16) bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 24) bitAnd: 16rFF)
+]
+
+{ #category : 'vm image saving' }
+ObjectMemory >> padToPageInStream: stream [
+	"Pad the binary write stream with zero bytes up to the next 512-byte page boundary.
+	Returns true on success. (Not BB code)"
+	| pos desired pad |
+	pos := stream position.
+	desired := ((pos + 511) // 512) * 512.
+	pad := desired - pos.
+	1 to: pad do: [ :i | stream nextPut: 0 ].
+	^ true
+]
+
+{ #category : 'vm image saving' }
+ObjectMemory >> saveObjectsToStream: fileStream [
+	"Write the VM snapshot to fileStream in Xerox interchange format (LSB, page-aligned).
+	This is the exact inverse of loadWithSnapshot:debug:.
+	File format (Xerox Virtual Image Booklet p. 2):
+	  Page 0 (512 bytes): [objectSpaceLength uint32][objectTableLength uint32][0 uint16][padding]
+	  Page 1..N:          Object space - each live object: [size uint16][class uint16][word0]..[wordN]
+	  Page N+1..:         Object table - each entry: [otWord uint16][locationWord uint16]
+
+	Because binaryWriteStream is non-seekable we build the entire image in a ByteArray
+	WriteStream first, patch the header in-place, then write it all to fileStream in one pass.
+	(Not BB code - equivalent to dbanay saveObjects)"
+
+	| buf storedObjectTableLength objectSpaceLength objectSize wordLength
+	  savedOtWord savedLocation newLocation objectImageWordAddress bytes |
+
+	buf := WriteStream on: ByteArray new.
+
+	"--- Step 1: Find the last used OT entry to minimise the saved OT size ---"
+	storedObjectTableLength := 2. "minimum: oop 0 slot"
+	2 to: ObjectTableSize - 2 by: 2 do: [ :oop |
+		(self hasObject: oop) ifTrue: [ storedObjectTableLength := oop + 2 ] ].
+
+	"--- Step 2: Write placeholder header (will be filled in at the end) ---"
+	self class writeUInt32: 0 to: buf. "placeholder: objectSpaceLength"
+	self class writeUInt32: 0 to: buf. "placeholder: objectTableLength"
+	self class writeUInt16: 0 to: buf. "interchange format flag = 0"
+	self padToPageInStream: buf.       "pad header to first page boundary (512 bytes)"
+
+	"--- Step 3: Write object space ---"
+	"Objects are written contiguously in OT order.
+	We do NOT write the extra HugeSize traversal word (dbanay does the same)."
+	objectSpaceLength := 0.
+	2 to: storedObjectTableLength - 2 by: 2 do: [ :oop |
+		(self hasObject: oop) ifTrue: [
+			objectSize := self sizeBitsOf: oop.
+			wordLength := self fetchWordLengthOf: oop.
+			self class writeUInt16: objectSize to: buf.
+			self class writeUInt16: (self fetchClassOf: oop) to: buf.
+			0 to: wordLength - 1 do: [ :wi |
+				self class writeUInt16: (self fetchWord: wi ofObject: oop) to: buf ].
+			objectSpaceLength := objectSpaceLength + objectSize ] ].
+
+	self padToPageInStream: buf. "pad to next page boundary before OT"
+
+	"--- Step 4: Write object table ---"
+	"For each entry we temporarily compute the on-disk 20-bit word address
+	(segment * 65536 + location in the contiguous image space), write the
+	adjusted entry, then restore the in-memory OT entry unchanged."
+	objectImageWordAddress := 0.
+	0 to: storedObjectTableLength - 2 by: 2 do: [ :oop |
+		savedOtWord   := self ot: oop.
+		savedLocation := self locationBitsOf: oop.
+
+		oop >= 2 ifTrue: [
+			"Free chunks (count=0 but not actually free) become free OT entries"
+			((self freeBitOf: oop) = 0 and: [ (self countBitsOf: oop) = 0 ])
+				ifTrue: [ self freeBitOf: oop put: 1 ].
+
+			(self freeBitOf: oop) = 1
+				ifTrue: [
+					"Free entry: zeroed with free bit set"
+					self ot: oop put: 0.
+					self freeBitOf: oop put: 1.
+					self locationBitsOf: oop put: 0 ]
+				ifFalse: [
+					"Live object: encode the 20-bit image word address into segment+location"
+					objectSize  := self sizeBitsOf: oop.
+					self segmentBitsOf: oop put: (objectImageWordAddress >> 16).
+					newLocation := objectImageWordAddress bitAnd: 16rFFFF.
+					self locationBitsOf: oop put: newLocation.
+					objectImageWordAddress := objectImageWordAddress + objectSize ] ].
+
+		self class writeUInt16: (self ot: oop) to: buf.
+		self class writeUInt16: (self locationBitsOf: oop) to: buf.
+
+		"Restore in-memory OT entry — the running VM must not be disturbed"
+		self ot: oop put: savedOtWord.
+		self locationBitsOf: oop put: savedLocation ].
+
+	"--- Step 5: Patch the header with the real lengths ---"
+	bytes := buf contents.
+	"Patch objectSpaceLength at offset 0"
+	bytes at: 1 put: (objectSpaceLength bitAnd: 16rFF).
+	bytes at: 2 put: ((objectSpaceLength >> 8)  bitAnd: 16rFF).
+	bytes at: 3 put: ((objectSpaceLength >> 16) bitAnd: 16rFF).
+	bytes at: 4 put: ((objectSpaceLength >> 24) bitAnd: 16rFF).
+	"Patch storedObjectTableLength at offset 4"
+	bytes at: 5 put: (storedObjectTableLength bitAnd: 16rFF).
+	bytes at: 6 put: ((storedObjectTableLength >> 8)  bitAnd: 16rFF).
+	bytes at: 7 put: ((storedObjectTableLength >> 16) bitAnd: 16rFF).
+	bytes at: 8 put: ((storedObjectTableLength >> 24) bitAnd: 16rFF).
+
+	"--- Step 6: Write the patched buffer to the actual file stream ---"
+	fileStream nextPutAll: bytes.
+
+	^ true
+]
+
+{ #category : 'vm image saving' }
+ObjectMemory >> saveWithSnapshotFile: aFileSystem [
+	"Save the current VM state as a snapshot file via the ST80FileSystem.
+	The snapshot file name is taken from aFileSystem snapshotFileName and is
+	resolved relative to the file system root directory.
+	Uses a Pharo-native binary write stream for efficiency, consistent with
+	how loadWithSnapshot: uses a native binaryReadStream. (Not BB code)"
+	| snapshotRef stream |
+	Logger << '>>>>>>>> Writing VM Snapshot to: ' << aFileSystem snapshotFileName; cr.
+	snapshotRef := aFileSystem rootDirectory / aFileSystem snapshotFileName.
+	[ stream := snapshotRef binaryWriteStream ]
+		on: Error do: [ :e |
+			Logger << 'ERROR: Could not create snapshot file: ' << e messageText; cr.
+			^ false ].
+	[ self saveObjectsToStream: stream ]
+		on: Error do: [ :e |
+			Logger << 'ERROR saving snapshot: ' << e messageText; cr.
+			stream close.
+			^ false ].
+	stream flush.
+	stream close.
+	Logger << '<<<<<<< Snapshot saved successfully.'; cr.
+	^ true
+]
+

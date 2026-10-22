@@ -2169,6 +2169,52 @@ Interpreter >> primitiveAtPut [
 ]
 
 { #category : 'io primitives' }
+Interpreter >> primitiveSnapshot [
+	"Primitive 97. Save the current state of the object memory as a snapshot file
+	that can be resumed exactly where execution left off.
+
+	Before saving we must:
+	  1. Store the current activeContext in the active process's suspendedContext field,
+	     so that when the snapshot is resumed the interpreter knows where to continue.
+	  2. Save the current interpreter registers (IP, SP) back into the active context.
+	  3. Run garbage collection to reclaim dead objects before saving.
+	  4. Write the snapshot via the file system.
+
+	Return value convention (from dbanay and ST80 sources):
+	  - Returning nil signals to the ST80 caller that we just *saved* (normal save case).
+	  - When a snapshot is *resumed*, execution re-enters at this point and 'self'
+	    (the receiver of the snapshotAs:thenQuit: message) is already on the stack,
+	    so the caller can distinguish save-vs-resume by checking the return value.
+	(BB p. 651, Not BB code for the implementation)"
+
+	| activeProcess |
+	"Step 1: Store active context in the scheduler's active process"
+	activeProcess := memory
+		fetchPointer: ActiveProcessIndex
+		ofObject: self schedulerPointer.
+	memory
+		storePointer: SuspendedContextIndex
+		ofObject: activeProcess
+		withValue: activeContext.
+
+	"Step 2: Save interpreter registers into the active context"
+	self storeContextRegisters.
+
+	"Step 3: Garbage collect to minimise snapshot size"
+	memory reclaimInaccessibleObjects.
+
+	"Step 4: Write the snapshot file"
+	memory saveWithSnapshotFile: fileSystem.
+
+	"Step 5: Return nil to signal 'just saved' to the ST80 caller.
+	We must pop the receiver first (the primitive was called with the receiver on the stack),
+	then push nil as the return value."
+	self pop: 1.
+	self push: NilPointer
+]
+
+
+{ #category : 'io primitives' }
 Interpreter >> primitiveBeCursor [
 	"Not BB code - This primitive is implementation dependent
 	From BB p. 651
