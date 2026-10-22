@@ -137,7 +137,8 @@ ST80BitBlt >> checkOverlap [
 	| t |
 	"check for possible overlap of source and destination"
 	hDir := vDir := 1. "defaults for no overlap"
-	(sourceForm == destForm and: [dy >= sy])
+	(sourceForm notNil and: [ destForm notNil and: [
+			sourceForm oop = destForm oop and: [dy >= sy] ] ])
 		ifTrue: [dy > sy "have to start at bottom"
 				ifTrue: [vDir := -1.
 					sy := sy + h - 1.
