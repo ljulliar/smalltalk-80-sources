@@ -149,7 +149,7 @@ ST80BitBlt >> checkOverlap [
 							"start at right"
 							dx := dx + w - 1.
 							"and fix up masks"
-							skewMask := skewMask bitInvert.
+							skewMask := (skewMask bitInvert) bitAnd: 16rFFFF.
 							t := mask1.
 							mask1 := mask2.
 						mask2 := t]]].
