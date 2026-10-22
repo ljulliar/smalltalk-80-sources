@@ -914,7 +914,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	self freeWordsLeft: 0. "Not BB code"
 	FirstHeapSegment to: LastHeapSegment do: [ :s |
 		remainingSpaceInSegment := heapSpaceRemaining at: (s - FirstHeapSegment + 1).
-		self freeWordsLeft: self freeWordsLeft + remainingSpaceInSegment. "Not BB code"
+    self freeWordsLeft: (self freeWordsLeft + (self spaceOccupiedBy: objectPointer)). "Not BB code"
 		remainingSpaceInSegment >= HeaderSize ifTrue: [ 
 			"offset in segment where free chunk starts"
 			offset := HeapSpaceStop - remainingSpaceInSegment + 1. 
@@ -1215,7 +1215,7 @@ ObjectMemory >> rectifyCountsAndDeallocateGarbage [
 				(count := self countBitsOf: objectPointer) = 0
 					ifTrue: [
 						"it is unmarked, so deallocate it"
-						self freeWordsLeft: (self freeWordsLeft + self spaceOccupiedBy: objectPointer). "Not BB code"
+						self freeWordsLeft: (self freeWordsLeft + (self spaceOccupiedBy: objectPointer)). "Not BB code"
 						self deallocate: objectPointer ]
 					ifFalse: [ "it is marked, so rectify reference counts"
 						count < 128
