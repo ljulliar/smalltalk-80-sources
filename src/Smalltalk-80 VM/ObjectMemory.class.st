@@ -812,7 +812,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 	"Not BB code"
 	"Load object space from VM snapshot. The length is given in 16-bit words"
 	
-	| word heapSpaceRemaining segment offset address objectCount 
+	| word heapSpaceRemaining segment offset objectCount
 	objectSize space objectPointer remainingSpaceInSegment |
 
 	debug ifTrue: [
@@ -827,9 +827,19 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 
 	segment := FirstHeapSegment. "start loading in first memory segment"
 	offset  := 0. "offset in memory segment"
-	address := 0. "absolute address of object in snapshot"
 	objectCount := 0.
-	
+
+	"Position the stream at the start of the object space and read sequentially.
+	Objects are stored contiguously in OT order (same order as the loop below).
+	Reading sequentially avoids any dependency on the saved	OT location fields 
+	for seeking. 
+	!!!IMPORTANT!!! Former implementation was seeking per-object
+	breaks for our own snapshots because HugeSize pointer objects consume an extra
+	runtime word that is not written to the file, causing a growing offset between file
+	positions and runtime positions."
+
+	stream position: fileOffset.
+
 	2 to: ObjectTableSize-2 by: 2 do: [ :oop |	
 		(self freeBitOf: oop) = 1
 			ifFalse: [ 
@@ -838,19 +848,15 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 				Virtual image Booklet p. 3)"
 				self assert: ((self countBitsOf: oop) ~= 0).
 				
-				"All objects in snapshot are stored one after the other as if it
-				was a contiguous 20 bit address space"
-				address := self addressOfObject: oop.
-				stream position: (fileOffset + (address * 2)).
-				
-				"read object size"
+				"Read object size - stream is already positioned at this object
+				because objects are read sequentially in the same OT order they were saved"
 				objectSize := self class readUInt16From: stream.
 				debug ifTrue: [
 					Logger << '----- Loading object...'; cr.
 					Logger << 'oop: ' << oop printString
-					  	<< ' size: ' << objectSize printString 
-						<< ' address: ' << address printString
-						<< ' snapshot position ' << address printString; cr.
+					  	<< ' size: ' << objectSize printString
+						<< ' segment: ' << segment printString
+						<< ' offset: ' << offset printString; cr.
 					].
 		
 				"Ooes this object requires an extra word ? (see 
