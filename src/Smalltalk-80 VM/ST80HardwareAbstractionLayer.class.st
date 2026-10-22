@@ -625,7 +625,15 @@ ST80HardwareAbstractionLayer >> updateDisplayRect: rectangle fromForm: sourceFor
 	on the display screen."
 		
 	| bitBlt nativeSourceForm align16Rectangle |
-	
+
+	"Guard: the ST80 system shrinks the display bitmap height to 100 before
+	writing a snapshot (to reduce image size). Any display update at that
+	point would access the bitmap at a row index beyond the shrunken height,
+	causing an out-of-bounds assertion in fetchWord:ofObject:. Skip the update —
+	the display will be restored to full size after the snapshot is written.
+	(Mirrors dbanay's 'if (height <= 100) return' guard in updateDisplay())"
+	sourceForm height <= 100 ifTrue: [ ^ self ].
+
 	"Adjust Rectangle left side to nearest lower 16 bits multiple 
 	and the Rectangle right side to the nearest upper 16 bit multiple
 	so as to copy the entire native form created"

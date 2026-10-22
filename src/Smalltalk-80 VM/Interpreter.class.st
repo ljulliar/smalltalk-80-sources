@@ -2433,14 +2433,22 @@ Interpreter >> primitiveCopyBits [
 	
 	bitBlt copyBits.
 
-	"if the copyBits operates on the current Display then update the
-	dirty rectangle from the dest form on the host display"
-	(bitBlt destForm oop = currentDisplay) ifTrue: [ 
+	"If copyBits operated on the current display, check for a resize then
+	refresh the dirty rectangle on the host screen."
+	(bitBlt destForm oop = currentDisplay) ifTrue: [
+		| width height |
+		width  := self fetchInteger: WidthInForm  ofObject: currentDisplay.
+		height := self fetchInteger: HeightInForm ofObject: currentDisplay.
+		(currentDisplayWidth ~= width or: [ currentDisplayHeight ~= height ]) ifTrue: [
+			"height <= 100 means ST80 is compressing the display before saving
+			a snapshot — ignore the resize, the display will be restored after."
+			height > 100 ifTrue: [
+				hal displayWidth: width displayHeight: height.
+				currentDisplayWidth  := width.
+				currentDisplayHeight := height ] ].
 		updatedRect := bitBlt updatedRect.
-		updatedRect width > 0 & (updatedRect height > 0) ifTrue: [ 
-			hal updateDisplayRect: (bitBlt updatedRect) fromForm: bitBlt destForm.
-			]
-		]
+		updatedRect width > 0 & (updatedRect height > 0) ifTrue: [
+			hal updateDisplayRect: updatedRect fromForm: bitBlt destForm ] ]
 
 ]
 
