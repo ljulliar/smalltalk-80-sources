@@ -85,6 +85,7 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 			Transcript show: 'ERROR: Path to image folder incorrect. Exiting'; cr.
 			self terminate 
 		].
+	vmImagePath := imagePathRef.
 	
 	" Replace the directory below with your own"
 	vmImageFile := imagePathRef / 'Smalltalk-80.image'.
@@ -138,4 +139,28 @@ ST80VirtualMachine >> keyboard [
 { #category : 'debugging actions' }
 ST80VirtualMachine >> terminate [
 	vmProcess terminate.
+]
+
+{ #category : 'snapshot' }
+ST80VirtualMachine >> saveSnapshot [
+	"Save the current VM state as a snapshot file named 'snapshot.im' in the
+	image assets directory (vmImagePath). This mirrors initializeWithImagePath:
+	which handles the load-side file I/O, keeping all host file access in this class.
+	Called by Interpreter >> primitiveSnapshot. (Not BB code)"
+	| snapshotRef stream |
+	snapshotRef := vmImagePath / fs snapshotFileName.
+	Logger << '>>>>>>>> Writing VM Snapshot to: ' << snapshotRef pathString; cr.
+	[ stream := snapshotRef binaryWriteStream ]
+		on: Error do: [ :e |
+			Logger << 'ERROR: Could not create snapshot file: ' << e messageText; cr.
+			^ false ].
+	[ interpreter memory saveObjectsToStream: stream ]
+		on: Error do: [ :e |
+			Logger << 'ERROR saving snapshot: ' << e messageText; cr.
+			stream close.
+			^ false ].
+	stream flush.
+	stream close.
+	Logger << '<<<<<<< Snapshot saved successfully.'; cr.
+	^ true
 ]

@@ -106,20 +106,36 @@ ObjectMemory class >> initialize [
 
 ]
 
-{ #category : 'vm image loading' }
+{ #category : 'vm image i/o' }
 ObjectMemory class >> readUInt16From: stream [
-	"Read next 4 bytes from stream and return an
-	unsigned 16-bit integer"
+	"Read next 2 bytes from stream and return an
+	unsigned 16-bit integer in LSB format. (Not BB code)"
 
 	^ (stream next) + (stream next bitShift: 8).
 ]
 
-{ #category : 'vm image loading' }
+{ #category : 'vm image i/o' }
 ObjectMemory class >> readUInt32From: stream [
 	"Read next 4 bytes from stream and return an
-	unsigned 32-bit integer"
+	unsigned 32-bit integer in LSB format. (Not BB code)"
 
 	^ (stream next) + (stream next bitShift: 8) + (stream next bitShift: 16) + (stream next bitShift: 24).
+]
+
+{ #category : 'vm image i/o' }
+ObjectMemory class >> writeUInt16: anInteger to: stream [
+	"Write a 16-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
+	stream nextPut: (anInteger bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 8) bitAnd: 16rFF)
+]
+
+{ #category : 'vm image i/o' }
+ObjectMemory class >> writeUInt32: anInteger to: stream [
+	"Write a 32-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
+	stream nextPut: (anInteger bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 8)  bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 16) bitAnd: 16rFF).
+	stream nextPut: ((anInteger >> 24) bitAnd: 16rFF)
 ]
 
 { #category : 'private - compaction' }
@@ -791,7 +807,7 @@ ObjectMemory >> lastPointerOf: objectPointer [
 		ifFalse: [ ^ self sizeBitsOf: objectPointer ]
 ]
 
-{ #category : 'vm image loading' }
+{ #category : 'vm image i/o' }
 ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLength [
 	"Not BB code"
 	"Load object space from VM snapshot. The length is given in 16-bit words"
@@ -927,7 +943,7 @@ ObjectMemory >> loadObjectSpaceWithSnapshot: stream at: fileOffset length: osLen
 
 ]
 
-{ #category : 'vm image loading' }
+{ #category : 'vm image i/o' }
 ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLength [
 	"Not BB code"
 	"Load object table from VM snapshot. The length is given in 16-bit words"
@@ -1003,7 +1019,7 @@ ObjectMemory >> loadObjectTableWithSnapshot: stream at: fileOffset length: otLen
 	^ true
 ]
 
-{ #category : 'vm image loading' }
+{ #category : 'vm image i/o' }
 ObjectMemory >> loadWithSnapshot: stream debug: onOff [
 	"Not BB code"
 
@@ -1428,23 +1444,7 @@ ObjectMemory >> zeroReferenceCounts [
 	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | self countBitsOf: objectPointer put: 0 ]
 ]
 
-{ #category : 'vm image saving' }
-ObjectMemory class >> writeUInt16: anInteger to: stream [
-	"Write a 16-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
-	stream nextPut: (anInteger bitAnd: 16rFF).
-	stream nextPut: ((anInteger >> 8) bitAnd: 16rFF)
-]
-
-{ #category : 'vm image saving' }
-ObjectMemory class >> writeUInt32: anInteger to: stream [
-	"Write a 32-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
-	stream nextPut: (anInteger bitAnd: 16rFF).
-	stream nextPut: ((anInteger >> 8)  bitAnd: 16rFF).
-	stream nextPut: ((anInteger >> 16) bitAnd: 16rFF).
-	stream nextPut: ((anInteger >> 24) bitAnd: 16rFF)
-]
-
-{ #category : 'vm image saving' }
+{ #category : 'vm image i/o' }
 ObjectMemory >> padToPageInStream: stream [
 	"Pad the binary write stream with zero bytes up to the next 512-byte page boundary.
 	Returns true on success. (Not BB code)"
@@ -1456,7 +1456,7 @@ ObjectMemory >> padToPageInStream: stream [
 	^ true
 ]
 
-{ #category : 'vm image saving' }
+{ #category : 'vm image i/o' }
 ObjectMemory >> saveObjectsToStream: fileStream [
 	"Write the VM snapshot to fileStream in Xerox interchange format (LSB, page-aligned).
 	This is the exact inverse of loadWithSnapshot:debug:.
@@ -1555,28 +1555,4 @@ ObjectMemory >> saveObjectsToStream: fileStream [
 	^ true
 ]
 
-{ #category : 'vm image saving' }
-ObjectMemory >> saveWithSnapshotFile: aFileSystem [
-	"Save the current VM state as a snapshot file via the ST80FileSystem.
-	The snapshot file name is taken from aFileSystem snapshotFileName and is
-	resolved relative to the file system root directory.
-	Uses a Pharo-native binary write stream for efficiency, consistent with
-	how loadWithSnapshot: uses a native binaryReadStream. (Not BB code)"
-	| snapshotRef stream |
-	Logger << '>>>>>>>> Writing VM Snapshot to: ' << aFileSystem snapshotFileName; cr.
-	snapshotRef := aFileSystem rootDirectory / aFileSystem snapshotFileName.
-	[ stream := snapshotRef binaryWriteStream ]
-		on: Error do: [ :e |
-			Logger << 'ERROR: Could not create snapshot file: ' << e messageText; cr.
-			^ false ].
-	[ self saveObjectsToStream: stream ]
-		on: Error do: [ :e |
-			Logger << 'ERROR saving snapshot: ' << e messageText; cr.
-			stream close.
-			^ false ].
-	stream flush.
-	stream close.
-	Logger << '<<<<<<< Snapshot saved successfully.'; cr.
-	^ true
-]
 

@@ -2203,8 +2203,9 @@ Interpreter >> primitiveSnapshot [
 	"Step 3: Garbage collect to minimise snapshot size"
 	memory reclaimInaccessibleObjects.
 
-	"Step 4: Write the snapshot file"
-	memory saveWithSnapshotFile: fileSystem.
+	"Step 4: Write the snapshot file via ST80VirtualMachine (host-side I/O,
+	mirrors how the load side is handled in ST80VirtualMachine >> initializeWithImagePath:)"
+	hal vm saveSnapshot.
 
 	"Step 5: Return nil to signal 'just saved' to the ST80 caller.
 	We must pop the receiver first (the primitive was called with the receiver on the stack),
