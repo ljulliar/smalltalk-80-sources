@@ -577,6 +577,13 @@ ST80HardwareAbstractionLayer >> quit [
 ]
 
 { #category : 'accessing' }
+ST80HardwareAbstractionLayer >> vm [
+	"Return the ST80VirtualMachine instance that owns this HAL.
+	Used by the Interpreter to reach host-side VM operations such as saveSnapshot."
+	^ vm
+]
+
+{ #category : 'accessing' }
 ST80HardwareAbstractionLayer >> sampleInterval: anInterval [
 	"For now we accept the intrnval value from primitiveSampleInterval 
 	but we actually don't do anything with it"
