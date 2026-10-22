@@ -76,12 +76,12 @@ ST80FileSystem >> errorText: code [
 { #category : 'file operations' }
 ST80FileSystem >> openFile: fileName [
 	"Open an existing file for binary read/write access.
-	Return an integer file handle on success, or -1 if not found or on error."
+	Return an integer file handle on success, or -1 if not found or on error.
+	Uses FileReference >> binaryReadWriteStream (Pharo 13+ API, replaces deprecated FileStream)."
 	| ref stream handle |
 	ref := rootDirectory / fileName.
 	ref exists ifFalse: [ lastError := -1. ^ -1 ].
-	[ stream := FileStream readWriteFileNamed: ref pathString.
-	  stream binary ]
+	[ stream := ref binaryReadWriteStream ]
 	on: Error do: [ :e | lastError := -1. ^ -1 ].
 	handle := nextHandle.
 	nextHandle := nextHandle + 1.
@@ -92,12 +92,13 @@ ST80FileSystem >> openFile: fileName [
 { #category : 'file operations' }
 ST80FileSystem >> createFile: fileName [
 	"Create a new file, truncating it if it already exists.
-	Return an integer file handle on success, or -1 on error."
+	Return an integer file handle on success, or -1 on error.
+	Uses FileReference >> binaryWriteStream to create/truncate, then binaryReadWriteStream
+	to reopen for read/write (Pharo 13+ API, replaces deprecated FileStream)."
 	| ref stream handle |
 	ref := rootDirectory / fileName.
-	[ ref exists ifTrue: [ ref delete ].
-	  stream := FileStream readWriteFileNamed: ref pathString.
-	  stream binary ]
+	[ ref binaryWriteStream close.
+	  stream := ref binaryReadWriteStream ]
 	on: Error do: [ :e | lastError := -1. ^ -1 ].
 	handle := nextHandle.
 	nextHandle := nextHandle + 1.
