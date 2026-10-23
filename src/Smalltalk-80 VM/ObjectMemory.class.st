@@ -12,7 +12,8 @@ Class {
 		'rootObjectPointers',
 		'debug',
 		'freeOops',
-		'freeWords'
+		'freeWords',
+		'interpreter'
 	],
 	#classVars : [
 		'BigSize',
@@ -122,6 +123,16 @@ ObjectMemory class >> readUInt32From: stream [
 	^ (stream next) + (stream next bitShift: 8) + (stream next bitShift: 16) + (stream next bitShift: 24).
 ]
 
+{ #category : 'as yet unclassified' }
+ObjectMemory class >> withInterpreter: anInterpreter [
+	"Initialize the Object Memory"
+	
+   "the code below follows the Seaside Object initialization conventions"
+	^ self basicNew
+		initializeWithInterpreter: anInterpreter;
+		yourself
+]
+
 { #category : 'vm image i/o' }
 ObjectMemory class >> writeUInt16: anInteger to: stream [
 	"Write a 16-bit unsigned integer in LSB format to the binary write stream. (Not BB code)"
@@ -156,6 +167,14 @@ ObjectMemory >> abandonFreeChunksInSegment: segment [
 				objectPointer := nextPointer ].
 		self resetFreeChunkList: size inSegment: segment ].
 	^ lowWaterMark
+]
+
+{ #category : 'private - marking gc' }
+ObjectMemory >> addRoot: objectPointer [
+	"Add objectPointer to the GC root set so it (and all objects reachable
+	from it) will not be collected by the next reclaimInaccessibleObjects call.
+	Must be paired with removeRoot: after GC completes. (Not BB code)"
+	rootObjectPointers add: objectPointer
 ]
 
 { #category : 'accessing' }
@@ -564,6 +583,13 @@ ObjectMemory >> freeWordsLeft: count [
 	freeWords := count
 ]
 
+{ #category : 'memory space' }
+ObjectMemory >> garbageCollect [ 
+	"Force a garbage collection (not BB code)"
+	
+	self reclaimInaccessibleObjects.
+]
+
 { #category : 'testing' }
 ObjectMemory >> hasObject: objectPointer [
 	"BB doesn't give the code for this method.
@@ -651,13 +677,17 @@ ObjectMemory >> initialInstanceOf: classPointer [
 ]
 
 { #category : 'initialization' }
-ObjectMemory >> initialize [
+ObjectMemory >> initializeWithInterpreter: anInterpreter [
 	"Initialize memory space (not BB code)"
 
 	super initialize.
 	
 	"Also make sure this class variables are initialized"
 	self class initialize.
+	
+	"We need the reference to the interpreter in a few places 
+	(e.g. signalling the beginning or end of the GC process"
+	interpreter := anInterpreter.
 	
 	"The real real memory implementation"
 	wordMemory := RealWordMemory new.
@@ -1090,11 +1120,15 @@ ObjectMemory >> locationBitsOf: objectPointer put: value [
 
 { #category : 'private - marking gc' }
 ObjectMemory >> markAccessibleObjects [
-	"invokes the marking algorithm markObjectsAccessibleFrom: for every object in the list rootObjectPointers"
+	"invokes the marking algorithm markObjectsAccessibleFrom: for every object in the 
+	list rootObjectPointers (BB p. 682)"
 
 	rootObjectPointers
 		do:
-			[ :rootObjectPointer | self markObjectsAccessibleFrom: rootObjectPointer ]
+			[ :rootObjectPointer | 
+				self markObjectsAccessibleFrom: rootObjectPointer ].
+			
+	interpreter prepareForCollection. "Not BB code"
 ]
 
 { #category : 'private - marking gc' }
@@ -1104,13 +1138,14 @@ ObjectMemory >> markObjectsAccessibleFrom: rootObjectPointer [
 	| unmarked |
 	^ self
 		forAllObjectsAccessibleFrom: rootObjectPointer
-		suchThat: [ :objectPointer | 
-			"the predicate tests for an unmarked object and marks it"
-			unmarked := (self countBitsOf: objectPointer) = 0.
-			unmarked
-				ifTrue: [ self countBitsOf: objectPointer put: 1 ].
-			unmarked ]
-		do: [ :objectPointer | "the action restores the mark to count = 1" self countBitsOf: objectPointer put: 1 ]
+		suchThat: "the predicate tests for an unmarked object and marks it"
+			[ :objectPointer | 
+				unmarked := (self countBitsOf: objectPointer) = 0.
+				unmarked	ifTrue: [ self countBitsOf: objectPointer put: 1 ].
+				unmarked ]
+		do: "the action restores the mark to count = 1" 
+			[ :objectPointer |
+				self countBitsOf: objectPointer put: 1 ]
 ]
 
 { #category : 'private - allocation' }
@@ -1186,6 +1221,18 @@ ObjectMemory >> ot: objectPointer put: value [
 		put: value
 ]
 
+{ #category : 'vm image i/o' }
+ObjectMemory >> padToPageInStream: stream [
+	"Pad the binary write stream with zero bytes up to the next 512-byte page boundary.
+	Returns true on success. (Not BB code)"
+	| pos desired pad |
+	pos := stream position.
+	desired := ((pos + 511) // 512) * 512.
+	pad := desired - pos.
+	1 to: pad do: [ :i | stream nextPut: 0 ].
+	^ true
+]
+
 { #category : 'private - object table entries' }
 ObjectMemory >> pointerBitOf: objectPointer [
 	^ self ot: objectPointer bits: 9 to: 9
@@ -1197,21 +1244,6 @@ ObjectMemory >> pointerBitOf: objectPointer put: value [
 ]
 
 { #category : 'private - marking gc' }
-ObjectMemory >> addRoot: objectPointer [
-	"Add objectPointer to the GC root set so it (and all objects reachable
-	from it) will not be collected by the next reclaimInaccessibleObjects call.
-	Must be paired with removeRoot: after GC completes. (Not BB code)"
-	rootObjectPointers add: objectPointer
-]
-
-{ #category : 'private - marking gc' }
-ObjectMemory >> removeRoot: objectPointer [
-	"Remove objectPointer from the GC root set after GC has completed.
-	Paired with addRoot:. (Not BB code)"
-	rootObjectPointers remove: objectPointer ifAbsent: []
-]
-
-{ #category : 'private - marking gc' }
 ObjectMemory >> reclaimInaccessibleObjects [
 	self zeroReferenceCounts.
 	self markAccessibleObjects.
@@ -1220,40 +1252,41 @@ ObjectMemory >> reclaimInaccessibleObjects [
 
 { #category : 'private - marking gc' }
 ObjectMemory >> rectifyCountsAndDeallocateGarbage [
-	"After the marking algorithm has been executed, every non-free object table entry is examined using the subroutine rectifyCountsAndDeallocateGarbage. If the entry is unmarked, then the entry and its heap chunk are added to the appropriate free lists. If the entry is marked, then the count is decremented by one to unmark it, and the counts of all objects that it references directly are incremented."
+	"After the marking algorithm has been executed, every non-free object table entry is examined using the subroutine rectifyCountsAndDeallocateGarbage. If the entry is unmarked, then the entry and its heap chunk are added to the appropriate free lists. If the entry is marked, then the count is decremented by one to unmark it, and the counts of all objects that it references directly are incremented. (BB p. 683-684)"
 
 	| count |
 	"reset heads of free-chunk lists"
-	FirstHeapSegment to: LastHeapSegment do: [ :segment | 
-		"for every segment"
-		HeaderSize to: BigSize do:
-			[ :size | "reset the list head" "for every free chunk list" self resetFreeChunkList: size inSegment: segment ] ].
+	FirstHeapSegment to: LastHeapSegment do: "for every segment"
+	[ :segment | 	
+		HeaderSize to: BigSize do:  "for every free chunk list"
+			[ :size | "reset the list head" 
+				self resetFreeChunkList: size inSegment: segment ] ].
 	"rectify counts, and deallocate garbage"
-	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | 
-		"for every object table entry"
-		(self freeBitOf: objectPointer) = 0
-			ifTrue: [ "if it is not a free entry"
-				(count := self countBitsOf: objectPointer) = 0
-					ifTrue: [
-						"it is unmarked, so deallocate it"
-						self freeWordsLeft: (self freeWordsLeft + (self spaceOccupiedBy: objectPointer)). "Not BB code"
+	0 to: ObjectTableSize - 2 by: 2 do: "for every object table entry"
+		[ :objectPointer | 
+			(self freeBitOf: objectPointer) = 0
+			ifTrue: "if it is not a free entry" 
+				[(count := self countBitsOf: objectPointer) = 0
+					ifTrue: "it is unmarked, so deallocate it"
+						[self freeWordsLeft: (self freeWordsLeft + (self spaceOccupiedBy: objectPointer)). "Not BB code"
 						self deallocate: objectPointer ]
-					ifFalse: [ "it is marked, so rectify reference counts"
-						count < 128
-							ifTrue: [ "subtract 1 to compensate for the mark" self countBitsOf: objectPointer put: count - 1 ].
+					ifFalse: "it is marked, so rectify reference counts"
+						[count < 128 ifTrue: "subtract 1 to compensate for the mark" 
+							[self countBitsOf: objectPointer put: count - 1 ].
 						1 to: (self lastPointerOf: objectPointer) - 1 do:
-							[ :offset |
-								"increment the reference count of each pointer" 
+							[ :offset | "increment the reference count of each pointer" 
 								self countUp: (self heapChunkOf: objectPointer word: offset) ] ] ] ].
 	
 	"be sure the root objects don't disappear"
 	rootObjectPointers
 		do: [ :rootObjectPointer | self countUp: rootObjectPointer ].
-		
 	self countBitsOf: NilPointer put: 128.
 	
-	"update count of free object table entries"
+	"update count of free object table entries (not BB code)"
 	self freeOopsLeft: self freeOopsCount.
+	
+	"Signal GC completion to interpreter (not BB code)"
+	interpreter collectionCompleted.
 	
 ]
 
@@ -1295,6 +1328,13 @@ ObjectMemory >> removeFromFreePointerList [
 	^ objectPointer
 ]
 
+{ #category : 'private - marking gc' }
+ObjectMemory >> removeRoot: objectPointer [
+	"Remove objectPointer from the GC root set after GC has completed.
+	Paired with addRoot:. (Not BB code)"
+	rootObjectPointers remove: objectPointer ifAbsent: []
+]
+
 { #category : 'private - object table entries' }
 ObjectMemory >> resetFreeChunkList: size inSegment: segment [
 	"resets the specified free-chunk list to an empty list"
@@ -1317,6 +1357,105 @@ ObjectMemory >> reverseHeapPointersAbove: lowWaterMark [
 								size := self sizeBitsOf: objectPointer.	"rescue the size"
 								self sizeBitsOf: objectPointer put: objectPointer.	"reverse the pointer"
 								self locationBitsOf: objectPointer put: size	"save the size" ] ] ] ]
+]
+
+{ #category : 'vm image i/o' }
+ObjectMemory >> saveObjectsToStream: fileStream [
+	"Write the VM snapshot to fileStream in Xerox interchange format (LSB, page-aligned).
+	This is the exact inverse of loadWithSnapshot:debug:.
+	File format (Xerox Virtual Image Booklet p. 2):
+	  Page 0 (512 bytes): [objectSpaceLength uint32][objectTableLength uint32][0 uint16][padding]
+	  Page 1..N:          Object space - each live object: [size uint16][class uint16][word0]..[wordN]
+	  Page N+1..:         Object table - each entry: [otWord uint16][locationWord uint16]
+
+	Because binaryWriteStream is non-seekable we build the entire image in a ByteArray
+	WriteStream first, patch the header in-place, then write it all to fileStream in one pass.
+	(Not BB code - equivalent to dbanay saveObjects)"
+
+	| buf storedObjectTableLength objectSpaceLength objectSize wordLength
+	  savedOtWord savedLocation newLocation objectImageWordAddress bytes |
+
+	buf := WriteStream on: ByteArray new.
+
+	"--- Step 1: Find the last used OT entry to minimise the saved OT size ---"
+	storedObjectTableLength := 2. "minimum: oop 0 slot"
+	2 to: ObjectTableSize - 2 by: 2 do: [ :oop |
+		(self hasObject: oop) ifTrue: [ storedObjectTableLength := oop + 2 ] ].
+
+	"--- Step 2: Write placeholder header (will be filled in at the end) ---"
+	self class writeUInt32: 0 to: buf. "placeholder: objectSpaceLength"
+	self class writeUInt32: 0 to: buf. "placeholder: objectTableLength"
+	self class writeUInt16: 0 to: buf. "interchange format flag = 0"
+	self padToPageInStream: buf.       "pad header to first page boundary (512 bytes)"
+
+	"--- Step 3: Write object space ---"
+	"Objects are written contiguously in OT order.
+	We do NOT write the extra HugeSize traversal word (dbanay does the same)."
+	objectSpaceLength := 0.
+	2 to: storedObjectTableLength - 2 by: 2 do: [ :oop |
+		(self hasObject: oop) ifTrue: [
+			objectSize := self sizeBitsOf: oop.
+			wordLength := self fetchWordLengthOf: oop.
+			self class writeUInt16: objectSize to: buf.
+			self class writeUInt16: (self fetchClassOf: oop) to: buf.
+			0 to: wordLength - 1 do: [ :wi |
+				self class writeUInt16: (self fetchWord: wi ofObject: oop) to: buf ].
+			objectSpaceLength := objectSpaceLength + objectSize ] ].
+
+	self padToPageInStream: buf. "pad to next page boundary before OT"
+
+	"--- Step 4: Write object table ---"
+	"For each entry we temporarily compute the on-disk 20-bit word address
+	(segment * 65536 + location in the contiguous image space), write the
+	adjusted entry, then restore the in-memory OT entry unchanged."
+	objectImageWordAddress := 0.
+	0 to: storedObjectTableLength - 2 by: 2 do: [ :oop |
+		savedOtWord   := self ot: oop.
+		savedLocation := self locationBitsOf: oop.
+
+		oop >= 2 ifTrue: [
+			"Free chunks (count=0 but not actually free) become free OT entries"
+			((self freeBitOf: oop) = 0 and: [ (self countBitsOf: oop) = 0 ])
+				ifTrue: [ self freeBitOf: oop put: 1 ].
+
+			(self freeBitOf: oop) = 1
+				ifTrue: [
+					"Free entry: zeroed with free bit set"
+					self ot: oop put: 0.
+					self freeBitOf: oop put: 1.
+					self locationBitsOf: oop put: 0 ]
+				ifFalse: [
+					"Live object: encode the 20-bit image word address into segment+location"
+					objectSize  := self sizeBitsOf: oop.
+					self segmentBitsOf: oop put: (objectImageWordAddress >> 16).
+					newLocation := objectImageWordAddress bitAnd: 16rFFFF.
+					self locationBitsOf: oop put: newLocation.
+					objectImageWordAddress := objectImageWordAddress + objectSize ] ].
+
+		self class writeUInt16: (self ot: oop) to: buf.
+		self class writeUInt16: (self locationBitsOf: oop) to: buf.
+
+		"Restore in-memory OT entry — the running VM must not be disturbed"
+		self ot: oop put: savedOtWord.
+		self locationBitsOf: oop put: savedLocation ].
+
+	"--- Step 5: Patch the header with the real lengths ---"
+	bytes := buf contents.
+	"Patch objectSpaceLength at offset 0"
+	bytes at: 1 put: (objectSpaceLength bitAnd: 16rFF).
+	bytes at: 2 put: ((objectSpaceLength >> 8)  bitAnd: 16rFF).
+	bytes at: 3 put: ((objectSpaceLength >> 16) bitAnd: 16rFF).
+	bytes at: 4 put: ((objectSpaceLength >> 24) bitAnd: 16rFF).
+	"Patch storedObjectTableLength at offset 4"
+	bytes at: 5 put: (storedObjectTableLength bitAnd: 16rFF).
+	bytes at: 6 put: ((storedObjectTableLength >> 8)  bitAnd: 16rFF).
+	bytes at: 7 put: ((storedObjectTableLength >> 16) bitAnd: 16rFF).
+	bytes at: 8 put: ((storedObjectTableLength >> 24) bitAnd: 16rFF).
+
+	"--- Step 6: Write the patched buffer to the actual file stream ---"
+	fileStream nextPutAll: bytes.
+
+	^ true
 ]
 
 { #category : 'private - object table entries' }
@@ -1460,120 +1599,9 @@ ObjectMemory >> wordMemory [
 
 { #category : 'private - marking gc' }
 ObjectMemory >> zeroReferenceCounts [
-	"Sets the count fields of all objects to 0 is called zeroReferenceCounts. It is superfluous to zero the count field of a free chunk or of a free entry. Nevertheless, the following version zeroes the count field of every entry, because on most computers, it takes less time to zero the first byte of an entry than it takes to test the status of that entry"
+	"Sets the count fields of all objects to 0 is called zeroReferenceCounts. It is superfluous to zero the count field of a free chunk or of a free entry. Nevertheless, the following version zeroes the count field of every entry, because on most computers, it takes less time to zero the first byte of an entry than it takes to test the status of that entry (BB p. 682)"
 
-	0 to: ObjectTableSize - 2 by: 2 do: [ :objectPointer | self countBitsOf: objectPointer put: 0 ]
+	0 to: ObjectTableSize - 2 by: 2 do: 
+		[ :objectPointer | 
+			self countBitsOf: objectPointer put: 0 ]
 ]
-
-{ #category : 'vm image i/o' }
-ObjectMemory >> padToPageInStream: stream [
-	"Pad the binary write stream with zero bytes up to the next 512-byte page boundary.
-	Returns true on success. (Not BB code)"
-	| pos desired pad |
-	pos := stream position.
-	desired := ((pos + 511) // 512) * 512.
-	pad := desired - pos.
-	1 to: pad do: [ :i | stream nextPut: 0 ].
-	^ true
-]
-
-{ #category : 'vm image i/o' }
-ObjectMemory >> saveObjectsToStream: fileStream [
-	"Write the VM snapshot to fileStream in Xerox interchange format (LSB, page-aligned).
-	This is the exact inverse of loadWithSnapshot:debug:.
-	File format (Xerox Virtual Image Booklet p. 2):
-	  Page 0 (512 bytes): [objectSpaceLength uint32][objectTableLength uint32][0 uint16][padding]
-	  Page 1..N:          Object space - each live object: [size uint16][class uint16][word0]..[wordN]
-	  Page N+1..:         Object table - each entry: [otWord uint16][locationWord uint16]
-
-	Because binaryWriteStream is non-seekable we build the entire image in a ByteArray
-	WriteStream first, patch the header in-place, then write it all to fileStream in one pass.
-	(Not BB code - equivalent to dbanay saveObjects)"
-
-	| buf storedObjectTableLength objectSpaceLength objectSize wordLength
-	  savedOtWord savedLocation newLocation objectImageWordAddress bytes |
-
-	buf := WriteStream on: ByteArray new.
-
-	"--- Step 1: Find the last used OT entry to minimise the saved OT size ---"
-	storedObjectTableLength := 2. "minimum: oop 0 slot"
-	2 to: ObjectTableSize - 2 by: 2 do: [ :oop |
-		(self hasObject: oop) ifTrue: [ storedObjectTableLength := oop + 2 ] ].
-
-	"--- Step 2: Write placeholder header (will be filled in at the end) ---"
-	self class writeUInt32: 0 to: buf. "placeholder: objectSpaceLength"
-	self class writeUInt32: 0 to: buf. "placeholder: objectTableLength"
-	self class writeUInt16: 0 to: buf. "interchange format flag = 0"
-	self padToPageInStream: buf.       "pad header to first page boundary (512 bytes)"
-
-	"--- Step 3: Write object space ---"
-	"Objects are written contiguously in OT order.
-	We do NOT write the extra HugeSize traversal word (dbanay does the same)."
-	objectSpaceLength := 0.
-	2 to: storedObjectTableLength - 2 by: 2 do: [ :oop |
-		(self hasObject: oop) ifTrue: [
-			objectSize := self sizeBitsOf: oop.
-			wordLength := self fetchWordLengthOf: oop.
-			self class writeUInt16: objectSize to: buf.
-			self class writeUInt16: (self fetchClassOf: oop) to: buf.
-			0 to: wordLength - 1 do: [ :wi |
-				self class writeUInt16: (self fetchWord: wi ofObject: oop) to: buf ].
-			objectSpaceLength := objectSpaceLength + objectSize ] ].
-
-	self padToPageInStream: buf. "pad to next page boundary before OT"
-
-	"--- Step 4: Write object table ---"
-	"For each entry we temporarily compute the on-disk 20-bit word address
-	(segment * 65536 + location in the contiguous image space), write the
-	adjusted entry, then restore the in-memory OT entry unchanged."
-	objectImageWordAddress := 0.
-	0 to: storedObjectTableLength - 2 by: 2 do: [ :oop |
-		savedOtWord   := self ot: oop.
-		savedLocation := self locationBitsOf: oop.
-
-		oop >= 2 ifTrue: [
-			"Free chunks (count=0 but not actually free) become free OT entries"
-			((self freeBitOf: oop) = 0 and: [ (self countBitsOf: oop) = 0 ])
-				ifTrue: [ self freeBitOf: oop put: 1 ].
-
-			(self freeBitOf: oop) = 1
-				ifTrue: [
-					"Free entry: zeroed with free bit set"
-					self ot: oop put: 0.
-					self freeBitOf: oop put: 1.
-					self locationBitsOf: oop put: 0 ]
-				ifFalse: [
-					"Live object: encode the 20-bit image word address into segment+location"
-					objectSize  := self sizeBitsOf: oop.
-					self segmentBitsOf: oop put: (objectImageWordAddress >> 16).
-					newLocation := objectImageWordAddress bitAnd: 16rFFFF.
-					self locationBitsOf: oop put: newLocation.
-					objectImageWordAddress := objectImageWordAddress + objectSize ] ].
-
-		self class writeUInt16: (self ot: oop) to: buf.
-		self class writeUInt16: (self locationBitsOf: oop) to: buf.
-
-		"Restore in-memory OT entry — the running VM must not be disturbed"
-		self ot: oop put: savedOtWord.
-		self locationBitsOf: oop put: savedLocation ].
-
-	"--- Step 5: Patch the header with the real lengths ---"
-	bytes := buf contents.
-	"Patch objectSpaceLength at offset 0"
-	bytes at: 1 put: (objectSpaceLength bitAnd: 16rFF).
-	bytes at: 2 put: ((objectSpaceLength >> 8)  bitAnd: 16rFF).
-	bytes at: 3 put: ((objectSpaceLength >> 16) bitAnd: 16rFF).
-	bytes at: 4 put: ((objectSpaceLength >> 24) bitAnd: 16rFF).
-	"Patch storedObjectTableLength at offset 4"
-	bytes at: 5 put: (storedObjectTableLength bitAnd: 16rFF).
-	bytes at: 6 put: ((storedObjectTableLength >> 8)  bitAnd: 16rFF).
-	bytes at: 7 put: ((storedObjectTableLength >> 16) bitAnd: 16rFF).
-	bytes at: 8 put: ((storedObjectTableLength >> 24) bitAnd: 16rFF).
-
-	"--- Step 6: Write the patched buffer to the actual file stream ---"
-	fileStream nextPutAll: bytes.
-
-	^ true
-]
-
-

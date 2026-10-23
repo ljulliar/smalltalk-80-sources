@@ -142,11 +142,6 @@ ST80VirtualMachine >> keyboard [
 	^keyboard 
 ]
 
-{ #category : 'debugging actions' }
-ST80VirtualMachine >> terminate [
-	vmProcess terminate.
-]
-
 { #category : 'snapshot' }
 ST80VirtualMachine >> saveSnapshot [
 	"Save the current VM state as a snapshot file named 'snapshot.im' in the
@@ -169,4 +164,9 @@ ST80VirtualMachine >> saveSnapshot [
 	stream close.
 	Logger << '<<<<<<< Snapshot saved successfully.'; cr.
 	^ true
+]
+
+{ #category : 'debugging actions' }
+ST80VirtualMachine >> terminate [
+	vmProcess terminate.
 ]
