@@ -1197,6 +1197,21 @@ ObjectMemory >> pointerBitOf: objectPointer put: value [
 ]
 
 { #category : 'private - marking gc' }
+ObjectMemory >> addRoot: objectPointer [
+	"Add objectPointer to the GC root set so it (and all objects reachable
+	from it) will not be collected by the next reclaimInaccessibleObjects call.
+	Must be paired with removeRoot: after GC completes. (Not BB code)"
+	rootObjectPointers add: objectPointer
+]
+
+{ #category : 'private - marking gc' }
+ObjectMemory >> removeRoot: objectPointer [
+	"Remove objectPointer from the GC root set after GC has completed.
+	Paired with addRoot:. (Not BB code)"
+	rootObjectPointers remove: objectPointer ifAbsent: []
+]
+
+{ #category : 'private - marking gc' }
 ObjectMemory >> reclaimInaccessibleObjects [
 	self zeroReferenceCounts.
 	self markAccessibleObjects.

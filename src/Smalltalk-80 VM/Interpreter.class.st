@@ -2200,8 +2200,20 @@ Interpreter >> primitiveSnapshot [
 	"Step 2: Save interpreter registers into the active context"
 	self storeContextRegisters.
 
-	"Step 3: Garbage collect to minimise snapshot size"
+	"Step 3: Garbage collect to minimise snapshot size.
+	Before running mark-sweep GC we must extend the root set beyond the
+	default oops 0..LastSpecialOop to include:
+	  - activeContext: the current execution context (not yet stored in the OT
+	    from the GC's perspective, lives only in an interpreter instVar)
+	  - SmalltalkPointer (25286): the global SystemDictionary; all globals
+	    (Cursor, Delay, DisplayScreen, CompiledMethod, …) are only reachable
+	    through it and would otherwise be collected, causing a crash on resume.
+	This mirrors dbanay's prepareForCollection() hook. (Not BB code)"
+	memory addRoot: activeContext.
+	memory addRoot: 25286.   "SmalltalkPointer = SystemDictionary"
 	memory reclaimInaccessibleObjects.
+	memory removeRoot: activeContext.
+	memory removeRoot: 25286.
 
 	"Step 4: Write the snapshot file via ST80VirtualMachine (host-side I/O,
 	mirrors how the load side is handled in ST80VirtualMachine >> initializeWithImagePath:)"
