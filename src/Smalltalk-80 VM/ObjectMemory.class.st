@@ -171,10 +171,13 @@ ObjectMemory >> abandonFreeChunksInSegment: segment [
 
 { #category : 'private - marking gc' }
 ObjectMemory >> addRoot: objectPointer [
-	"Add objectPointer to the GC root set so it (and all objects reachable
-	from it) will not be collected by the next reclaimInaccessibleObjects call.
-	Must be paired with removeRoot: after GC completes. (Not BB code)"
-	rootObjectPointers add: objectPointer
+	"Not BB code - Comes from dbanay.
+	Mark objectPointer and everything reachable from it so that it survives the
+	garbage collection in progress. Only meant to be called from the interpreter's
+	prepareForCollection hook, which markAccessibleObjects invokes after it has
+	marked the permanent roots (rootObjectPointers). The root is not remembered:
+	it must be registered again at every collection."
+	self markObjectsAccessibleFrom: objectPointer
 ]
 
 { #category : 'accessing' }
@@ -1326,13 +1329,6 @@ ObjectMemory >> removeFromFreePointerList [
 		ifTrue: [ ^ nil ].
 	self headOfFreePointerListPut: (self locationBitsOf: objectPointer).
 	^ objectPointer
-]
-
-{ #category : 'private - marking gc' }
-ObjectMemory >> removeRoot: objectPointer [
-	"Remove objectPointer from the GC root set after GC has completed.
-	Paired with addRoot:. (Not BB code)"
-	rootObjectPointers remove: objectPointer ifAbsent: []
 ]
 
 { #category : 'private - object table entries' }
