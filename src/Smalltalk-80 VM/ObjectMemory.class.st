@@ -718,7 +718,10 @@ ObjectMemory >> initializeWithInterpreter: anInterpreter [
    the current process and the object pointer of the global variable dictionary,
    from which all other accessible objects are referenced directly or indirectly. 
 	dbanay implmentation suggest that we should add oop from 0 to last special oop
-   (See SystemTracer in Smalltalk.sources"
+   (See SystemTracer in Smalltalk.sources).
+	The other roots (Smalltalk system dictionary, active context and pending new process)
+	are not kept in this list: the interpreter registers them at each collection
+	through Interpreter >> prepareForCollection and addRoot:"
    rootObjectPointers := OrderedCollection new.
 	0 to: LastSpecialOop by: 2  do: [ :oop| rootObjectPointers add: oop ].
 	

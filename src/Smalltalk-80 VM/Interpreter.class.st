@@ -3423,9 +3423,12 @@ Interpreter >> primitiveSnapshot [
 	Before saving we must:
 	  1. Store the current activeContext in the active process's suspendedContext field,
 	     so that when the snapshot is resumed the interpreter knows where to continue.
-	  2. Save the current interpreter registers (IP, SP) back into the active context.
-	  3. Run garbage collection to reclaim dead objects before saving.
-	  4. Write the snapshot via the file system.
+	  2. Run garbage collection to reclaim dead objects. The collector calls back
+	     prepareForCollection, which saves the interpreter registers (IP, SP) into the
+	     active context and registers the extra GC roots (Smalltalk dictionary,
+	     active context, pending new process).
+	  3. Write the snapshot file (host side I/O done by ST80VirtualMachine >> saveSnapshot).
+	  4. Pop the receiver and push nil.
 
 	Return value convention (from dbanay and ST80 sources):
 	  - Returning nil signals to the ST80 caller that we just *saved* (normal save case).
