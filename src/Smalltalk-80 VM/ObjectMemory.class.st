@@ -99,7 +99,7 @@ ObjectMemory class >> initialize [
 	IntegerClass := 12.
    "object pointer of CompiledMethod"
 	"BB p. 686 and Xerox VM Image Booklet p. 6"
-	MethodClass := 22.
+	MethodClass := 34.
 	
 	"Not BB code
 	For root object pointers in garbage collection"
