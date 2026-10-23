@@ -28,6 +28,11 @@ The Smalltalk-80 startup screen that you see here is exactly as presented in the
 
 Paraphrasing a well known character of the French history: "With this screen, Developers, 40+ years of Computer Science history look down upon you.” :smile:
 
+# Saving your session
+To save your work, right-click on the Smalltalk-80 desktop background and select `save`. The whole environment is written to `snapshot.im` in the `assets` folder.
+
+At startup the VM loads `assets/snapshot.im` if it exists and falls back to the original `Smalltalk-80.image` otherwise. To go back to a clean Smalltalk-80 environment, simply delete `snapshot.im` (it is ignored by git).
+
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
 * The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf), courtesy Stéphane Ducasse)
