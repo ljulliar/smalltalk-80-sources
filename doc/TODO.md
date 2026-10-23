@@ -8,10 +8,10 @@ So you feel brave enough to contribute to this project ? :wink: And help revive 
 - [ ] (Easy) Test the Smalltalk-80 environment like manipulating windows, executing some sample code and report any VM exception or wrong result
 
 Implement the missing features of the VM. For instance:
-- [ ] The Filesystem primitives
+- [x] The Filesystem primitives
 - [ ] The accelerated CharacterScanner primitives and function on the host side
-- [ ] Make the execution of the DisplayScreen dispayExtent:  work (see sample code int he ST-80 System Workspace window)
-- [ ] Save a snapshot of the Smalltalk 80 environment (right click on the desktop background and select 'save')
+- [ ] Make the execution of the DisplayScreen displayExtent: code work from the Smalltalk-80 VM System Workspace window
+- [x] Save a snapshot of the Smalltalk 80 environment (right click on the desktop background and select 'save')
 - [ ] Writing unit and stress tests for the virtual machine interpreter and object memory manager
 - [ ] and many others!
   
