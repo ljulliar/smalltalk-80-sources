@@ -33,6 +33,24 @@ To save your work, right-click on the Smalltalk-80 desktop background and select
 
 At startup the VM loads `assets/snapshot.im` if it exists and falls back to the original `Smalltalk-80.image` otherwise. To go back to a clean Smalltalk-80 environment, simply delete `snapshot.im` (it is ignored by git).
 
+# Developer notes: memory sanity checks
+The virtual machine can check every access to the object memory (valid object pointer, valid field index, valid address and 16-bit value) and raise an assertion failure as soon as something is wrong. These checks are very costly (5x performance degradation !!), so they are **off by default** (`false`): with the checks on, the VM runs several times slower.
+
+There are two independent switches, both class-side flags:
+
+| Flag | Checks |
+|---|---|
+| `ObjectMemory checksEnabled:` | object and field indices (`fetchPointer:ofObject:`, `fetchWord:ofObject:`, current segment when allocating) |
+| `RealWordMemory checksEnabled:` | segment and word addresses and the values stored (`segment:word:`, `segment:word:put:`, the bits and byte variants) |
+
+Both flags are set explicitly to `false` at the start of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` every time a VM is launched, so a value set in a Pharo Workspace before launching is overwritten.
+
+If you suspect a memory corruption (for instance a wrong class pointer, an object that changed under your feet, or a crash far away from its cause), switch the checks on:
+* Change `false` to `true` in the two `checksEnabled:` lines of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` and launch the VM again, or
+* Evaluate `ObjectMemory checksEnabled: true. RealWordMemory checksEnabled: true` from the debugger or a Workspace while a VM is running. The change takes effect immediately.
+
+The first failed assertion stops the VM close to the faulty access, and the Pharo debugger stack shows the caller. Remember to switch the checks back off afterwards.
+
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
 * The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf), courtesy Stéphane Ducasse)

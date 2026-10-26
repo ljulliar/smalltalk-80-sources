@@ -71,6 +71,13 @@ ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayou
 	
 	debug := false.
 	
+	"Sanity checks on memory accesses (Not BB code). They are very costly (5x penalty
+	in performance): leave them off for normal runs and set them to true here when hunting
+	a memory corruption. Set explicitly, before the Interpreter creates the object memory,
+	so the outcome does not depend on the state left in the image by a previous run."
+	ObjectMemory checksEnabled: false.
+	RealWordMemory checksEnabled: false.
+	
 	"Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
 	Logger truncate."
 	
