@@ -9,12 +9,26 @@ Class {
 		'realWordMemory'
 	],
 	#classVars : [
+		'ChecksEnabled',
 		'SegmentCount',
 		'WordSegmentCount'
 	],
 	#category : 'Smalltalk-80 VM',
 	#package : 'Smalltalk-80 VM'
 }
+
+{ #category : 'accessing' }
+RealWordMemory class >> checksEnabled [
+	"Answer whether the address and value sanity checks run on every memory access"
+	^ ChecksEnabled
+]
+
+{ #category : 'accessing' }
+RealWordMemory class >> checksEnabled: aBoolean [
+	"Switch the sanity checks on (debugging) or off (speed). Takes effect immediately
+	on all existing instances. Example: RealWordMemory checksEnabled: true"
+	ChecksEnabled := aBoolean
+]
 
 { #category : 'class initialization' }
 RealWordMemory class >> initialize [
@@ -23,6 +37,12 @@ RealWordMemory class >> initialize [
 	"For values see BB p. 656"
 	SegmentCount := 16.
 	WordSegmentCount := 65536.
+
+	"Not BB code. The sanity checks done on every memory access cost about 30% of
+	the VM run time, so they are off by default. They are only initialized when nil
+	because RealWordMemory >> initialize calls this method: creating a new instance
+	must not reset a value chosen by the developer."
+	ChecksEnabled ifNil: [ ChecksEnabled := false ]
 ]
 
 { #category : 'access' }
@@ -66,9 +86,10 @@ RealWordMemory >> segment: s word: w [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 	
    "Not BB code"
-	"Some preliminary sanity checks"
-	self assert: ( (s >= 0) and: (s < SegmentCount)).
-	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	"Some preliminary sanity checks (only when enabled, see checksEnabled:)"
+	ChecksEnabled ifTrue: [
+		self assert: ( (s >= 0) and: (s < SegmentCount)).
+		self assert: ( (w >= 0) and: (w < WordSegmentCount)) ].
 	
 	^ realWordMemory at: (s * WordSegmentCount + w + 1).
 
@@ -81,8 +102,9 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex [
 	
 	"Not BB code. For bit index see BB p. 657"
 	| shift mask |
-	self assert: ( (s >= 0) and: (s < SegmentCount)).
-	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+	ChecksEnabled ifTrue: [
+		self assert: ( (s >= 0) and: (s < SegmentCount)).
+		self assert: ( (w >= 0) and: (w < WordSegmentCount)) ].
 	
 	shift := (self segment: s word: w) >> (15-lastBitIndex).
 	mask  := (1 << (lastBitIndex - firstBitIndex + 1) - 1).
@@ -98,10 +120,11 @@ RealWordMemory >> segment: s word: w bits: firstBitIndex to: lastBitIndex put: v
 	|mask word|
 	mask  := (1 << (lastBitIndex - firstBitIndex + 1)) - 1.
 	
-	"Some preliminary sanity checks"
-	self assert: ( (s >= 0) and: (s < SegmentCount)).
-	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
-	self assert: ( value = (value & mask)).
+	"Some preliminary sanity checks (only when enabled, see checksEnabled:)"
+	ChecksEnabled ifTrue: [
+		self assert: ( (s >= 0) and: (s < SegmentCount)).
+		self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+		self assert: ( value = (value & mask)) ].
 	
 	word := self segment: s word: w.
 	word := (word & ((mask << (15-lastBitIndex)) bitInvert)) | (value << (15 - lastBitIndex)).
@@ -119,17 +142,18 @@ RealWordMemory >> segment: s word: w byte: byteNumber [
 	the test on byteNumber below"
 	
 	|word byte|
-	"Some preliminary sanity checks"
-	self assert: ( (s >= 0) and: (s < SegmentCount)).
-	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
-	self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
+	"Some preliminary sanity checks (only when enabled, see checksEnabled:)"
+	ChecksEnabled ifTrue: [
+		self assert: ( (s >= 0) and: (s < SegmentCount)).
+		self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+		self assert: ( (byteNumber = 0) or: (byteNumber = 1)) ].
 	
 	word := self segment: s word: w.
 	"byte := (byteNumber = 1)
 		ifTrue: [ word bitAnd: 16rFF ] 
 		ifFalse: [ word bitShift: -8 ]."
 	byte := (word bitShift: (-8 * byteNumber)) bitAnd: 16rFF.
-	self assert: (byte < 256).
+	ChecksEnabled ifTrue: [ self assert: (byte < 256) ].
 	^ byte 
 ]
 
@@ -143,17 +167,18 @@ RealWordMemory >> segment: s word: w byte: byteNumber put: value [
 	the test on byteNumber below"
 	
 	|word|
-	"Some preliminary sanity checks"
-	self assert: ( (s >= 0) and: (s < SegmentCount)).
-	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
-	self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
-	self assert: ( (value >= 0) and: (value < 256)).
+	"Some preliminary sanity checks (only when enabled, see checksEnabled:)"
+	ChecksEnabled ifTrue: [
+		self assert: ( (s >= 0) and: (s < SegmentCount)).
+		self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+		self assert: ( (byteNumber = 0) or: (byteNumber = 1)).
+		self assert: ( (value >= 0) and: (value < 256)) ].
 	
 	word := self segment: s word: w.
 	word := (byteNumber = 1)
 		ifTrue:  [ (word bitAnd: 16r00FF) bitOr: (value bitShift: 8) ]
 		ifFalse: [ (word bitAnd: 16rFF00) bitOr: value ].
-	self assert: ( (word >= 0) and: (word < 65536)).
+	ChecksEnabled ifTrue: [ self assert: ( (word >= 0) and: (word < 65536)) ].
 		
 	^ self segment: s word: w put: word.
 	
@@ -165,10 +190,11 @@ RealWordMemory >> segment: s word: w put: value [
 	"ShouldBeImplemented signalFor: thisContext sender selector"
 
 	"Not BB code"	
-	"Some preliminary sanity checks"
-	self assert: ( (s >= 0) and: (s < SegmentCount)).
-	self assert: ( (w >= 0) and: (w < WordSegmentCount)).
-	self assert: ( (value >= 0) and: (value < 65536)).
+	"Some preliminary sanity checks (only when enabled, see checksEnabled:)"
+	ChecksEnabled ifTrue: [
+		self assert: ( (s >= 0) and: (s < SegmentCount)).
+		self assert: ( (w >= 0) and: (w < WordSegmentCount)).
+		self assert: ( (value >= 0) and: (value < 65536)) ].
 	
 	^realWordMemory at: (s * WordSegmentCount + w + 1) put: value
 
