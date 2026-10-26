@@ -17,6 +17,7 @@ Class {
 	],
 	#classVars : [
 		'BigSize',
+		'ChecksEnabled',
 		'FirstFreeChunkList',
 		'FirstFreeChunkListSize',
 		'FirstHeapSegment',
@@ -39,6 +40,20 @@ Class {
 	#category : 'Smalltalk-80 VM',
 	#package : 'Smalltalk-80 VM'
 }
+
+{ #category : 'accessing' }
+ObjectMemory class >> checksEnabled [
+	"Answer whether the sanity checks on object and field indices run on every object access"
+	^ ChecksEnabled
+]
+
+{ #category : 'accessing' }
+ObjectMemory class >> checksEnabled: aBoolean [
+	"Switch the sanity checks on (debugging) or off (speed). Takes effect immediately
+	on all existing instances. Independent from RealWordMemory checksEnabled:
+	Example: ObjectMemory checksEnabled: true"
+	ChecksEnabled := aBoolean
+]
 
 { #category : 'class initialization' }
 ObjectMemory class >> initialize [ 
@@ -105,6 +120,11 @@ ObjectMemory class >> initialize [
 	For root object pointers in garbage collection"
 	LastSpecialOop := 52.
 
+	"Not BB code. The sanity checks done on every object access are off by default
+	for speed. They are only initialized when nil because initializeWithInterpreter:
+	calls this method: creating a new instance must not reset a value chosen by
+	the developer."
+	ChecksEnabled ifNil: [ ChecksEnabled := false ]
 ]
 
 { #category : 'vm image i/o' }
@@ -258,7 +278,8 @@ ObjectMemory >> attemptToAllocateChunk: size [
 	If no space can be found anywhere, the routine returns nil. "
 
 	| objectPointer |
-	self assert: (currentSegment between: FirstHeapSegment  and: LastHeapSegment). 
+	ChecksEnabled ifTrue: [
+		self assert: (currentSegment between: FirstHeapSegment  and: LastHeapSegment) ].
 	objectPointer := self attemptToAllocateChunkInCurrentSegment: size.
 	objectPointer isNil
 		ifFalse: [ ^ objectPointer ].
@@ -450,7 +471,8 @@ ObjectMemory >> fetchPointer: fieldIndex ofObject: objectPointer [
 	"Return the object pointer found in the field numbered 
 	fieldIndex of the object associated with ObjectPointer"
 	|value|
-	self assert: (fieldIndex >= 0 & (fieldIndex < (self fetchWordLengthOf: objectPointer))).
+	ChecksEnabled ifTrue: [
+		self assert: (fieldIndex >= 0 & (fieldIndex < (self fetchWordLengthOf: objectPointer))) ].
 	value := self heapChunkOf: objectPointer word: (HeaderSize + fieldIndex).
 	debug ifTrue: [ 
 		Logger << objectPointer printString << ' pointer: ' 
@@ -464,8 +486,9 @@ ObjectMemory >> fetchWord: wordIndex ofObject: objectPointer [
 	"Return the 16 bit numerical value found in the word numbered fieldIndex of the object associated with ObjectPointer"
 	|value|
 	
-	"Line below not BB code"
-	self assert: (wordIndex between: 0 and: (self fetchWordLengthOf: objectPointer) - 1).
+	"Lines below not BB code"
+	ChecksEnabled ifTrue: [
+		self assert: (wordIndex between: 0 and: (self fetchWordLengthOf: objectPointer) - 1) ].
 	
 	value := self heapChunkOf: objectPointer word: HeaderSize + wordIndex.
 	debug ifTrue: [ 
