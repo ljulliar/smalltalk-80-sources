@@ -64,78 +64,91 @@ ST80VirtualMachine >> initializeRunWithImagePath: imagePath keyboard: keyboardLa
 
 { #category : 'initialization' }
 ST80VirtualMachine >> initializeWithImagePath: imagePath keyboard: keyboardLayout [
-   "Not BB code"
+	"Not BB code"
+
 	"Initialize a new ST80 VM"
-	
+
 	| snapshot imagePathRef |
-	
 	debug := false.
-	
+
 	"Sanity checks on memory accesses (Not BB code). They are very costly (5x penalty
 	in performance): leave them off for normal runs and set them to true here when hunting
 	a memory corruption. Set explicitly, before the Interpreter creates the object memory,
 	so the outcome does not depend on the state left in the image by a previous run."
 	ObjectMemory checksEnabled: false.
 	RealWordMemory checksEnabled: false.
-	
+
+	"Native implementation of the character scanning primitive (103, Not BB code). It makes
+	the display of text and the typing much faster than the guest Smalltalk loop. Set it to
+	false to fall back on that loop, for instance to compare the two or to debug a text display
+	problem. Set explicitly for the same reason as the flags above."
+	ST80CharacterScanner useNativeScan: true.
+
 	"Smalltalk globals at: #Logger put: (ST80Logger withFile: '/tmp/st80_vm.log' asFileReference).
 	Logger truncate."
-	
+
 	"Register the ST80Sensor class as a synonym for the guest VM Sensor class (BB 661)"
 	Smalltalk at: #Sensor put: ST80Sensor.
-	
+
 	"Check image path and image file exist"
-   (imagePathRef := imagePath asFileReference) exists
-		ifFalse: [ 
-			Transcript show: 'ERROR: Path to image folder incorrect. Exiting'; cr.
-			self terminate 
-		].
+	(imagePathRef := imagePath asFileReference) exists ifFalse: [
+			Transcript
+				show: 'ERROR: Path to image folder incorrect. Exiting';
+				cr.
+			self terminate ].
 	vmImagePath := imagePathRef.
 
 	"Load snapshot.im if it exists (saved by primitiveSnapshot), otherwise
 	fall back to the original Smalltalk-80.image. To force a fresh start,
 	simply delete snapshot.im from the assets directory."
 	vmImageFile := (imagePathRef / 'snapshot.im') exists
-		ifTrue:  [
-			Transcript show: 'Loading snapshot: snapshot.im'; cr.
-			imagePathRef / 'snapshot.im' ]
-		ifFalse: [
-			Transcript show: 'Loading original image: Smalltalk-80.image'; cr.
-			imagePathRef / 'Smalltalk-80.image' ].
+		               ifTrue: [
+				               Transcript
+					               show: 'Loading snapshot: snapshot.im';
+					               cr.
+				               imagePathRef / 'snapshot.im' ]
+		               ifFalse: [
+				               Transcript
+					               show: 'Loading original image: Smalltalk-80.image';
+					               cr.
+				               imagePathRef / 'Smalltalk-80.image' ].
 	vmSourcesFile := imagePathRef / 'Smalltalk-80.sources'.
-	vmChangesFile := imagePathRef /  'Smalltalk-80.changes'.
+	vmChangesFile := imagePathRef / 'Smalltalk-80.changes'.
 	vmClassOopsFile := imagePathRef / 'class.oops'.
-	vmMethodOopsFile := imagePathRef /  'method.oops'.
-	
+	vmMethodOopsFile := imagePathRef / 'method.oops'.
+
 	"Open snapshot stream"
 	hal := ST80HardwareAbstractionLayer withVM: self.
 	fs := ST80FileSystem withRoot: imagePathRef.
 	snapshot := vmImageFile asFileReference binaryReadStream.
-	interpreter := Interpreter withSnapshot: snapshot 
-						hal: hal fileSystem: fs
-						debug: debug.
-	
+	interpreter := Interpreter
+		               withSnapshot: snapshot
+		               hal: hal
+		               fileSystem: fs
+		               debug: debug.
+
 	"Check that keyboard layout exists"
 	(hal supportedKeyboardLayouts includes: keyboardLayout)
 		ifTrue: [ keyboard := keyboardLayout ]
-		ifFalse: [ 
-			keyboard := 'US'.
-			Transcript show: '!! WARNING !!: Unsupported Keyboard layout: '; 
-				nextPutAll: keyboardLayout printString; 
-				nextPutAll: '. Defaulting to ''';
-				nextPutAll: keyboard; nextPutAll:''''; cr.
-			 ].
-	
+		ifFalse: [
+				keyboard := 'US'.
+				Transcript
+					show: '!! WARNING !!: Unsupported Keyboard layout: ';
+					nextPutAll: keyboardLayout printString;
+					nextPutAll: '. Defaulting to ''';
+					nextPutAll: keyboard;
+					nextPutAll: '''';
+					cr ].
+
 	"Load symbol tables if debug activated"
-	debug ifTrue: [ 
-		interpreter initializeMethodOopsWith: vmMethodOopsFile asFileReference readStream.
-		interpreter initializeClassOopsWith: vmClassOopsFile asFileReference readStream.
-		].
-	
+	debug ifTrue: [
+			interpreter initializeMethodOopsWith:
+				vmMethodOopsFile asFileReference readStream.
+			interpreter initializeClassOopsWith:
+				vmClassOopsFile asFileReference readStream ].
+
 	"run the Smalltalk-80 VM loaded in memory"
-	interpreter interpret.
-
-
+	interpreter interpret
 ]
 
 { #category : 'accessing' }

@@ -2147,43 +2147,31 @@ Interpreter >> primitiveClass [
 	self push: (memory fetchClassOf: instance)
 ]
 
-{ #category : 'primitive methods' }
+{ #category : 'io primitives' }
 Interpreter >> primitiveCopyBits [
 
-	| bitBltPointer bitBlt updatedRect |
-	
+	| bitBltPointer bitBlt |
 	bitBltPointer := self stackTop.
 	bitBlt := ST80BitBlt bitBltPointer: bitBltPointer memory: memory.
-	
-	self success: ((bitBlt combinationRule) between: 0 and: 15).
-	success ifFalse: [ 
-		self error: ('Unsupported BitBlt combination rule: ', bitBlt combinationRule printString).  
-		].
-	
-	debug ifTrue: [ 
-		Logger << 'bitBltPointer: ' << bitBltPointer printString; cr.
-		Logger << 'currentDisplay Form: ' << currentDisplay printString; cr.
-		].
-	
+
+	self success: (bitBlt combinationRule between: 0 and: 15).
+	success ifFalse: [
+			self error: 'Unsupported BitBlt combination rule: '
+				, bitBlt combinationRule printString ].
+
+	debug ifTrue: [
+			(Logger << 'bitBltPointer: ')
+				<< bitBltPointer printString;
+				cr.
+			(Logger << 'currentDisplay Form: ')
+				<< currentDisplay printString;
+				cr ].
+
 	bitBlt copyBits.
 
 	"If copyBits operated on the current display, check for a resize then
 	refresh the dirty rectangle on the host screen."
-	(bitBlt destForm oop = currentDisplay) ifTrue: [
-		| width height |
-		width  := self fetchInteger: WidthInForm  ofObject: currentDisplay.
-		height := self fetchInteger: HeightInForm ofObject: currentDisplay.
-		(currentDisplayWidth ~= width or: [ currentDisplayHeight ~= height ]) ifTrue: [
-			"height <= 100 means ST80 is compressing the display before saving
-			a snapshot — ignore the resize, the display will be restored after."
-			height > 100 ifTrue: [
-				hal displayWidth: width displayHeight: height.
-				currentDisplayWidth  := width.
-				currentDisplayHeight := height ] ].
-		updatedRect := bitBlt updatedRect.
-		updatedRect width > 0 & (updatedRect height > 0) ifTrue: [
-			hal updateDisplayRect: updatedRect fromForm: bitBlt destForm ] ]
-
+	self refreshDisplayRect: bitBlt updatedRect ofForm: bitBlt destForm
 ]
 
 { #category : 'primitive methods' }
@@ -3295,20 +3283,62 @@ Interpreter >> primitiveSampleInterval [
 
 { #category : 'primitive methods' }
 Interpreter >> primitiveScanCharacters [
-   "TODO: Do not implement native implementation for now"
-	self primitiveFail.
+	"Primitive 103, optional (BB p. 652): the inner loop of the display of text, that is
+	CharacterScanner >> scanCharactersFrom: startIndex to: stopIndex in: sourceString rightX: rightX
+	stopConditions: stops displaying: display. It is the guest Smalltalk method that does the
+	same when this primitive fails.
 
-"	| scannerPointer  characterScan |
-	
-	scannerPointer := self stackTop.
-	characterScan  := ST80CharacterScanner scannerPointer: scannerPointer memory: memory.
-	
-	self success: ((scannerPointer combinationRule) between: 0 and: 15).
-	success ifFalse: [ 
-		self error: ('Unsupported BitBlt combination rule in Character Scanner: ', scannerPointer combinationRule printString).  
-		].
-	
-"
+	The arguments stay on the stack until the scan is known to succeed. Everything that
+	could make it fail is checked beforehand, because the scan draws as it goes and a failure
+	half way would be seen twice: here and in the guest method."
+
+	| displaying stops rightX string stopIndex startIndex scannerPointer scanner result |
+	ST80CharacterScanner useNativeScan ifFalse: [ ^ self primitiveFail ].
+
+	displaying := self stackValue: 0.
+	stops := self stackValue: 1.
+	rightX := self stackValue: 2.
+	string := self stackValue: 3.
+	stopIndex := self stackValue: 4.
+	startIndex := self stackValue: 5.
+	scannerPointer := self stackValue: 6.
+
+	(displaying = TruePointer or: [ displaying = FalsePointer ])
+		ifFalse: [ ^ self primitiveFail ].
+	({
+		 rightX.
+		 stopIndex.
+		 startIndex } allSatisfy: [ :each | memory isIntegerObject: each ])
+		ifFalse: [ ^ self primitiveFail ].
+	startIndex := memory integerValueOf: startIndex.
+	stopIndex := memory integerValueOf: stopIndex.
+	rightX := memory integerValueOf: rightX.
+
+	scanner := ST80CharacterScanner
+		           scannerPointer: scannerPointer
+		           memory: memory
+		           displaying: displaying = TruePointer.
+	scanner ifNil: [ ^ self primitiveFail ].
+	(scanner
+		 canScanFrom: startIndex
+		 to: stopIndex
+		 in: string
+		 stops: stops) ifFalse: [ ^ self primitiveFail ].
+
+	result := scanner
+		          scanFrom: startIndex
+		          to: stopIndex
+		          in: string
+		          rightX: rightX
+		          stops: stops.
+	scanner storeResults.
+	displaying = TruePointer ifTrue: [
+		self
+			refreshDisplayRect: scanner scannedRect
+			ofForm: scanner destForm ].
+
+	self pop: 7.
+	self push: result
 ]
 
 { #category : 'control primitives' }
@@ -3891,6 +3921,26 @@ Interpreter >> quickReturnSelf [
    "Returning self is a no-op as far as the interpreter is concerned since 
     self's object pointer occupies the same place on the stack as the message
     receiver that it should occupy as the message response. (BB 620)"
+]
+
+{ #category : 'io primitives' }
+Interpreter >> refreshDisplayRect: aRectangle ofForm: aForm [
+	"Not BB code. Show on the host display the rectangle aRectangle that a BitBlt operation
+	has changed in the ST80 form aForm, when aForm is the current display. As in
+	primitiveCopyBits, a change of the display size is passed on to the host first, except
+	the shrinking to 100 lines that the ST80 system does before saving a snapshot."
+
+	| width height |
+	aForm oop = currentDisplay ifFalse: [ ^ self ].
+	width := self fetchInteger: WidthInForm ofObject: currentDisplay.
+	height := self fetchInteger: HeightInForm ofObject: currentDisplay.
+	((currentDisplayWidth ~= width or: [ currentDisplayHeight ~= height ])
+		 and: [ height > 100 ]) ifTrue: [
+			hal displayWidth: width displayHeight: height.
+			currentDisplayWidth := width.
+			currentDisplayHeight := height ].
+	(aRectangle notNil and: [ aRectangle hasPositiveExtent ]) ifTrue: [
+		hal updateDisplayRect: aRectangle fromForm: aForm ]
 ]
 
 { #category : 'control primitives' }
