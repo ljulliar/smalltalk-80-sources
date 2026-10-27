@@ -236,15 +236,16 @@ ST80FileSystem >> tell: handle [
 ST80FileSystem >> truncateTo: handle length: byteCount [
 	"Truncate the file to byteCount bytes. Return true on success, false on error."
 
-	| stream |
-	stream := fileHandles at: handle ifAbsent: [ ^ false ].
-	^ [
-		  stream truncate: byteCount.
-		  true ]
-		  on: Error
-		  do: [ :e |
-				  lastError := -1.
-				  false ]
+	| stream succeeded |
+	stream := fileHandles at: handle ifAbsent: [ nil ].
+	succeeded := stream isNotNil and: [
+			             [
+				             stream truncate: byteCount.
+				             true ]
+				             on: Error
+				             do: [ :e | false ] ].
+	succeeded ifFalse: [ lastError := -1 ].
+	^ succeeded
 ]
 
 { #category : 'file operations' }
