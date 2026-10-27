@@ -2154,10 +2154,10 @@ Interpreter >> primitiveCopyBits [
 	bitBltPointer := self stackTop.
 	bitBlt := ST80BitBlt bitBltPointer: bitBltPointer memory: memory.
 
+	"A combination rule out of range makes the primitive fail, so that the guest
+	Smalltalk code of BitBlt >> copyBits takes over (BB p. 652)"
 	self success: (bitBlt combinationRule between: 0 and: 15).
-	success ifFalse: [
-			self error: 'Unsupported BitBlt combination rule: '
-				, bitBlt combinationRule printString ].
+	success ifFalse: [ ^ self ].
 
 	debug ifTrue: [
 			(Logger << 'bitBltPointer: ')
