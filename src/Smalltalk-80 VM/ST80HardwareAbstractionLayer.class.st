@@ -30,7 +30,8 @@ Class {
 		'lastEventTime',
 		'cursorLink',
 		'scheduledSemaphore',
-		'st80ScheduledSemaphore'
+		'st80ScheduledSemaphore',
+		'blueEmulated'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -369,32 +370,38 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 
 { #category : 'event handling' }
 ST80HardwareAbstractionLayer >> handleMouseEvent: anEvent way: way [
-
 	"ERROR in BB p. 650 the parameter values for the left and right
 	buuttons are actuelly the other way around. So here is the
 	proper naming and parameter numbering for a mouse configured 
 	for a right handed user:
 	
-		Usual naming   | Xerox naming   | ST80 Parameter | Pharo whichButton
+		Usual naming   | Xerox naming   | ST80 Parameter | Pharo event
 		---------------+----------------+----------------+-------------
-		Left button    | Red button     |   130          |     4 (click)
-		Middle button  | Yellow button  |   129          |     ? (meta-click)
-		Left button    | Blue button    |   128		      |     2 (action-click)
-	"
-	
-	| eventType |
+		Left button    | Red button     |   130          | click
+		Middle button  | Yellow button  |   129          | right click
+		Third button   | Blue button    |   128          | cmd/alt/ctrl + click
 
-	eventType := (way = #down) ifTrue: [ DeviceOn ] ifFalse: [ DeviceOff ].
-	
-	anEvent redButtonChanged ifTrue: [ 
-		self inputTimeWord.
-		self inputWordType: eventType parameter: RedButton. 
-		^self ].
+	The blue button opens the window menu (under, move, frame, collapse, close)."
+
+	| eventType |
+	eventType := way = #down
+		             ifTrue: [ DeviceOn ]
+		             ifFalse: [ DeviceOff ].
+
+	(self isBlueButtonEvent: anEvent way: way) ifTrue: [
+			self inputTimeWord.
+			self inputWordType: eventType parameter: BlueButton.
+			^ self ].
+	anEvent redButtonChanged ifTrue: [
+			self inputTimeWord.
+			self inputWordType: eventType parameter: RedButton.
+			^ self ].
 	anEvent yellowButtonChanged ifTrue: [
-		self inputTimeWord.
-		self inputWordType: eventType parameter: YellowButton.
-		^self ].
-	Error new signal: 'Unknown mouse button: ', anEvent whichButton printString.
+			self inputTimeWord.
+			self inputWordType: eventType parameter: YellowButton.
+			^ self ].
+	Error new signal:
+		'Unknown mouse button: ' , anEvent whichButton printString
 ]
 
 { #category : 'initialization' }
@@ -492,6 +499,22 @@ ST80HardwareAbstractionLayer >> inputWordType: anEventType parameter: aParameter
 	self assert: (aParameter between: 0 and: 4095).
 	self assert: (anEventType between: 0 and: 5).
 	self inputWord: (anEventType << 12) | (aParameter & 16rFFF).
+]
+
+{ #category : 'event handling' }
+ST80HardwareAbstractionLayer >> isBlueButtonEvent: anEvent way: way [
+	"Not BB code. Hosts rarely have three buttons, so the blue button is also 
+	emulated by clicking the primary button while holding Command, Alt or Control.
+	The modifier may be released before the button, so the button released is
+	the one that was pressed."
+
+	anEvent blueButtonChanged ifTrue: [ ^ true ].
+	anEvent redButtonChanged ifFalse: [ ^ false ].
+	way = #down ifFalse: [ ^ blueEmulated ifNil: [ false ] ].
+	blueEmulated := anEvent commandKeyPressed or: [
+		                anEvent altKeyPressed or: [
+			                anEvent controlKeyPressed ] ].
+	^ blueEmulated
 ]
 
 { #category : 'event handling' }
