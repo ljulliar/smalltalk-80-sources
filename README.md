@@ -51,6 +51,21 @@ If you suspect a memory corruption (for instance a wrong class pointer, an objec
 
 The first failed assertion stops the VM close to the faulty access, and the Pharo debugger stack shows the caller. Remember to switch the checks back off afterwards.
 
+# Developer notes: native text scanning
+Displaying text spends most of its time in the guest primitive 103 (`CharacterScanner >> scanCharactersFrom:to:in:rightX:stopConditions:displaying:`), which the Blue Book lists as optional. The VM implements it natively in `Interpreter >> primitiveScanCharacters` and `ST80CharacterScanner`: the scan of a whole run of characters is done on the host side and the changed part of the screen is refreshed once, instead of once per character. Typing and erasing text is noticeably faster.
+
+The native scan is controlled by a class-side flag, set explicitly to `true` at the start of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` every time a VM is launched, just like the memory checks above:
+
+| Flag | Effect |
+|---|---|
+| `ST80CharacterScanner useNativeScan:` | `true`: primitive 103 scans the characters on the host side. `false`: primitive 103 always fails and the guest Smalltalk code runs its own (slower) loop |
+
+To compare the two or to track down a text display problem:
+* Change `true` to `false` in the `useNativeScan:` line of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` and launch the VM again, or
+* Evaluate `ST80CharacterScanner useNativeScan: false` from a Workspace while a VM is running. The change takes effect immediately.
+
+The native scan checks all its arguments before drawing the first character. If anything looks wrong (an unexpected object, an index out of range...) the primitive fails and the guest code runs, so the screen never shows a character twice.
+
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
 * The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf), courtesy Stéphane Ducasse)

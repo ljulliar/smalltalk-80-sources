@@ -9,7 +9,7 @@ So you feel brave enough to contribute to this project ? :wink: And help revive 
 
 Implement the missing features of the VM. For instance:
 - [x] The Filesystem primitives
-- [ ] The accelerated CharacterScanner primitives and function on the host side
+- [x] The accelerated CharacterScanner primitive (103) on the host side
 - [ ] Make the execution of the DisplayScreen displayExtent: code work from the Smalltalk-80 VM System Workspace window
 - [x] Save a snapshot of the Smalltalk 80 environment (right click on the desktop background and select 'save')
 - [ ] Writing unit and stress tests for the virtual machine interpreter and object memory manager
