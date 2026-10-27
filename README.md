@@ -30,10 +30,23 @@ Mouse buttons: left click is the Smalltalk-80 red button (select), right click i
 
 Paraphrasing a well known character of the French history: "With this screen, Developers, 40+ years of Computer Science history look down upon you.” :smile:
 
-# Saving your session
-To save your work, right-click on the Smalltalk-80 desktop background and select `save`. The whole environment is written to `snapshot.im` in the `assets` folder.
+# The assets directory
+The `assets` directory holds everything the VM needs to boot a Smalltalk-80 environment:
 
-At startup the VM loads `assets/snapshot.im` if it exists and falls back to the original `Smalltalk-80.image` otherwise. To go back to a clean Smalltalk-80 environment, simply delete `snapshot.im` (it is ignored by git).
+| File | Origin | Purpose |
+|---|---|---|
+| `Smalltalk-80.image` | Xerox PARC 1983 distribution (via Mario Wolczko) | The original, pristine virtual image. |
+| `Smalltalk-80.sources` | Xerox PARC 1983 distribution (via Mario Wolczko) | Source code of all system methods, read by the browsers. |
+| `Smalltalk-80.changes` | Dan Banay | Changes log of the environment. Its content is appended to when you accept code. |
+| `snapshot.im` | Dan Banay | A snapshot of the image with the `PosixFile`, `PosixFileDirectory` and `PosixFilePage` classes and a bootstrapped `SourceFiles`, so that the guest file system (`FileStream`, source browsing, change logging) works on the host disk. This is the file loaded at startup. |
+| `class.oops`, `method.oops` | This project | Lists of class and method oops used by the VM to find well-known objects in the original image. |
+
+The guest file system is served by the host through the file primitives implemented in `ST80FileSystem`: the files of the `assets` directory are the ones the guest sees.
+
+# Saving your session
+To save your work, right-click on the Smalltalk-80 desktop background and select `save`. The whole environment is written to `snapshot.im` in the `assets` folder, **replacing** the one shipped with the project.
+
+At startup the VM loads `assets/snapshot.im` if it exists and falls back to the original `Smalltalk-80.image` otherwise (in which case the guest file system classes are missing). To go back to the shipped environment, restore `snapshot.im` with `git checkout assets/snapshot.im`.
 
 # Developer notes: memory sanity checks
 The virtual machine can check every access to the object memory (valid object pointer, valid field index, valid address and 16-bit value) and raise an assertion failure as soon as something is wrong. These checks are very costly (5x performance degradation !!), so they are **off by default** (`false`): with the checks on, the VM runs several times slower.
@@ -72,7 +85,7 @@ The native scan checks all its arguments before drawing the first character. If 
 I'd like to thank a number of people whose prior work made this project possible:
 * The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf), courtesy Stéphane Ducasse)
 * The [Pharo](https://www.pharo.org/) developers community for providing this remarkable Open Source Smalltalk environment
-* [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project, a C++ implementation of the VM, that proved very helpful when I started debugging my Smalltalk implementation.
+* [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project, a C++ implementation of the VM, that proved very helpful when I started debugging my Smalltalk implementation. The `snapshot.im` and `Smalltalk-80.changes` files of the `assets` directory are his work, taken from his repository and redistributed under his MIT license (see `assets/LICENSE-dbanay.txt`). Many thanks, Dan!
 * Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) dedicated to the Smalltalk-80 specifications.
 * And last but not the least, [Mario Wolczko ST-80 web page](http://www.wolczko.com/st80/) for putting together critical files that one absolutely needs to run the full Smalltalk environment, most notably the Virtual Machine image as published (on tapes!!) by Xerox Parc in 1983.
 
