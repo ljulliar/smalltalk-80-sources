@@ -40,14 +40,19 @@ ST80FileSystem >> closeFile: handle [
 { #category : 'file operations' }
 ST80FileSystem >> createFile: fileName [
 	"Create a new file, truncating it if it already exists.
-	Return an integer file handle on success, or -1 on error.
-	Uses FileReference >> binaryWriteStream to create/truncate, then binaryReadWriteStream
-	to reopen for read/write (Pharo 13+ API, replaces deprecated FileStream)."
+	Return an integer file handle on success, or -1 on error."
+
 	| ref stream handle |
 	ref := rootDirectory / fileName.
-	[ ref binaryWriteStream close.
-	  stream := ref binaryReadWriteStream ]
-	on: Error do: [ :e | lastError := -1. ^ -1 ].
+	[ ref binaryWriteStream close ]
+		on: Error
+		do: [ :e |
+				lastError := -1.
+				^ -1 ].
+	stream := self openStreamOn: ref.
+	stream ifNil: [
+			lastError := -1.
+			^ -1 ].
 	handle := nextHandle.
 	nextHandle := nextHandle + 1.
 	fileHandles at: handle put: stream.
@@ -57,10 +62,16 @@ ST80FileSystem >> createFile: fileName [
 { #category : 'file operations' }
 ST80FileSystem >> deleteFile: fileName [
 	"Delete the named file from the root directory. Return true on success, false on error."
+
 	| ref |
 	ref := rootDirectory / fileName.
-	[ ref delete. ^ true ]
-	on: Error do: [ :e | lastError := -1. ^ false ]
+	^ [
+		  ref delete.
+		  true ]
+		  on: Error
+		  do: [ :e |
+				  lastError := -1.
+				  false ]
 ]
 
 { #category : 'file operations' }
@@ -79,10 +90,16 @@ ST80FileSystem >> errorText: code [
 { #category : 'file operations' }
 ST80FileSystem >> fileFlush: handle [
 	"Flush buffered data to disk for the given handle. Return true on success, false on error."
+
 	| stream |
 	stream := fileHandles at: handle ifAbsent: [ ^ false ].
-	[ stream flush. ^ true ]
-	on: Error do: [ :e | lastError := -1. ^ false ]
+	^ [
+		  stream flush.
+		  true ]
+		  on: Error
+		  do: [ :e |
+				  lastError := -1.
+				  false ]
 ]
 
 { #category : 'file operations' }
@@ -119,18 +136,37 @@ ST80FileSystem >> lastError [
 
 { #category : 'file operations' }
 ST80FileSystem >> openFile: fileName [
-	"Open an existing file for binary read/write access.
-	Return an integer file handle on success, or -1 if not found or on error.
-	Uses FileReference >> binaryReadWriteStream (Pharo 13+ API, replaces deprecated FileStream)."
+	"Open an existing file for binary read/write access, falling back to read-only
+	when the file is not writable. Return an integer file handle on success, or -1 if
+	not found or on error."
+
 	| ref stream handle |
 	ref := rootDirectory / fileName.
-	ref exists ifFalse: [ lastError := -1. ^ -1 ].
-	[ stream := ref binaryReadWriteStream ]
-	on: Error do: [ :e | lastError := -1. ^ -1 ].
+	ref exists ifFalse: [
+			lastError := -1.
+			^ -1 ].
+	stream := self openStreamOn: ref.
+	stream ifNil: [
+			lastError := -1.
+			^ -1 ].
 	handle := nextHandle.
 	nextHandle := nextHandle + 1.
 	fileHandles at: handle put: stream.
 	^ handle
+]
+
+{ #category : 'private' }
+ST80FileSystem >> openStreamOn: aFileReference [
+	"Answer a seekable binary stream on aFileReference opened for reading and writing,
+	or opened read-only if the file is not writable. Answer nil on failure.
+	Pharo 13 FileReference has no binaryReadWriteStream, so we use File >> openForWrite:
+	which answers a BinaryFileStream that supports position:, next:, truncate: and size."
+
+	| file |
+	file := File named: aFileReference fullName.
+	^ [ file openForWrite: aFileReference isWritable ]
+		  on: Error
+		  do: [ :e | nil ]
 ]
 
 { #category : 'file operations' }
@@ -149,10 +185,16 @@ ST80FileSystem >> read: handle into: aByteArray count: byteCount [
 { #category : 'file operations' }
 ST80FileSystem >> renameFile: oldName to: newName [
 	"Rename a file within the root directory. Return true on success, false on error."
+
 	| ref |
 	ref := rootDirectory / oldName.
-	[ ref renameTo: newName. ^ true ]
-	on: Error do: [ :e | lastError := -1. ^ false ]
+	^ [
+		  ref renameTo: newName.
+		  true ]
+		  on: Error
+		  do: [ :e |
+				  lastError := -1.
+				  false ]
 ]
 
 { #category : 'accessing' }
@@ -193,12 +235,16 @@ ST80FileSystem >> tell: handle [
 { #category : 'file operations' }
 ST80FileSystem >> truncateTo: handle length: byteCount [
 	"Truncate the file to byteCount bytes. Return true on success, false on error."
+
 	| stream |
 	stream := fileHandles at: handle ifAbsent: [ ^ false ].
-	[ stream position: byteCount.
-	  stream truncate.
-	  ^ true ]
-	on: Error do: [ :e | lastError := -1. ^ false ]
+	^ [
+		  stream truncate: byteCount.
+		  true ]
+		  on: Error
+		  do: [ :e |
+				  lastError := -1.
+				  false ]
 ]
 
 { #category : 'file operations' }
