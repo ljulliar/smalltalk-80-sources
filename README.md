@@ -26,6 +26,8 @@ But does it actually work ? the answer is yes it does :-) As seeing is believing
 
 The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book. Notice the date of the VM image in the System Transcript window. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace...
 
+Mouse buttons: left click is the Smalltalk-80 red button (select), right click is the yellow button (menus, do it, print it), and Cmd/Alt/Ctrl + left click is the blue button (window menu: under, move, frame, collapse, close). To move a window, blue-click its title bar and choose `move`, then click to drop it.
+
 Paraphrasing a well known character of the French history: "With this screen, Developers, 40+ years of Computer Science history look down upon you.” :smile:
 
 # Saving your session
