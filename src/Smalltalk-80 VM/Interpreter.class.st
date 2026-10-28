@@ -880,6 +880,25 @@ Interpreter >> fetchInteger: fieldIndex ofObject: objectPointer [
 		ifFalse: [ ^ self primitiveFail ]
 ]
 
+{ #category : 'private - file primitives' }
+Interpreter >> fetchPageNumberOf: pagePointer [
+	"Answer the page number of a PosixFilePage (field 3). It is a SmallInteger up to 16383 pages (8 MB)
+	 and a LargePositiveInteger beyond. Fails on anything else or on a value below 1.
+	(not BB code)"
+
+	| pointer value |
+	pointer := memory fetchPointer: 3 ofObject: pagePointer.
+	(memory isIntegerObject: pointer)
+		ifTrue: [ value := memory integerValueOf: pointer ]
+		ifFalse: [
+			(memory fetchClassOf: pointer) = ClassLargePositiveIntegerPointer
+				ifFalse: [ ^ self primitiveFail ].
+			value := self positive32BitValueOf: pointer ].
+	self success ifFalse: [ ^ 0 ].
+	value >= 1 ifFalse: [ ^ self primitiveFail ].
+	^ value
+]
+
 { #category : 'compiled method header access' }
 Interpreter >> fieldIndexOf: methodPointer [
 	"The following routine returns the index of the field representing the instance 
