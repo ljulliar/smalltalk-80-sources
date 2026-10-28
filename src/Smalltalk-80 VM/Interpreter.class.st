@@ -1741,33 +1741,36 @@ Interpreter >> positive16BitValueOf: integerPointer [
 { #category : 'primitive methods' }
 Interpreter >> positive32BitIntegerFor: integerValue [
 	"Since the largest indexable collections may have 65534 indexable elements,
-   and SmallIntegers can only represent values up to 16383, primitive routines 
-   that deal with indices or sizes must be able to manipulate LargePositiveIntegers. 
-   This routine convert between 16-bit unsigned values and object pointers 
-   to SmallIntegers or LargePositiveIntegers. (BB 617)"
+	and SmallIntegers can only represent values up to 16383, primitive routines
+	that deal with indices or sizes must be able to manipulate LargePositiveIntegers.
+	This routine converts a host native unsigned value of up to 32 bits to a SmallInteger
+	or a LargePositiveInteger object pointer. (BB 617)"
 
-	| newLargeInteger |
 	"ERROR BB code ljulliard. Integer value here is a native integer
 	of the host platform, not a ST80 integer value. So replace the line below:
 	(self extractBits: 0 to: 1 of: integerValue) = 0
-	with: "
-	(memory isIntegerValue: integerValue)
-		ifTrue: [ ^ memory integerObjectOf: integerValue ].
+	with: (memory isIntegerValue: integerValue)"
 
-	newLargeInteger := memory instantiateClass: ClassLargePositiveIntegerPointer
-		                       withBytes: 4.
-	memory storeByte: 0
-		    ofObject: newLargeInteger
-		    withValue: (self lowByteOf: integerValue).
-	memory storeByte: 1
-          ofObject: newLargeInteger
-          withValue: (self highByteOf: integerValue).
-	memory storeByte: 2
-          ofObject: newLargeInteger
-          withValue: (integerValue bitShift: -16).
-	memory storeByte: 3
-          ofObject: newLargeInteger
-          withValue: (integerValue bitShift: -24).
+	"The BB only builds a 2 byte LargePositiveInteger. A 4 byte one must not 
+	carry a zero high byte: the guest	LargePositiveInteger comparisons (digitCompare:)
+	decide on the number of digits first, so such a number would be greater than any
+	shorter one. The result is therefore normalized, like the guest
+	LargePositiveInteger >> truncated does."
+
+	| byteCount newLargeInteger |
+	(memory isIntegerValue: integerValue) ifTrue: [
+		^ memory integerObjectOf: integerValue ].
+
+	byteCount := (integerValue highBit + 7) // 8.
+	newLargeInteger := memory
+		                   instantiateClass:
+		                   ClassLargePositiveIntegerPointer
+		                   withBytes: byteCount.
+	1 to: byteCount do: [ :index |
+			memory
+				storeByte: index - 1
+				ofObject: newLargeInteger
+				withValue: ((integerValue bitShift: (index - 1) * -8) bitAnd: 16rFF) ].
 	^ newLargeInteger
 ]
 
