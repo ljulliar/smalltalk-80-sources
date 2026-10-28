@@ -1775,21 +1775,22 @@ Interpreter >> positive32BitIntegerFor: integerValue [
 Interpreter >> positive32BitValueOf: integerPointer [
 	"Not BB code.
 	This message doesn't exist in the BB or in the Smalltalk source code
-	but we need it in some places (e.g. when ST80 primtive sends 32 bit
-	integer values"
+	but we need it in some places (e.g. when ST80 primitives send 32 bit
+	integer values). Answer the host native value of a SmallInteger or of a
+	LargePositiveInteger of up to 4 bytes, stored with the low order byte first."
 
-	| value bytes |
-	(memory isIntegerObject: integerPointer)
-		ifTrue: [ ^ memory integerValueOf: integerPointer ].
-	(memory fetchClassOf: integerPointer) = ClassLargePositiveIntegerPointer
-		ifFalse: [ ^ self primitiveFail ].
-	
-	bytes := memory fetchByteLengthOf: integerPointer.
-	
-	value := (memory fetchByte: 3 ofObject: integerPointer).
-	bytes > 1 ifTrue: [ value := value bitOr: (memory fetchByte: 2 ofObject: integerPointer) << 8 ].
-	bytes > 2 ifTrue: [ value := value bitOr: (memory fetchByte: 1 ofObject: integerPointer) << 16].
-	bytes > 3 ifTrue: [ value := value bitOr: (memory fetchByte: 0 ofObject: integerPointer) << 24].
+	| value byteCount |
+	(memory isIntegerObject: integerPointer) ifTrue: [
+		^ memory integerValueOf: integerPointer ].
+	(memory fetchClassOf: integerPointer)
+	= ClassLargePositiveIntegerPointer ifFalse: [ ^ self primitiveFail ].
+	byteCount := memory fetchByteLengthOf: integerPointer.
+	byteCount > 4 ifTrue: [ ^ self primitiveFail ].
+
+	value := 0.
+	byteCount to: 1 by: -1 do: [ :index |
+			value := (value bitShift: 8)
+			         + (memory fetchByte: index - 1 ofObject: integerPointer) ].
 	^ value
 ]
 
