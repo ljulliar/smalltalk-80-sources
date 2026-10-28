@@ -727,6 +727,37 @@ ObjectMemoryTest >> testObjectsInOtherSegmentAreAccessible [
 	self assert: (memory countBitsOf: object) equals: 1
 ]
 
+{ #category : 'tests - allocation' }
+ObjectMemoryTest >> testOutOfMemoryErrorCannotBeResumed [
+	"Resuming the warning must not let the allocation go on with a nil pointer: the memory is exhausted and the VM must stop."
+
+	self
+		should: [
+				[ memory outOfMemoryError ]
+					on: Warning
+					do: [ :warning | warning resume ] ]
+		raise: Error
+]
+
+{ #category : 'tests - allocation' }
+ObjectMemoryTest >> testOutOfMemoryErrorWarnsFirst [
+	"The host is warned before the error, with the number of free words left."
+
+	| warning |
+	[
+		[ memory outOfMemoryError ]
+			on: Warning
+			do: [ :w |
+					warning := w.
+					w resume ] ]
+		on: Error
+		do: [ :e | e return ].
+
+	self assert: warning isNotNil.
+	self assert:
+		(warning messageText includesSubstring: 'Out of object memory')
+]
+
 { #category : 'tests - garbage collection' }
 ObjectMemoryTest >> testReclaimDoesNotFollowBytes [
 	"The words of a byte object are data, not pointers: they must not keep anything alive."

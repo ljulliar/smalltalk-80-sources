@@ -1250,6 +1250,16 @@ ObjectMemory >> ot: objectPointer put: value [
 		put: value
 ]
 
+{ #category : 'private - allocation' }
+ObjectMemory >> outOfMemoryError [
+	"Not BB code. Neither compaction nor garbage collection could free a chunk big enough, so the guest VM cannot go on. The Warning lets the host report it (as ST80Sensor class >> notify: does), but resuming cannot help since the allocation has failed: the Error stops the VM in any case."
+
+	Warning signal:
+		'Out of object memory: ' , self freeWordsLeft printString
+		, ' words left'.
+	^ self error: 'Out of object memory'
+]
+
 { #category : 'vm image i/o' }
 ObjectMemory >> padToPageInStream: stream [
 	"Pad the binary write stream with zero bytes up to the next 512-byte page boundary.
