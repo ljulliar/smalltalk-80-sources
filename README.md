@@ -2,7 +2,13 @@
 
 This project is about delivering the promise of the book "Smalltalk-80: The Language and its Implementation" (also known as the "Blue Book") as published by Xerox PARC in 1983. That is, implementing and running the complete Smalltalk-80 virtual machine and its environment using only the Smalltalk language itself. Want to know more about the background of this project? Read our [bits of history](doc/History.md).
 
-**Disclaimer**: This project is still very much a work in progress. If you feel like contributing your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions, be it bug reports, code fixes, missing features, improved documentation, etc., are very welcome.
+In carrying out this project, my aim was twofold. First, to show that the specification written in Smalltalk in 1983 was perfectly functional. And it is! Second, to gather into this project's source code all the corrections and errata published over the 40+ years since its original design at Xerox PARC. This work remains, even today, a remarkable technical reference for anyone who wants to understand how a virtual machine works.
+
+# Status
+
+The project is now quite complete and stable. It has been thoroughly tested with a suite of 400+ tests covering both the interpreter and the object memory manager. 
+
+If you feel like contributing your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions, be it bug reports, code fixes, missing features, improved documentation, etc., are very welcome.
 
 # Installation
 * Install the Smalltalk [Pharo](https://www.pharo.org/) environment
@@ -24,9 +30,13 @@ where local_git_path is where you created your local git repo and XX is your hos
 But does it actually work ? the answer is yes it does :-) As seeing is believing, here is a screenshot of the ST-80 VM running for real in my Smalltalk Pharo environment. 
 ![Screenshot of the ST-80 VM startup screen ) ](images/ST80-startup-screen.png)
 
-The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book. Notice the date of the VM image in the System Transcript window. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace...
+The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book _Smalltalk-80: The Language and Its Implementation
+By Adele Goldberg and David Robson_. Notice the date of the VM image in the System Transcript window. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace...
 
-Mouse buttons: left click is the Smalltalk-80 red button (select), right click is the yellow button (menus, do it, print it), and Cmd/Alt/Ctrl + left click is the blue button (window menu: under, move, frame, collapse, close). To move a window, blue-click its title bar and choose `move`, then click to drop it.
+Mouse buttons mapping:
+* left click is the Smalltalk-80 red button (select)
+* right click is the yellow button (menus, do it, print it)
+* Cmd/Alt/Ctrl + left click is the blue button (window menu: under, move, frame, collapse, close). To move a window, blue-click its title bar and choose `move`, then click to drop it.
 
 Paraphrasing a well known character of the French history: "With this screen, Developers, 40+ years of Computer Science history look down upon you.” :smile:
 
@@ -48,44 +58,14 @@ To save your work, right-click on the Smalltalk-80 desktop background and select
 
 At startup the VM loads `assets/snapshot.im` if it exists and falls back to the original `Smalltalk-80.image` otherwise (in which case the guest file system classes are missing). To go back to the shipped environment, restore `snapshot.im` with `git checkout assets/snapshot.im`.
 
-# Developer notes: memory sanity checks
-The virtual machine can check every access to the object memory (valid object pointer, valid field index, valid address and 16-bit value) and raise an assertion failure as soon as something is wrong. These checks are very costly (5x performance degradation !!), so they are **off by default** (`false`): with the checks on, the VM runs several times slower.
-
-There are two independent switches, both class-side flags:
-
-| Flag | Checks |
-|---|---|
-| `ObjectMemory checksEnabled:` | object and field indices (`fetchPointer:ofObject:`, `fetchWord:ofObject:`, current segment when allocating) |
-| `RealWordMemory checksEnabled:` | segment and word addresses and the values stored (`segment:word:`, `segment:word:put:`, the bits and byte variants) |
-
-Both flags are set explicitly to `false` at the start of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` every time a VM is launched, so a value set in a Pharo Workspace before launching is overwritten.
-
-If you suspect a memory corruption (for instance a wrong class pointer, an object that changed under your feet, or a crash far away from its cause), switch the checks on:
-* Change `false` to `true` in the two `checksEnabled:` lines of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` and launch the VM again, or
-* Evaluate `ObjectMemory checksEnabled: true. RealWordMemory checksEnabled: true` from the debugger or a Workspace while a VM is running. The change takes effect immediately.
-
-The first failed assertion stops the VM close to the faulty access, and the Pharo debugger stack shows the caller. Remember to switch the checks back off afterwards.
-
-# Developer notes: native text scanning
-Displaying text spends most of its time in the guest primitive 103 (`CharacterScanner >> scanCharactersFrom:to:in:rightX:stopConditions:displaying:`), which the Blue Book lists as optional. The VM implements it natively in `Interpreter >> primitiveScanCharacters` and `ST80CharacterScanner`: the scan of a whole run of characters is done on the host side and the changed part of the screen is refreshed once, instead of once per character. Typing and erasing text is noticeably faster.
-
-The native scan is controlled by a class-side flag, set explicitly to `true` at the start of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` every time a VM is launched, just like the memory checks above:
-
-| Flag | Effect |
-|---|---|
-| `ST80CharacterScanner useNativeScan:` | `true`: primitive 103 scans the characters on the host side. `false`: primitive 103 always fails and the guest Smalltalk code runs its own (slower) loop |
-
-To compare the two or to track down a text display problem:
-* Change `true` to `false` in the `useNativeScan:` line of `ST80VirtualMachine >> initializeWithImagePath:keyboard:` and launch the VM again, or
-* Evaluate `ST80CharacterScanner useNativeScan: false` from a Workspace while a VM is running. The change takes effect immediately.
-
-The native scan checks all its arguments before drawing the first character. If anything looks wrong (an unexpected object, an index out of range...) the primitive fails and the guest code runs, so the screen never shows a character twice.
+# Developer notes
+You will find some guidelines and relevant instructions in the [Developer Notes](doc/DEVELOPER.md)
 
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
-* The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf), courtesy Stéphane Ducasse)
+* The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf) in its original 1983 edition, courtesy Stéphane Ducasse)
 * The [Pharo](https://www.pharo.org/) developers community for providing this remarkable Open Source Smalltalk environment
-* [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project, a C++ implementation of the VM, that proved very helpful when I started debugging my Smalltalk implementation. The `snapshot.im` and `Smalltalk-80.changes` files of the `assets` directory are his work, taken from his repository and redistributed under his MIT license (see `assets/LICENSE-dbanay.txt`). Many thanks, Dan!
-* Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) dedicated to the Smalltalk-80 specifications.
-* And last but not the least, [Mario Wolczko ST-80 web page](http://www.wolczko.com/st80/) for putting together critical files that one absolutely needs to run the full Smalltalk environment, most notably the Virtual Machine image as published (on tapes!!) by Xerox Parc in 1983.
+* [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project, a C++ implementation of the same VM, that proved very helpful when I started debugging my Smalltalk implementation. The `snapshot.im` and `Smalltalk-80.changes` files of the `assets` directory are his work, taken from his repository and redistributed under his MIT license (see `assets/LICENSE-dbanay.txt`). Many thanks, Dan!
+* Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) covering the Smalltalk-80 specifications and implementation.
+* And last but not the least, [Mario Wolczko Smalltalk-80 web page](http://www.wolczko.com/st80/) for putting together critical files that one absolutely needs to run the full Smalltalk environment, most notably the Virtual Machine image as published (on tapes!!) by Xerox Parc in 1983.
 

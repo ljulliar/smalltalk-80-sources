@@ -3,15 +3,15 @@
 So you feel brave enough to contribute to this project ? :wink: And help revive this remarkable Smalltalk-80 programming environment ? Here are some suggestions for you:
 
 - [ ] (Easy) Improve the documentation! Typically a never ending task as you know... For instance add a documentation file to explain the basics of how to use the Smalltalk-80 environment (how to use the scrollbars, the workspace, how to edit or execute code,...) or a document on the architecture of this projet (The VM, the ST80 proxy classes, the HAL,...)
-- [ ] (Intermediate) Write a UI interface to launch and stop the VM (select image path, keyboard layout, possibly the screen size,...
-- [ ] (Intermediate) Add more keyboard layouts mapping to the HardwareAbstractionLayer class
-- [ ] (Easy) Test the Smalltalk-80 environment like manipulating windows, executing some sample code and report any VM exception or wrong result
+- [ ] (Intermediate) Write a UI interface to launch and stop the VM (select image path, keyboard layout, possibly the screen size, debug / logging / assertion flags...
+- [ ] (Intermediate) Add more keyboard layouts mapping to the HardwareAbstractionLayer class (for now we have only US and FR layouts)
+- [ ] (Easy) Test the Smalltalk-80 environment like manipulating windows, executing some sample code and report any VM exception or wrong result;
 
 Implement the missing features of the VM. For instance:
 - [x] The Filesystem primitives
 - [x] The accelerated CharacterScanner primitive (103) on the host side
-- [ ] Make the execution of the DisplayScreen displayExtent: code work from the Smalltalk-80 VM System Workspace window
+- [x] Make the execution of the DisplayScreen displayExtent: code work from the Smalltalk-80 VM System Workspace window
 - [x] Save a snapshot of the Smalltalk 80 environment (right click on the desktop background and select 'save')
-- [ ] Writing unit and stress tests for the virtual machine interpreter and object memory manager
-- [ ] and many others!
+- [x] Writing unit and stress tests for the virtual machine interpreter and object memory manager
+
   
