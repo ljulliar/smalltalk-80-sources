@@ -5,11 +5,24 @@ Class {
 	#name : 'InterpreterTestVM',
 	#superclass : 'Object',
 	#instVars : [
-		'savedCount'
+		'savedCount',
+		'interpreter'
 	],
 	#category : 'Smalltalk-80 VM-Tests',
 	#package : 'Smalltalk-80 VM-Tests'
 }
+
+{ #category : 'vm protocol' }
+InterpreterTestVM >> interpreter [
+
+	^ interpreter
+]
+
+{ #category : 'vm protocol' }
+InterpreterTestVM >> interpreter: anInterpreter [
+
+	interpreter := anInterpreter
+]
 
 { #category : 'vm protocol' }
 InterpreterTestVM >> saveSnapshot [

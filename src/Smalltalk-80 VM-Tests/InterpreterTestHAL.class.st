@@ -35,6 +35,12 @@ InterpreterTestHAL >> callsTo: aSelector [
 ]
 
 { #category : 'hal protocol' }
+InterpreterTestHAL >> checkScheduledSemaphore [
+
+	calls add: #checkScheduledSemaphore -> #(  )
+]
+
+{ #category : 'hal protocol' }
 InterpreterTestHAL >> cursor: anOop memory: aMemory [
 
 	calls add: #cursor:memory: -> { anOop }.

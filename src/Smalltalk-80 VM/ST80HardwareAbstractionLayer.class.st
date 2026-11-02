@@ -31,7 +31,8 @@ Class {
 		'cursorLink',
 		'scheduledSemaphore',
 		'st80ScheduledSemaphore',
-		'blueEmulated'
+		'blueEmulated',
+		'scheduledTime'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -195,6 +196,18 @@ ST80HardwareAbstractionLayer class >> initialize [
 { #category : 'class initialization' }
 ST80HardwareAbstractionLayer class >> withVM: aVm [
 	^ self basicNew initializeWithVM: aVm; yourself
+]
+
+{ #category : 'time management' }
+ST80HardwareAbstractionLayer >> checkScheduledSemaphore [
+	"Not BB code. Signal the Semaphore of the outstanding request (see #signal:atMilliseconds:) when its time has passed, and forget it: it is signaled only once. Called regularly by the interpreter."
+
+	| semaphore |
+	scheduledSemaphore ifNil: [ ^ self ].
+	(self hasMillisecondClockReached: scheduledTime) ifFalse: [ ^ self ].
+	semaphore := scheduledSemaphore.
+	scheduledSemaphore := nil.
+	vm interpreter asynchronousSignal: semaphore
 ]
 
 { #category : 'accessing' }
@@ -404,14 +417,21 @@ ST80HardwareAbstractionLayer >> handleMouseEvent: anEvent way: way [
 		'Unknown mouse button: ' , anEvent whichButton printString
 ]
 
+{ #category : 'time management' }
+ST80HardwareAbstractionLayer >> hasMillisecondClockReached: aTime [
+	"Not BB code. The millisecond clock of the ST80 VM is a 32 bit unsigned number that rolls over (every 49 days): aTime, a value of that clock, is reached when it is at most 2^31 milliseconds behind the clock (the same rule as SDL_TICKS_PASSED in the C++ VM)."
+
+	^ (self millisecondsUptime - aTime bitAnd: 16rFFFFFFFF) < 16r80000000
+]
+
 { #category : 'initialization' }
 ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
-
 	"Make sure to initialize class variables"
+
 	self class initialize.
-	
+
 	vm := aVm.
-	
+
 	"Initial Screen dimensions can be found
 	in the Xerox ST80 Virtual Image Booklet p. 3.
 	The original ST80 VM will set them up at start time
@@ -419,22 +439,24 @@ ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	displayWidth := nil.
 	displayHeight := nil.
 	display := nil.
-	
+
 	"I/O Device (keyboard, mouse, location,...) 
 	Input event queue"
 	inputQueue := OrderedCollection new.
-	
+
 	"Set the initial mouse position to the upper left corner
 	as we are sure that this position exists whatever the size 
 	of the ST780 display is"
-	mousePosition := 0@0.
-	
+	mousePosition := 0 @ 0.
+
 	"Initialize last input event time to zero"
 	lastEventTime := 0.
-	
-	"Scheduler timer semaphore"
-	scheduledSemaphore := Semaphore new.
-	
+
+	"Outstanding timer request (see #signal:atMilliseconds:): the guest 
+	Semaphore to signal, and the millisecond clock time to signal it at.
+	None to start with"
+	scheduledSemaphore := nil.
+	scheduledTime := 0
 ]
 
 { #category : 'event handling' }
@@ -444,11 +466,9 @@ ST80HardwareAbstractionLayer >> inputSemaphore [
 
 { #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputSemaphore: aSemaphore [
-	"keep track of the semaphore to signal when input events occur"
-	self assert: aSemaphore notNil.
-	inputSemaphore := aSemaphore.
-	
+	"keep track of the semaphore to signal when input events occur. nil stops the signalling (BB p. 648)"
 
+	inputSemaphore := aSemaphore
 ]
 
 { #category : 'event handling' }
@@ -479,15 +499,14 @@ ST80HardwareAbstractionLayer >> inputTimeWord [
 { #category : 'event handling' }
 ST80HardwareAbstractionLayer >> inputWord: aValue [
 	"Push a 16 bit value in the input event queue
-	and signal the input semaphore. BB p. 648"
-	self assert: (aValue between: 0 and: 16rFFFF).
-	inputQueue add: aValue.
-	"Transcript show: '-> IQ (size: '; nextPutAll: inputQueue size printString; 
-		nextPutAll: ') :'; nextPutAll: (aValue >> 12) printString;
-		 nextPutAll: ' / '; nextPutAll: (aValue & 16rFFF) printString; cr; flush."
-	vm interpreter asynchronousSignal: inputSemaphore.
+	and signal the input semaphore. BB p. 648.
+	Not BB code: with no input semaphore (not set yet, or reset to nil by 
+	the guest) nobody listens: the word is dropped, as the C++ VM does."
 
-	
+	self assert: (aValue between: 0 and: 16rFFFF).
+	inputSemaphore ifNil: [ ^ self ].
+	inputQueue add: aValue.
+	vm interpreter asynchronousSignal: inputSemaphore
 ]
 
 { #category : 'event handling' }
@@ -620,17 +639,20 @@ ST80HardwareAbstractionLayer >> signal: aST80Semaphore atMilliseconds: time [
 	"This is called by the ST80 primitiveSignalAtTick primitive.
 	From BB p 652: If a new call is made on it before the last timer
 	value has been reached the lastSemaphore will not be signaled.
-	This is also how the native primSignal:atMilliseconds: primitive 
-	below behaves. So there is no need for additional logic in the code"
-	Transcript show: 'signal: atMilliseconds:'; cr; flush.
-	DelayMillisecondTicker new primSignal: scheduledSemaphore atMilliseconds: time.
-	[
-		scheduledSemaphore wait.
-		vm interpreter asynchronousSignal: aST80Semaphore.
-	] forkAt: Processor userInterruptPriority.
-	
+	If the first argument is not a Semaphore (nil here) any currently
+	waiting Semaphore is forgotten: the request is cancelled.
+	If the time has already passed, the Semaphore is signaled immediately.
 
-	
+	Not BB code, following the same design as the C++ VM from dbanay: there 
+	is only one outstanding request, kept as a Semaphore and a time, that a new 
+	request replaces. The interpreter polls it (see #checkScheduledSemaphore), 
+	so no host process is needed and a cancelled request can never reach the 
+	interpreter semaphore buffer.
+	The time is a 32 bit unsigned number, as stored by primitiveTickWordsInto."
+
+	scheduledSemaphore := aST80Semaphore.
+	scheduledTime := time.
+	aST80Semaphore ifNotNil: [ self checkScheduledSemaphore ]
 ]
 
 { #category : 'settings' }

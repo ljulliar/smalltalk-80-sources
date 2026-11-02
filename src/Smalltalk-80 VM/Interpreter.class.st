@@ -38,7 +38,8 @@ Class {
 		'currentCursorOop',
 		'lowSpaceSemaphore',
 		'oopsLeftLimit',
-		'wordsLeftLimit'
+		'wordsLeftLimit',
+		'semaphoreMutex'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -293,10 +294,20 @@ Interpreter >> asynchronousSignal: aSemaphore [
 	"The asynchronousSignal: routine adds a Semaphore to the buffer.
    The Semaphores will actually be signaled in the checkProcessSwitch
    routine which calls the synchronousSignal: routine once for each 
-   Semaphore in the buffer. BB p.642"
+   Semaphore in the buffer. BB p.642
 
-	semaphoreIndex := semaphoreIndex + 1.
-	semaphoreList at: semaphoreIndex put: aSemaphore
+   Not BB code: 
+   - nil (host) and NilPointer (guest) are not Semaphores and are ignored. 
+     They can come from a Semaphore that the guest has cancelled (e.g. 
+     primitiveInputSemaphore with nil, BB p. 648). Buffering them would crash 
+     checkProcessSwitch when it tries to signal them.
+   - the buffer is protected by a mutex: this routine is called from the host 
+     UI process (input events) while the interpreter process drains the buffer."
+
+	(aSemaphore isNil or: [ aSemaphore = NilPointer ]) ifTrue: [ ^ self ].
+	semaphoreMutex critical: [
+			semaphoreIndex := semaphoreIndex + 1.
+			semaphoreList at: semaphoreIndex put: aSemaphore ]
 ]
 
 { #category : 'contexts' }
@@ -339,31 +350,39 @@ Interpreter >> checkInstanceVariableBoundsOf: index in: object [
 
 { #category : 'control primitives' }
 Interpreter >> checkProcessSwitch [
-   "The checkProcessSwitch routine is called before each bytecode fetch (in 
+	"The checkProcessSwitch routine is called before each bytecode fetch (in 
    the interpret routine) and performs the actual process switch if one has 
    been called for. It stores the active context pointer in the old Process, 
    stores the new Process in the ProcessorScheduler's active process field, 
    and loads the new active context out of that Process. (BB 643)"
 
-   | activeProcess |
-   [semaphoreIndex > 0]
-      whileTrue: [self synchronousSignal: (semaphoreList at: semaphoreIndex).
-                  semaphoreIndex := semaphoreIndex - 1].
-   newProcessWaiting
-      ifTrue: [newProcessWaiting := false.
-               activeProcess := self activeProcess.
-               memory storePointer: SuspendedContextIndex
-                      ofObject: activeProcess
-                      withValue: activeContext.
-               memory storePointer: ActiveProcessIndex
-                      ofObject: self schedulerPointer
-                      withValue: newProcess.
-               self newActiveContext: (memory fetchPointer: SuspendedContextIndex
-                                              ofObject: newProcess).
-               "From dbanay: Need to remove reference"
-               memory decreaseReferencesTo: newProcess.
-               newProcess := NilPointer]
+	| activeProcess |
+	[ semaphoreIndex > 0 ] whileTrue: [
+		self synchronousSignal: self nextBufferedSemaphore ].
+	newProcessWaiting ifTrue: [
+			newProcessWaiting := false.
+			activeProcess := self activeProcess.
+			memory
+				storePointer: SuspendedContextIndex
+				ofObject: activeProcess
+				withValue: activeContext.
+			memory
+				storePointer: ActiveProcessIndex
+				ofObject: self schedulerPointer
+				withValue: newProcess.
+			self newActiveContext:
+				(memory fetchPointer: SuspendedContextIndex ofObject: newProcess).
+			"From dbanay: Need to remove reference"
+			memory decreaseReferencesTo: newProcess.
+			newProcess := NilPointer ]
+]
 
+{ #category : 'main loop' }
+Interpreter >> checkTimerOfTheHost [
+	"Not BB code, as in the C++ VM from dbanay: every 256 cycles ask the host if the time of the outstanding timer request (primitiveSignalAtTick) has passed. If so the host buffers the Semaphore (see asynchronousSignal:) that checkProcessSwitch signals."
+
+	(cycleCounter bitAnd: 255) = 0 ifFalse: [ ^ self ].
+	hal ifNotNil: [ hal checkScheduledSemaphore ]
 ]
 
 { #category : 'garbage collection' }
@@ -437,23 +456,20 @@ Interpreter >> cycle [
    The checkProcessSwitch routine will be described with the process scheduling primitive
    routines in the next chapter. After checking for a process switch, a bytecode is fetched
    (perhaps from a new process), and a dispatch is made to the appropriate routine. (BB 594)"
-   
-   cycleCounter := cycleCounter + 1.
+
+	cycleCounter := cycleCounter + 1.
 	debug ifTrue: [ Logger flush ].
-	
-	"cycleCounter >= 1176 & ((cycleCounter rem: 5) = 0) ifTrue: [ self debug: true. memory debug: true. self halt. ]."
-	"cycleCounter = 10000 ifTrue: [ self debug: true. memory debug: true ]."
-	"cycleCounter = 1680 ifTrue: [ self halt ]."
+	self checkTimerOfTheHost.
 	self checkProcessSwitch.
 	currentBytecode := self fetchByte.
 	debug ifTrue: [
-		Logger << '-----------------------------------------'; cr.
-		Logger << 'cycle ' << cycleCounter printString 
-	   		<<' - Bytecode: ' << currentBytecode printString; cr.
-		].
-	self dispatchOnThisBytecode.
-
-
+			Logger
+				<< '-----------------------------------------';
+				cr.
+			(Logger << 'cycle ' << cycleCounter printString << ' - Bytecode: ')
+				<< currentBytecode printString;
+				cr ].
+	self dispatchOnThisBytecode
 ]
 
 { #category : 'accessing' }
@@ -1321,6 +1337,8 @@ Interpreter >> initializeWithMemory: anObjectMemory hal: hwAbstractionLayer file
 	"TODO: turn it into an #initializeSemaphore method when code is stable"
 	semaphoreList := Array new: 4096 withAll: 0.
 	semaphoreIndex := 0.
+	"Not BB code: the buffer is filled by the host processes (input events, timer) and drained by the interpreter process"
+	semaphoreMutex := Semaphore forMutualExclusion.
 
 	"No process switch pending (see also firstContext)"
 	newProcessWaiting := false.
@@ -1673,6 +1691,17 @@ the routine to change active contexts must perform the appropriate reference cou
 	activeContext := aContext.
 	memory increaseReferencesTo: activeContext.
 	self fetchContextRegisters
+]
+
+{ #category : 'control primitives' }
+Interpreter >> nextBufferedSemaphore [
+	"Not BB code. Take the last Semaphore out of the buffer of asynchronousSignal:, under the mutex that protects it from the host processes. The BB code reads the last Semaphore, signals it and only then decrements semaphoreIndex: here the decrement is done at once, so that a Semaphore that the host buffers while this one is signalled is not lost."
+
+	^ semaphoreMutex critical: [
+			  | semaphore |
+			  semaphore := semaphoreList at: semaphoreIndex.
+			  semaphoreIndex := semaphoreIndex - 1.
+			  semaphore ]
 ]
 
 { #category : 'return bytecodes' }
@@ -2573,22 +2602,25 @@ Interpreter >> primitiveIndexOf: methodPointer [
 		ifFalse: [ ^ 0 ]
 ]
 
-{ #category : 'io primitives' }
+{ #category : 'control primitives' }
 Interpreter >> primitiveInputSemaphore [
 	"Initialize the Semaphore to be signalled whenever an input event occurs.
    The semaphore will be signaled once for every word placed in the input 
    buffer by an I/O device. Fail if the argument is neither a Semaphore 
-   nor nil. (BB 648)"	
-			
-	| semaphore  |
+   nor nil. (BB 648)
+   Not BB code: the guest nil is given to the HAL as the host nil, to tell it 
+   that nobody listens to the input events (same as primitiveSignalAtTick)"
+
+	| semaphore |
 	semaphore := self popStack.
-	self success: semaphore = NilPointer | ((memory fetchClassOf: semaphore) = ClassSemaphorePointer).
-	
+	self success: semaphore = NilPointer
+		| ((memory fetchClassOf: semaphore) = ClassSemaphorePointer).
+
 	self success
-      "TODO: adjust for Semaphore handling in the VM"	   
-	   ifTrue: [ hal inputSemaphore: semaphore ]
-	   ifFalse: [ self unPop: 1 ]
-	
+		ifTrue: [
+				semaphore = NilPointer ifTrue: [ semaphore := nil ].
+				hal inputSemaphore: semaphore ]
+		ifFalse: [ self unPop: 1 ]
 ]
 
 { #category : 'io primitives' }

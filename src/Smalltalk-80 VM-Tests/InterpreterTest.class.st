@@ -1535,6 +1535,20 @@ InterpreterTest >> testAsynchronousSignalBuffersTheSemaphore [
 ]
 
 { #category : 'tests - process switch' }
+InterpreterTest >> testAsynchronousSignalIgnoresNil [
+	"The host can ask to signal nothing: the input Semaphore is not set yet, or the guest has reset it to nil, or a timer was cancelled with nil. Such a request must not be buffered: checkProcessSwitch would send messages to it as if it was an object pointer, and the interpreter would die at the next cycle."
+
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+
+	interpreter asynchronousSignal: nil.
+	interpreter asynchronousSignal: nilPointer.
+
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0.
+	interpreter checkProcessSwitch.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0
+]
+
+{ #category : 'tests - process switch' }
 InterpreterTest >> testAsynchronousSignalWakesAWaitingProcess [
 	"A Process waiting for a Semaphore signalled by the host runs again at the next process check: here a higher priority waiter is resumed, preempts the active Process, and becomes the active one."
 
@@ -2203,6 +2217,22 @@ InterpreterTest >> testCheckProcessSwitchSignalsTheBufferedSemaphores [
 	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0
 ]
 
+{ #category : 'tests - main loop' }
+InterpreterTest >> testCheckTimerOfTheHostOnlyEvery256Cycles [
+	"The host is not asked at each cycle, which would cost too much."
+
+	| hal |
+	hal := self useHAL.
+
+	interpreter instVarNamed: 'cycleCounter' put: 255.
+	interpreter checkTimerOfTheHost.
+	self assert: (hal callsTo: #checkScheduledSemaphore) isEmpty.
+
+	interpreter instVarNamed: 'cycleCounter' put: 256.
+	interpreter checkTimerOfTheHost.
+	self assert: (hal callsTo: #checkScheduledSemaphore) size equals: 1
+]
+
 { #category : 'tests - arithmetic primitives' }
 InterpreterTest >> testComparisons [
 
@@ -2571,6 +2601,22 @@ InterpreterTest >> testCursorLocationPutOfANonPointFails [
 		with: { (self integer: 3) }.
 
 	self assert: (hal callsTo: #cursorLocation:) isEmpty
+]
+
+{ #category : 'tests - main loop' }
+InterpreterTest >> testCyclePollsTheTimerOfTheHost [
+	"A cycle asks the host, every 256 cycles, if the time of the outstanding timer request has passed."
+
+	| hal |
+	hal := self useHAL.
+	interpreter instVarNamed: 'cycleCounter' put: 255.
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+
+	[ interpreter cycle ]
+		on: Error
+		do: [ :error | "the bytecode of the test context is of no interest" ].
+
+	self assert: (hal callsTo: #checkScheduledSemaphore) size equals: 1
 ]
 
 { #category : 'tests - file primitives' }
@@ -4202,6 +4248,18 @@ InterpreterTest >> testInputSemaphoreAcceptsNil [
 ]
 
 { #category : 'tests - input and cursor primitives' }
+InterpreterTest >> testInputSemaphoreNilIsGivenToTheHostAsNil [
+	"The guest nil means that nobody listens to the input events: the host is told with its own nil, not with the object pointer of the guest nil, which it would take for a Semaphore."
+
+	| hal |
+	hal := self useHAL.
+
+	self runPrimitive: #primitiveInputSemaphore with: { nilPointer }.
+
+	self assert: (hal callsTo: #inputSemaphore:) equals: { { nil } }
+]
+
+{ #category : 'tests - input and cursor primitives' }
 InterpreterTest >> testInputSemaphoreOfAnotherObjectFails [
 	"Anything that is neither a Semaphore nor nil fails the primitive."
 
@@ -4255,6 +4313,30 @@ InterpreterTest >> testInputWordOfAnEmptyQueueFails [
 	self runPrimitive: #primitiveInputWord with: { nilPointer }.
 
 	self deny: interpreter success
+]
+
+{ #category : 'tests - input and cursor primitives' }
+InterpreterTest >> testInputWordsAreDroppedWithoutAnInputSemaphore [
+	"With no input Semaphore nobody listens: the words are dropped, and nothing is buffered for the interpreter. Once a Semaphore is set each word signals it."
+
+	| hal semaphore |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	semaphore := self newSemaphore.
+
+	hal inputWord: 16r1234.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0.
+	self assert: hal nextInputWord isNil.
+
+	hal inputSemaphore: semaphore.
+	hal inputWord: 16r1234.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 1.
+	self assert: hal nextInputWord equals: 16r1234.
+
+	hal inputSemaphore: nil.
+	hal inputWord: 16r4321.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 1.
+	self assert: hal nextInputWord isNil
 ]
 
 { #category : 'tests - storage primitives' }
@@ -6970,6 +7052,104 @@ InterpreterTest >> testTimeWordsInto [
 		equals: #( 13 12 11 10 ) asByteArray
 ]
 
+{ #category : 'tests - time primitives' }
+InterpreterTest >> testTimerAcrossTheRollOverOfTheClock [
+	"The millisecond clock is a 32 bit number that rolls over: a time just after the roll over is in the future for a clock just before it, and in the past for a clock just after it."
+
+	| hal timer |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	timer := self newSemaphore.
+	hal uptime: 16rFFFFFFF0.
+
+	hal signal: timer atMilliseconds: 16r10.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0.
+
+	hal uptime: 16rF.
+	hal checkScheduledSemaphore.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0.
+
+	hal uptime: 16r10.
+	hal checkScheduledSemaphore.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 1
+]
+
+{ #category : 'tests - time primitives' }
+InterpreterTest >> testTimerCancelledWithNilSignalsNothing [
+	"A nil Semaphore cancels the outstanding request (BB p 652): nothing reaches the interpreter, even when the time of the cancelled request is reached."
+
+	| hal timer |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	timer := self newSemaphore.
+	hal signal: timer atMilliseconds: 1500.
+
+	hal signal: nil atMilliseconds: 1500.
+	hal uptime: 2000.
+	hal checkScheduledSemaphore.
+
+	self assert: hal scheduledSemaphore isNil.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0
+]
+
+{ #category : 'tests - time primitives' }
+InterpreterTest >> testTimerInThePastSignalsAtOnce [
+	"If the time has already passed when the request is made, the Semaphore is signaled immediately (BB p 652)."
+
+	| hal timer |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	timer := self newSemaphore.
+
+	hal signal: timer atMilliseconds: 900.
+
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 1.
+	self assert: hal scheduledSemaphore isNil
+]
+
+{ #category : 'tests - time primitives' }
+InterpreterTest >> testTimerRequestReplacesThePreviousOne [
+	"Only one request is outstanding: a new one replaces the previous one, whose Semaphore is not signaled (BB p 652)."
+
+	| hal first second |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	first := self newSemaphore.
+	second := self newSemaphore.
+
+	hal signal: first atMilliseconds: 1500.
+	hal signal: second atMilliseconds: 1600.
+	hal uptime: 2000.
+	hal checkScheduledSemaphore.
+	interpreter checkProcessSwitch.
+
+	self assert: (self excessSignalsOf: first) equals: 0.
+	self assert: (self excessSignalsOf: second) equals: 1
+]
+
+{ #category : 'tests - time primitives' }
+InterpreterTest >> testTimerSignalsOnceWhenItsTimeHasPassed [
+	"The outstanding request is polled: nothing is buffered before its time, the Semaphore is buffered once when the time is reached, and the request is then forgotten."
+
+	| hal timer |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	timer := self newSemaphore.
+
+	hal signal: timer atMilliseconds: 1500.
+	hal checkScheduledSemaphore.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 0.
+
+	hal uptime: 1500.
+	hal checkScheduledSemaphore.
+	hal checkScheduledSemaphore.
+
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 1.
+	self assert: hal scheduledSemaphore isNil.
+	interpreter checkProcessSwitch.
+	self assert: (self excessSignalsOf: timer) equals: 1
+]
+
 { #category : 'tests - scheduling' }
 InterpreterTest >> testTransferToAsksForASwitch [
 	"transferTo: only records the request: the new Process is held in newProcess, and the switch happens between two bytecodes, in checkProcessSwitch. The new Process is counted, so that it cannot be freed while it waits."
@@ -7215,6 +7395,19 @@ InterpreterTest >> twoClassesUnderstanding: selector [
 	^ base -> (self
 		   newClassInheritingFrom: base
 		   methods: { (selector -> (self newMethodReturning: 2)) })
+]
+
+{ #category : 'private - io' }
+InterpreterTest >> useClockHAL [
+	"The real hardware abstraction layer, hooked to a VM that answers the interpreter of the test, with a millisecond clock that the test sets (at 1000 to start with)"
+
+	| vm hal |
+	vm := InterpreterTestVM new.
+	vm interpreter: interpreter.
+	hal := InterpreterTestClockHAL withVM: vm.
+	hal uptime: 1000.
+	interpreter instVarNamed: 'hal' put: hal.
+	^ hal
 ]
 
 { #category : 'private - files' }
