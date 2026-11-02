@@ -3,14 +3,7 @@ Tests for ObjectMemory, the Smalltalk-80 object table and heap manager (Blue Boo
 "
 Class {
 	#name : 'ObjectMemoryTest',
-	#superclass : 'TestCase',
-	#instVars : [
-		'memory',
-		'nilPointer',
-		'interpreter',
-		'classPointer',
-		'methodClassPointer'
-	],
+	#superclass : 'ObjectMemoryTestCase',
 	#category : 'Smalltalk-80 VM-Tests',
 	#package : 'Smalltalk-80 VM-Tests'
 }
@@ -40,40 +33,6 @@ ObjectMemoryTest >> reloadedMemory [
 	^ reloaded
 ]
 
-{ #category : 'running' }
-ObjectMemoryTest >> setUp [
-
-	super setUp.
-	interpreter := ObjectMemoryTestInterpreter new.
-	memory := ObjectMemory withInterpreter: interpreter.
-	interpreter memory: memory.
-	methodClassPointer := ObjectMemory classVarNamed: 'MethodClass'.
-	self setUpObjectTable.
-	self setUpSpecialObjects.
-	self setUpFreeChunk.
-	"A class for the test objects, referenced once (by us)"
-	classPointer := memory instantiateClass: nilPointer withPointers: 0.
-	memory countUp: classPointer.
-	"Permanent roots of the collector: nil, the method class and our class"
-	memory instVarNamed: 'rootObjectPointers' put: (OrderedCollection
-			 with: nilPointer
-			 with: methodClassPointer
-			 with: classPointer)
-]
-
-{ #category : 'running' }
-ObjectMemoryTest >> setUpFreeChunk [
-	"One free chunk covering the rest of segment 0, starting right after the method class. The whole segment must be described: the compactor walks it up to HeapSpaceStop."
-
-	| size |
-	size := (ObjectMemory classVarNamed: 'HeapSpaceStop') + 1 - 4.
-	memory
-		toFreeChunkList: (ObjectMemory classVarNamed: 'BigSize')
-		add: (memory obtainPointer: size location: 4).
-	memory freeOopsLeft: memory freeOopsLeft - 1.
-	memory freeWordsLeft: size
-]
-
 { #category : 'private' }
 ObjectMemoryTest >> setUpFreeChunkInSegment: segment [
 	"Make the whole of a heap segment one free chunk, as the snapshot loader does for the space it does not use. The current segment is left unchanged."
@@ -87,35 +46,6 @@ ObjectMemoryTest >> setUpFreeChunkInSegment: segment [
 				 obtainPointer: (ObjectMemory classVarNamed: 'HeapSpaceStop') + 1
 				 location: 0).
 	memory instVarNamed: 'currentSegment' put: current
-]
-
-{ #category : 'running' }
-ObjectMemoryTest >> setUpObjectTable [
-	"Entries 2 to 40 are free and chained on the free pointer list, except the one of the method class. The other entries are free but not chained, so the garbage collector skips them."
-
-	0 to: (ObjectMemory classVarNamed: 'ObjectTableSize') - 2 by: 2 do: [
-	:oop | memory freeBitOf: oop put: 1 ].
-	((2 to: 40 by: 2) copyWithout: methodClassPointer) reverseDo: [ :oop |
-			memory ot: oop put: 0.
-			memory freeBitOf: oop put: 1.
-			memory toFreePointerListAdd: oop ].
-	memory freeOopsLeft: 19
-]
-
-{ #category : 'running' }
-ObjectMemoryTest >> setUpSpecialObjects [
-	"Oop 2 is NilPointer: fields of new objects default to it, so it must be a real object. Its count is saturated (128) like in a real image: new objects point to nil without counting it. The method class is a header only object right after nil, also saturated: the garbage collector must know it to scan the literals of CompiledMethods."
-
-	nilPointer := memory obtainPointer: 2 location: 0.
-	memory countBitsOf: nilPointer put: 128.
-	memory freeOopsLeft: memory freeOopsLeft - 1.
-	memory ot: methodClassPointer put: 0.
-	memory segmentBitsOf: methodClassPointer put: 0.
-	memory locationBitsOf: methodClassPointer put: 2.
-	memory sizeBitsOf: methodClassPointer put: 2.
-	memory classBitsOf: methodClassPointer put: nilPointer.
-	memory pointerBitOf: methodClassPointer put: 1.
-	memory countBitsOf: methodClassPointer put: 128
 ]
 
 { #category : 'tests - accessors' }

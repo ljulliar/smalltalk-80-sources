@@ -138,11 +138,36 @@ Interpreter class >> initialize [
 ]
 
 { #category : 'instance creation' }
+Interpreter class >> withMemory: anObjectMemory hal: hwAbstractionLayer fileSystem: hostFS debug: debug [
+	"Not BB code. An interpreter on an object memory that is already built, without an initial active context: used by the tests."
+
+	^ self basicNew
+		  initializeWithMemory: anObjectMemory
+		  hal: hwAbstractionLayer
+		  fileSystem: hostFS
+		  debug: debug;
+		  yourself
+]
+
+{ #category : 'instance creation' }
 Interpreter class >> withSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug [
    "the code below follows the Seaside Object initialization conventions"
 	^ self basicNew
 		initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: debug;
 		yourself
+]
+
+{ #category : 'initialization' }
+Interpreter >> activateInitialContext [
+	"Not BB code"
+
+	"When Smalltalk is started up, the initial active context is found through the scheduler's active Process (BB p. 644)"
+
+	activeContext := self firstContext.
+	memory increaseReferencesTo: activeContext.
+
+	"Fetch all the registers of the context that represents the CompiledMethod or block currently being executed (aka activeContext)"
+	self fetchContextRegisters
 ]
 
 { #category : 'send bytecodes' }
@@ -290,9 +315,16 @@ Interpreter >> checkIndexableBoundsOf: index in: array [
    subscript of an object. It must take into account any fixed fields. (BB 627)"
 
 	| class |
+	"Errata by ljulliard: a SmallInteger is not an object, it has no entry in the object table, so it
+	has no length. lengthOf: below would read one anyway (and signal the warning of
+	ObjectMemory >> cantBeIntegerObject:). The check is made here so that at:, at:put: and the other
+	primitives that use this routine fail cleanly, as for any other object that cannot be indexed,
+	and the guest code reports the error."
+	(memory isIntegerObject: array) ifTrue: [ ^ self primitiveFail ].
 	class := memory fetchClassOf: array.
 	self success: index >= 1.
-	self success: index + (self fixedFieldsOf: class) <= (self lengthOf: array)
+	self success:
+		index + (self fixedFieldsOf: class) <= (self lengthOf: array)
 ]
 
 { #category : 'storage management primitives' }
@@ -1255,17 +1287,18 @@ Interpreter >> initializeStreamIndices [
 ]
 
 { #category : 'initialization' }
-Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: onOff [
-   "Not BB code"
-   "Initialize the Interpreter"
- 
+Interpreter >> initializeWithMemory: anObjectMemory hal: hwAbstractionLayer fileSystem: hostFS debug: onOff [
+	"Not BB code"
+
+	"Initialize the Interpreter on an object memory that is already loaded. The initial active context is left to the caller (see activateInitialContext), so that the tests can run an interpreter on a small hand built memory."
+
 	hal := hwAbstractionLayer.
 	fileSystem := hostFS.
 	debug := onOff.
-	
+
 	"Make sure class variables are initialized"
 	self class initialize.
-	
+
 	"Initialize all constants known to the interpreter"
 	self
 		initializeSmallIntegers;
@@ -1282,37 +1315,47 @@ Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem
 		initializeStreamIndices;
 		initializeOtherConstants.
 
-	"Create the object memory and load it with VM Snapshot"
-	memory := ObjectMemory withInterpreter: self.
-	memory loadWithSnapshot: stream debug: onOff.
-	
+	memory := anObjectMemory.
+
 	"BB doesn't say how large the semaphore list must be..."
 	"TODO: turn it into an #initializeSemaphore method when code is stable"
 	semaphoreList := Array new: 4096 withAll: 0.
 	semaphoreIndex := 0.
-	
-	debug ifTrue: [ 
-		Logger << '>>>>>>>> Initializing interpreter...'; cr
-	].
 
-	"When Smalltalk is started up, the initial active context is found
-	through the scheduler's active Process (BB p. 644)"
-	activeContext := self firstContext.
-	memory increaseReferencesTo: activeContext.
-	
-	"Fetch all the registers of the context that represents the 
-	CompiledMethod or block currently being executed (aka activeContext)"
-	self fetchContextRegisters.
-	
+	"No process switch pending (see also firstContext)"
+	newProcessWaiting := false.
+	newProcess := NilPointer.
+
 	"Cycle counter"
 	cycleCounter := 0.
-	
+
 	"ST80 Memory space parameters"
 	lowSpaceSemaphore := NilPointer.
 	oopsLeftLimit := 0.
-	wordsLeftLimit := 0.
-	
-	
+	wordsLeftLimit := 0
+]
+
+{ #category : 'initialization' }
+Interpreter >> initializeWithSnapshot: stream hal: hwAbstractionLayer fileSystem: hostFS debug: onOff [
+	"Not BB code"
+
+	"Initialize the Interpreter: create the object memory, load the VM snapshot into it and start from the active process"
+
+	| loadedMemory |
+	loadedMemory := ObjectMemory withInterpreter: self.
+	loadedMemory loadWithSnapshot: stream debug: onOff.
+	self
+		initializeWithMemory: loadedMemory
+		hal: hwAbstractionLayer
+		fileSystem: hostFS
+		debug: onOff.
+
+	debug ifTrue: [
+			Logger
+				<< '>>>>>>>> Initializing interpreter...';
+				cr ].
+
+	self activateInitialContext
 ]
 
 { #category : 'instances' }
@@ -2207,12 +2250,12 @@ Interpreter >> primitiveCoreLeft [
 { #category : 'io primitives' }
 Interpreter >> primitiveCursorLink [
 	"Cause the cursor to track the pointing device location if the argument is true.
-   Decouple the cursor from the pointing device if the argument is false. (BB 651)"	
-			
+   Decouple the cursor from the pointing device if the argument is false. (BB 651)"
+
 	| flag |
 	flag := self popStack.
 	" set cursor link to true here"
-	hal cursorLink: (flag class = TruePointer)
+	hal cursorLink: flag = TruePointer
 ]
 
 { #category : 'io primitives' }
@@ -2252,19 +2295,21 @@ Interpreter >> primitiveDiv [
 
 { #category : 'arithmetic primitives' }
 Interpreter >> primitiveDivide [
-	"The primitive routine for the modulo function (associated with the 
-	selector \\) gives the remainder of a division where the quotient is 
-	always rounded down (toward negative infinity). This primitive fails
-	if its argument is 0. (BB 623)"
+	"The primitive routine for the exact division (associated with the selector /) fails if its argument is 0 or if the division is not exact. (BB 623)"
 
 	| integerReceiver integerArgument integerResult |
 	integerArgument := self popInteger.
 	integerReceiver := self popInteger.
 	self success: integerArgument ~= 0.
-	self success: integerReceiver \\ integerArgument = 0.
-	self success
-		ifTrue: [ integerResult := integerReceiver // integerArgument.
-			       self success: (memory isIntegerValue: integerResult) ].
+
+	"Not BB code: the test below is skipped when the argument is 0 (host ZeroDivide)"
+	self success ifTrue: [
+		self success: integerReceiver \\ integerArgument = 0 ].
+
+	integerResult := 0.
+	self success ifTrue: [
+			integerResult := integerReceiver // integerArgument.
+			self success: (memory isIntegerValue: integerResult) ].
 	self success
 		ifTrue: [ self push: (memory integerObjectOf: integerResult) ]
 		ifFalse: [ self unPop: 2 ]
@@ -2479,8 +2524,9 @@ Interpreter >> primitiveFractionalPart [
 	| floatReceiver floatResult |
 	floatReceiver := self popFloat.
 	self success
-		ifTrue: [ floatResult := floatReceiver - floatReceiver asInteger.
-			       self pushFloat: floatResult ]
+		ifTrue: [
+				floatResult := floatReceiver - floatReceiver asInteger.
+				self pushFloat: floatResult asIEEE32BitWord ]
 		ifFalse: [ self unPop: 1 ]
 ]
 
@@ -2779,55 +2825,63 @@ Interpreter >> primitiveNewWithArg [
 	size := self positive16BitValueOf: self popStack.
 	"ERROR from dbanay check maw size"
 	self success: size <= 65533.
-	
+
 	class := self popStack.
 	self success: (self isIndexable: class).
 	self success
-		ifTrue: [size := size + (self fixedFieldsOf: class).
-			      (self isPointers: class)
-				      ifTrue: [self push: (memory instantiateClass: class withPointers: size)]
-				      ifFalse: [(self isWords: class)
-						             ifTrue: [self push: (memory instantiateClass: class withWords: size)]
-						             ifFalse: [self push: (memory instantiateClass: class withBytes: size)]]]
-		ifFalse: [self unPop: 2]
+		ifTrue: [
+				size := size + (self fixedFieldsOf: class).
+				(self isPointers: class)
+					ifTrue: [
+					self push: (memory instantiateClass: class withPointers: size) ]
+					ifFalse: [
+							(self isWords: class)
+								ifTrue: [
+								self push: (memory instantiateClass: class withWords: size) ]
+								ifFalse: [
+								self push: (memory instantiateClass: class withBytes: size) ] ] ]
+		ifFalse: [ self unPop: 2 ]
 ]
 
 { #category : 'array stream primitives' }
 Interpreter >> primitiveNext [
-   "The primitiveNext routine is an optional primitive version of the Smalltalk
+	"The primitiveNext routine is an optional primitive version of the Smalltalk
    code for the next message to streams. This routine only works if the object 
    being streamed is an Array or a String. (BB 631)"
 
-   | stream index limit array arrayClass result ascii |
-   stream := self popStack.
-   array := memory fetchPointer: StreamArrayIndex
-                   ofObject: stream.
-   arrayClass := memory fetchClassOf: array.
-   index := self fetchInteger: StreamIndexIndex
-                 ofObject: stream.
-   limit := self fetchInteger: StreamReadLimitIndex
-                 ofObject: stream.
+	| stream index limit array arrayClass result ascii |
+	stream := self popStack.
+	array := memory fetchPointer: StreamArrayIndex ofObject: stream.
+	arrayClass := memory fetchClassOf: array.
+	index := self fetchInteger: StreamIndexIndex ofObject: stream.
+	limit := self fetchInteger: StreamReadLimitIndex ofObject: stream.
 
-   self success: index < limit.
-   self success: (arrayClass ~= ClassArrayPointer) | (arrayClass = ClassStringPointer).
-   self checkIndexableBoundsOf: index + 1
-        in: array.
+	self success: index < limit.
+	"Errata by ljulliard: the BB reads (arrayClass ~= ClassArrayPointer) | (arrayClass = ClassStringPointer),
+   which made next fail on an Array and work on any other class. It now tests the same as
+   primitiveNextPut and primitiveAtEnd (and dbanay's version): an Array or a String."
+	self success:
+		arrayClass = ClassArrayPointer | (arrayClass = ClassStringPointer).
+	self checkIndexableBoundsOf: index + 1 in: array.
 
-   self success
-      ifTrue: [index := index + 1.
-               result := self subscript: array
-                              with: index].
-   self success
-      ifTrue: [self storeInteger: StreamIndexIndex
-                    ofObject: stream
-                    withValue: index].
-   self success
-      ifTrue: [arrayClass = ClassArrayPointer
-                  ifTrue: [self push: result]
-                  ifFalse: [ascii := memory integerValueOf: result.
-                            self push: (memory fetchPointer: ascii
-                                               ofObject: CharacterTablePointer)]]
-     ifFalse: [self unPop: 1]
+	result := NilPointer.
+	self success ifTrue: [
+			index := index + 1.
+			result := self subscript: array with: index ].
+	self success ifTrue: [
+		self
+			storeInteger: StreamIndexIndex
+			ofObject: stream
+			withValue: index ].
+	self success
+		ifTrue: [
+				arrayClass = ClassArrayPointer
+					ifTrue: [ self push: result ]
+					ifFalse: [
+							ascii := memory integerValueOf: result.
+							self push:
+								(memory fetchPointer: ascii ofObject: CharacterTablePointer) ] ]
+		ifFalse: [ self unPop: 1 ]
 ]
 
 { #category : 'storage management primitives' }
@@ -2960,23 +3014,34 @@ Interpreter >> primitivePerform [
    than the 'perform' message did. The primitive fails if the number of arguments 
    does not match. (BB 640)"
 
-	| performSelector newReceiver selectorIndex |
+	| performSelector performMethod performPrimitiveIndex newReceiver selectorIndex |
 	performSelector := messageSelector.
+	"Errata by ljulliard: the lookup below overwrites newMethod and primitiveIndex with those of the
+	method found for the selector to perform. If the primitive fails, executeNewMethod activates
+	newMethod: it must be the method of perform: again, whose Smalltalk code handles the error, and
+	not the method that was found, which would run with the wrong number of arguments."
+	performMethod := newMethod.
+	performPrimitiveIndex := primitiveIndex.
 	messageSelector := self stackValue: argumentCount - 1.
 	newReceiver := self stackValue: argumentCount.
 	self lookupMethodInClass: (memory fetchClassOf: newReceiver).
 	self success: (self argumentCountOf: newMethod) = (argumentCount - 1).
 	self success
-		ifTrue: [ selectorIndex := stackPointer - argumentCount + 1.
-			       self transfer: argumentCount - 1
-				         fromIndex: selectorIndex + 1
-				         ofObject: activeContext
-				         toIndex: selectorIndex
-				         ofObject: activeContext.
-			      self pop: 1.
-			      argumentCount := argumentCount - 1.
-			     self executeNewMethod ]
-		ifFalse: [ messageSelector := performSelector ]
+		ifTrue: [
+				selectorIndex := stackPointer - argumentCount + 1.
+				self
+					transfer: argumentCount - 1
+					fromIndex: selectorIndex + 1
+					ofObject: activeContext
+					toIndex: selectorIndex
+					ofObject: activeContext.
+				self pop: 1.
+				argumentCount := argumentCount - 1.
+				self executeNewMethod ]
+		ifFalse: [
+				messageSelector := performSelector.
+				newMethod := performMethod.
+				primitiveIndex := performPrimitiveIndex ]
 ]
 
 { #category : 'control primitives' }
@@ -2986,33 +3051,36 @@ Interpreter >> primitivePerformWithArgs [
    that the message arguments come in a single Array argument to the performWithArguments: 
    message instead of as multiple arguments to the 'perform' message. (BB 641)"
 
-	| thisReceiver performSelector argumentArray arrayClass arraySize index |
+	| thisReceiver performSelector performMethod performPrimitiveIndex argumentArray arrayClass arraySize |
 	argumentArray := self popStack.
 	arraySize := memory fetchWordLengthOf: argumentArray.
 	arrayClass := memory fetchClassOf: argumentArray.
-	self
-		success: stackPointer + arraySize < (memory fetchWordLengthOf: activeContext).
+	self success:
+		stackPointer + arraySize < (memory fetchWordLengthOf: activeContext).
 	self success: arrayClass = ClassArrayPointer.
+	self success ifFalse: [ ^ self unPop: 1 ].
+
+	performSelector := messageSelector.
+	"Errata by ljulliard: same as in primitivePerform. The lookup below overwrites newMethod and
+	primitiveIndex, so they are kept to be put back if the argument count is wrong."
+	performMethod := newMethod.
+	performPrimitiveIndex := primitiveIndex.
+	messageSelector := self popStack.
+	thisReceiver := self stackTop.
+	argumentCount := arraySize.
+	self pushElementsOf: argumentArray.
+	self lookupMethodInClass: (memory fetchClassOf: thisReceiver).
+	self success: (self argumentCountOf: newMethod) = argumentCount.
 	self success
-		ifTrue: [ performSelector := messageSelector.
-			messageSelector := self popStack.
-			thisReceiver := self stackTop.
-			argumentCount := arraySize.
-			index := 1.
-			[ index <= argumentCount ]
-				whileTrue: [ self push: (memory fetchPointer: index - 1 
-					                             ofObject: argumentArray).
-					         index := index + 1 ].
-			self lookupMethodInClass: (memory fetchClassOf: thisReceiver).
-			self success: (self argumentCountOf: newMethod) = argumentCount.
-			self success
-				ifTrue: [ self executeNewMethod ]
-				ifFalse: [ self pop: argumentCount.
-					        self push: messageSelector.
-					        self push: argumentArray.
-					        argumentCount := 2.
-					        messageSelector := performSelector ] ]
-		ifFalse: [ self unPop: 1 ]
+		ifTrue: [ self executeNewMethod ]
+		ifFalse: [
+				self pop: argumentCount.
+				self push: messageSelector.
+				self push: argumentArray.
+				argumentCount := 2.
+				messageSelector := performSelector.
+				newMethod := performMethod.
+				primitiveIndex := performPrimitiveIndex ]
 ]
 
 { #category : 'private - file primitives' }
@@ -3434,41 +3502,48 @@ Interpreter >> primitiveSignalAtTick [
 	  documentation whatIsAPrimitive."
 
 	| timePointer semaphore time |
-	
 	timePointer := self popStack.
 	semaphore := self popStack.
 	self success: true.
-	
-	self success: semaphore = NilPointer | ((memory fetchClassOf: semaphore) = ClassSemaphorePointer).
-	success 
-		ifTrue: [ 
-			semaphore = NilPointer ifTrue: [ semaphore := nil ].
-			time := (memory fetchByte: 0 ofObject: timePointer).
-			time := time bitOr: (memory fetchByte: 1 ofObject: timePointer) << 8.
-			time := time bitOr: (memory fetchByte: 1 ofObject: timePointer) << 16.
-			time := time bitOr: (memory fetchByte: 1 ofObject: timePointer) << 24.
-			hal signal: semaphore atMilliseconds: time.
-		]
-		ifFalse: [ 
-			self unPop: 2.
-		]
+
+	self success: semaphore = NilPointer
+		| ((memory fetchClassOf: semaphore) = ClassSemaphorePointer).
+	success
+		ifTrue: [
+				semaphore = NilPointer ifTrue: [ semaphore := nil ].
+				time := memory fetchByte: 0 ofObject: timePointer.
+				time := time bitOr:
+					        (memory fetchByte: 1 ofObject: timePointer) << 8.
+				time := time bitOr:
+					        (memory fetchByte: 2 ofObject: timePointer) << 16.
+				time := time bitOr:
+					        (memory fetchByte: 3 ofObject: timePointer) << 24.
+				hal signal: semaphore atMilliseconds: time ]
+		ifFalse: [ self unPop: 2 ]
 ]
 
 { #category : 'array stream primitives' }
 Interpreter >> primitiveSize [
-   "The primitiveSize routine returns the number of indexable fields the receiver 
+	"The primitiveSize routine returns the number of indexable fields the receiver 
    has (i.e., the largest legal subscript). (BB 629)"
 
-   | array class length |
-   array := self popStack.
+	| array class length |
+	array := self popStack.
 	"Line below not in BB code. See dbanay implementation"
-	self success: ((memory isIntegerObject: array ) not).
-   class := memory fetchClassOf: array.
-   length := self positive16BitIntegerFor: (self lengthOf: array) - (self fixedFieldsOf: class).
+	self success: (memory isIntegerObject: array) not.
+	"Errata by ljulliard: the line above records the failure but the length was computed anyway.
+	For a SmallInteger that reads the object table entry of something that is not an object (and
+	signals the warning of ObjectMemory >> cantBeIntegerObject:), so it is computed only when the
+	primitive has not failed."
+	length := 0.
+	self success ifTrue: [
+			class := memory fetchClassOf: array.
+			length := self positive16BitIntegerFor:
+				          (self lengthOf: array) - (self fixedFieldsOf: class) ].
 
-   self success
-      ifTrue: [self push: length]
-      ifFalse: [self unPop: 1]
+	self success
+		ifTrue: [ self push: length ]
+		ifFalse: [ self unPop: 1 ]
 ]
 
 { #category : 'io primitives' }
@@ -3815,6 +3890,14 @@ Interpreter >> pushConstantBytecode [
    currentBytecode = 117 ifTrue: [^self push: ZeroPointer].
    currentBytecode = 118 ifTrue: [^self push: OnePointer].
    currentBytecode = 119 ifTrue: [^self push: TwoPointer]
+]
+
+{ #category : 'control primitives' }
+Interpreter >> pushElementsOf: anArray [
+	"Push the elements of anArray on the stack, the first one first. The caller has checked that the stack has room for them (see primitivePerformWithArgs)."
+
+	1 to: (memory fetchWordLengthOf: anArray) do: [ :index |
+		self push: (memory fetchPointer: index - 1 ofObject: anArray) ]
 ]
 
 { #category : 'primitive methods' }

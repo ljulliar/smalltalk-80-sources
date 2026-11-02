@@ -44,6 +44,7 @@ ST80FileSystem >> createFile: fileName [
 
 	| ref stream handle |
 	ref := rootDirectory / fileName.
+	"Creates the file if it does not exist. It does not empty an existing one: closing a write stream leaves the content alone in Pharo 13, so the truncation is done below, on the stream that is kept"
 	[ ref binaryWriteStream close ]
 		on: Error
 		do: [ :e |
@@ -53,6 +54,12 @@ ST80FileSystem >> createFile: fileName [
 	stream ifNil: [
 			lastError := -1.
 			^ -1 ].
+	[ stream truncate: 0 ]
+		on: Error
+		do: [ :e |
+				stream close.
+				lastError := -1.
+				^ -1 ].
 	handle := nextHandle.
 	nextHandle := nextHandle + 1.
 	fileHandles at: handle put: stream.
