@@ -5,10 +5,9 @@ This project is about delivering the promise of the book "Smalltalk-80: The Lang
 In carrying out this project, my aim was twofold. First, to show that the specification written in Smalltalk in 1983 was perfectly functional. And it is! Second, to gather into this project's source code all the corrections and errata published over the 40+ years since its original design at Xerox PARC. This work remains, even today, a remarkable technical reference for anyone who wants to understand how a virtual machine works.
 
 # Status
-
 This project that I started in June 2020 during the COVID confinement is pretty much complete and stable (as of Nov 2026). It has been thoroughly tested with a suite of 400+ tests covering both the interpreter and the object memory manager. 
 
-If you feel like contributing your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions, be it bug reports, code fixes, missing features, improved documentation, etc., are very welcome.
+
 
 # Installation
 * Install the Smalltalk [Pharo](https://www.pharo.org/) environment
@@ -59,7 +58,14 @@ To save your work, right-click on the Smalltalk-80 desktop background and select
 At startup the VM loads `assets/snapshot.im` if it exists and falls back to the original `Smalltalk-80.image` otherwise (in which case the guest file system classes are missing). To go back to the shipped environment, restore `snapshot.im` with `git checkout assets/snapshot.im`.
 
 # Developer notes
+If you feel like contributing your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions, be it bug reports, code fixes, missing features, improved documentation, etc., are very welcome.
+
 You will find some guidelines and relevant instructions in the [Developer Notes](doc/DEVELOPER.md)
+
+# Licenses
+The code of the Smalltalk-80 VM used in this project (both the Interpreter and the Object memory classes) as published by Xerox PARC in 1983 is owned by Adele Goldberg.
+
+The rest of the code (the primitives, the hardware abstraction layer, the POSIX file system mapping) is copyright Laurent Julliard, 2020-2026 and distributed under GPL 3.0 .
 
 # Credits
 I'd like to thank a number of people whose prior work made this project possible:
