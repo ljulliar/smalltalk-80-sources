@@ -30,7 +30,6 @@ Class {
 		'lastEventTime',
 		'cursorLink',
 		'scheduledSemaphore',
-		'st80ScheduledSemaphore',
 		'blueEmulated',
 		'scheduledTime'
 	],
