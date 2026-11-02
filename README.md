@@ -6,7 +6,7 @@ In carrying out this project, my aim was twofold. First, to show that the specif
 
 # Status
 
-The project is now quite complete and stable. It has been thoroughly tested with a suite of 400+ tests covering both the interpreter and the object memory manager. 
+This project that I started in June 2020 during the COVID confinement is pretty much complete and stable (as of Nov 2026). It has been thoroughly tested with a suite of 400+ tests covering both the interpreter and the object memory manager. 
 
 If you feel like contributing your time and talent to this project, pick any item in this [TODO](doc/TODO.md) list or any other task of your choice. All contributions, be it bug reports, code fixes, missing features, improved documentation, etc., are very welcome.
 
