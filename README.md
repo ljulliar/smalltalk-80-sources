@@ -16,13 +16,13 @@ This project that I started in June 2020 during the COVID confinement is pretty 
 * Choose the "Clone remote repository" option
 * In the Remote URL field  copy-paste this git repo URL  : `https://github.com/ljulliar/smalltalk-80-sources.git`and select the local directory of your choice where to clone the git repo (let's call it 'local_path' for future reference)
 * Right-click on the `Smalltak-80 Sources` entry in the Repositories window and select `Packages`
-* Right-click on the `Smalltalk-80 VM' package and select `Load`
+* Right-click on the `Smalltalk-80 VM` package and select `Load`
 * Click on the `Browse > Playground` menu
 * In the Playground window type :
 ```
-ST80VirtualMachine runWithImagePath: 'local_git_path/assets' keyboard: 'XX'.
+ST80VirtualMachine runWithImagePath: 'local_git_repo_path/assets' keyboard: 'XX'.
 ```
-where local_git_path is where you created your local git repo and XX is your host keyboard layout (for now only 'US' (US international) and 'FR' (French) keyboards are supported).  
+where `local_git_repo_path` is where you cloned this git repo and XX is your host keyboard layout (for now only 'US' (US international) and 'FR' (French) keyboards are supported).  
 * Right click in the Playground and Do It. Et voilà! 
 
 # Smalltalk-80 at work
