@@ -72,6 +72,6 @@ I'd like to thank a number of people whose prior work made this project possible
 * The Blue Book by Adele Goldberg and Dave Robson (available [here](http://stephane.ducasse.free.fr/FreeBooks/BlueBook/Bluebook.pdf) in its original 1983 edition, courtesy Stéphane Ducasse)
 * The [Pharo](https://www.pharo.org/) developers community for providing this remarkable Open Source Smalltalk environment
 * [Dan Banay's Smalltalk-80 VM](https://github.com/dbanay/Smalltalk) project, a C++ implementation of the same VM, that proved very helpful when I started debugging my Smalltalk implementation. The `snapshot.im` and `Smalltalk-80.changes` files of the `assets` directory are his work, taken from his repository and redistributed under his MIT license (see `assets/LICENSE-dbanay.txt`). Many thanks, Dan!
-* Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) covering the Smalltalk-80 specifications and implementation.
+* Dwight Hughes and Eliot Miranda for providing in plain text the [5 chapters of the Blue Book](http://www.mirandabanda.org/bluebook/bluebook_imp_toc.html) covering the Smalltalk-80 specifications and implementation.
 * And last but not the least, [Mario Wolczko Smalltalk-80 web page](http://www.wolczko.com/st80/) for putting together critical files that one absolutely needs to run the full Smalltalk environment, most notably the Virtual Machine image as published (on tapes!!) by Xerox Parc in 1983.
 
