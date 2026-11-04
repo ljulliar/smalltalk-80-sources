@@ -37,8 +37,6 @@ Mouse buttons mapping:
 * right click is the yellow button (menus, do it, print it)
 * Cmd/Alt/Ctrl + left click is the blue button (window menu: under, move, frame, collapse, close). To move a window, blue-click its title bar and choose `move`, then click to drop it.
 
-Paraphrasing a well known character of the French history: "With this screen, Developers, 40+ years of Computer Science history look down upon you.” :smile:
-
 # The assets directory
 The `assets` directory holds everything the VM needs to boot a Smalltalk-80 environment:
 
