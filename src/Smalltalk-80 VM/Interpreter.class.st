@@ -129,9 +129,9 @@ Class {
 
 { #category : 'idle' }
 Interpreter class >> idleMilliseconds [
-	"Not BB code. How long the interpreter sleeps each time it takes the guest for idle, at most: an input word or a timer ends the sleep at once (see ST80HardwareAbstractionLayer>>idleFor:)."
+	"Not BB code. How long the interpreter sleeps each time it takes the guest for idle, at most: an input word or a timer ends the sleep at once (see ST80HardwareAbstractionLayer>>idleFor:). 25 ms brings the CPU use of an idle guest down to about a quarter of a core, see doc/DEVELOPER.md."
 
-	^ IdleMilliseconds ifNil: [ 5 ]
+	^ IdleMilliseconds ifNil: [ 25 ]
 ]
 
 { #category : 'idle' }
