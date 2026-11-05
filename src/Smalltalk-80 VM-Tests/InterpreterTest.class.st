@@ -311,6 +311,34 @@ InterpreterTest >> classPointerSize [
 	^ 3
 ]
 
+{ #category : 'private - copy bits' }
+InterpreterTest >> combineSource: s destination: d rule: rule [
+	"The 16 combination rules (BB p. 356) on one pixel (0 or 1), written from their truth table, independently of the word arithmetic of ST80BitBlt>>merge:with:"
+
+	rule = 0 ifTrue: [ ^ 0 ].
+	rule = 1 ifTrue: [ ^ s * d ].
+	rule = 2 ifTrue: [ ^ s * (1 - d) ].
+	rule = 3 ifTrue: [ ^ s ].
+	rule = 4 ifTrue: [ ^ 1 - s * d ].
+	rule = 5 ifTrue: [ ^ d ].
+	rule = 6 ifTrue: [
+			^ s ~= d
+				  ifTrue: [ 1 ]
+				  ifFalse: [ 0 ] ].
+	rule = 7 ifTrue: [ ^ s + d min: 1 ].
+	rule = 8 ifTrue: [ ^ 1 - s * (1 - d) ].
+	rule = 9 ifTrue: [
+			^ s = d
+				  ifTrue: [ 1 ]
+				  ifFalse: [ 0 ] ].
+	rule = 10 ifTrue: [ ^ 1 - d ].
+	rule = 11 ifTrue: [ ^ s + (1 - d) min: 1 ].
+	rule = 12 ifTrue: [ ^ 1 - s ].
+	rule = 13 ifTrue: [ ^ 1 - s + d min: 1 ].
+	rule = 14 ifTrue: [ ^ 1 - s + (1 - d) min: 1 ].
+	^ 1
+]
+
 { #category : 'private - methods' }
 InterpreterTest >> contextOf: method receiver: receiver sender: sender [
 	"A MethodContext about to run the first bytecode of method, with an empty stack"
@@ -717,6 +745,52 @@ InterpreterTest >> newFormWidth: width height: height words: words [
 			  (self newPoint: 0 at: 0) }
 ]
 
+{ #category : 'private - copy bits' }
+InterpreterTest >> newGuestFormWidth: width height: height pixels: pixels [
+	"A Form of the guest (16 bit words, the leftmost pixel is the high bit of a word, each row is a whole number of words) holding these pixels, a row after the other"
+
+	| raster form |
+	raster := width + 15 // 16.
+	form := self
+		        newFormWidth: width
+		        height: height
+		        words: raster * height.
+	0 to: height - 1 do: [ :y |
+			0 to: raster - 1 do: [ :wordIndex |
+					| word |
+					word := 0.
+					0 to: 15 do: [ :bit |
+							| x |
+							x := wordIndex * 16 + bit.
+							x < width ifTrue: [
+									word := word bitOr:
+										        ((pixels at: y * width + x + 1) bitShift: 15 - bit) ] ].
+					memory
+						storeWord: y * raster + wordIndex
+						ofObject: (self bitsOfForm: form)
+						withValue: word ] ].
+	^ form
+]
+
+{ #category : 'private - copy bits' }
+InterpreterTest >> newHostFormWidth: width height: height pixels: pixels [
+	"A native 1 bit Form holding these pixels, a row after the other. Its words are 32 bits, the leftmost pixel being the high bit."
+
+	| form raster bits |
+	form := Form extent: width @ height depth: 1.
+	raster := width + 31 // 32.
+	bits := form bits.
+	0 to: height - 1 do: [ :y |
+			0 to: width - 1 do: [ :x |
+					(pixels at: y * width + x + 1) = 1 ifTrue: [
+							| index |
+							index := y * raster + (x // 32) + 1.
+							bits
+								at: index
+								put: ((bits at: index) bitOr: (1 bitShift: 31 - (x \\ 32))) ] ] ].
+	^ form
+]
+
 { #category : 'running' }
 InterpreterTest >> newInterpreter [
 	"The real interpreter, through the seam that leaves the active context to us (see setUpContext)"
@@ -925,6 +999,32 @@ InterpreterTest >> pageBufferOf: aPage [
 	^ memory fetchPointer: 1 ofObject: aPage
 ]
 
+{ #category : 'private - copy bits' }
+InterpreterTest >> pixelsOfGuestForm: aForm width: width height: height [
+	"The pixels of a Form of the guest, a row after the other (see #newGuestFormWidth:height:pixels:)"
+
+	| raster bits |
+	raster := width + 15 // 16.
+	bits := self bitsOfForm: aForm.
+	^ (0 to: height - 1) flatCollect: [ :y |
+			  (0 to: width - 1) collect: [ :x |
+					  ((memory fetchWord: y * raster + (x // 16) ofObject: bits)
+						   bitShift: x \\ 16 - 15) bitAnd: 1 ] ]
+]
+
+{ #category : 'private - copy bits' }
+InterpreterTest >> pixelsOfHostForm: aForm [
+	"The pixels of a native 1 bit Form, a row after the other (see #newHostFormWidth:height:pixels:)"
+
+	| raster bits |
+	raster := aForm width + 31 // 32.
+	bits := aForm bits.
+	^ (0 to: aForm height - 1) flatCollect: [ :y |
+			  (0 to: aForm width - 1) collect: [ :x |
+					  ((bits at: y * raster + (x // 32) + 1) bitShift: x \\ 32 - 31)
+						  bitAnd: 1 ] ]
+]
+
 { #category : 'private' }
 InterpreterTest >> push: anObject [
 
@@ -937,11 +1037,97 @@ InterpreterTest >> pushInteger: anInteger [
 	interpreter pushInteger: anInteger
 ]
 
+{ #category : 'private - copy bits' }
+InterpreterTest >> randomCopyBitsCase: rng [
+	"The parameters of one random copy of bits: rule, sizes of the forms, origins, extent, clipping rectangle and the content of the forms. One time out of 5 the source is the destination, to exercise the overlap. The clipping rectangle is always inside the destination, as in the guest."
+
+	| sameForm destWidth destHeight sourceWidth sourceHeight clipX clipY between |
+	between := [ :low :high | rng nextIntegerBetween: low and: high ].
+	sameForm := (between value: 1 value: 5) = 1.
+	destWidth := between value: 16 value: 80.
+	destHeight := between value: 4 value: 24.
+	sourceWidth := sameForm
+		               ifTrue: [ destWidth ]
+		               ifFalse: [ between value: 16 value: 64 ].
+	sourceHeight := sameForm
+		                ifTrue: [ destHeight ]
+		                ifFalse: [ between value: 4 value: 24 ].
+	clipX := between value: 0 value: destWidth // 2.
+	clipY := between value: 0 value: destHeight // 2.
+	^ Dictionary new
+		  at: #rule put: (between value: 0 value: 15);
+		  at: #sameForm put: sameForm;
+		  at: #destWidth put: destWidth;
+		  at: #destHeight put: destHeight;
+		  at: #sourceWidth put: sourceWidth;
+		  at: #sourceHeight put: sourceHeight;
+		  at: #destX put: (between value: -8 value: destWidth);
+		  at: #destY put: (between value: -4 value: destHeight);
+		  at: #width put: (between value: 1 value: 70);
+		  at: #height put: (between value: 1 value: 20);
+		  at: #sourceX put: (between value: -4 value: 60);
+		  at: #sourceY put: (between value: -4 value: 20);
+		  at: #clipX put: clipX;
+		  at: #clipY put: clipY;
+		  at: #clipWidth put: (between value: 1 value: destWidth - clipX);
+		  at: #clipHeight put: (between value: 1 value: destHeight - clipY);
+		  at: #destPixels
+		  put: (self randomPixels: destWidth * destHeight from: rng);
+		  at: #sourcePixels
+		  put: (self randomPixels: sourceWidth * sourceHeight from: rng);
+		  yourself
+]
+
+{ #category : 'private - copy bits' }
+InterpreterTest >> randomPixels: aCount from: rng [
+	"An Array of aCount random bits (0 or 1)"
+
+	^ (1 to: aCount) collect: [ :each | rng nextIntegerBetween: 0 and: 1 ]
+]
+
 { #category : 'private - scheduling' }
 InterpreterTest >> readyListAt: priority [
 	"The LinkedList of the ready Processes of a priority"
 
 	^ memory fetchPointer: priority - 1 ofObject: processLists
+]
+
+{ #category : 'private - copy bits' }
+InterpreterTest >> referenceCopyBitsCase: aCase [
+	"The pixels of the destination after one copy of bits (see #randomCopyBitsCase:), computed pixel by pixel from the definition and without any word arithmetic: a destination pixel changes when it is in the clipping rectangle and in the extent of the copy, and when the source pixel it comes from is inside the source form. It is then the combination of the source and the destination pixel by the rule. The source is read before the copy, as BitBlt does for a source that is the destination (its direction of copy avoids the overlap)."
+
+	| destWidth destHeight sourceWidth sourceHeight dest source result rule |
+	destWidth := aCase at: #destWidth.
+	destHeight := aCase at: #destHeight.
+	sourceWidth := aCase at: #sourceWidth.
+	sourceHeight := aCase at: #sourceHeight.
+	rule := aCase at: #rule.
+	dest := aCase at: #destPixels.
+	source := (aCase at: #sameForm)
+		          ifTrue: [ dest ]
+		          ifFalse: [ aCase at: #sourcePixels ].
+	result := dest copy.
+	0 to: (aCase at: #height) - 1 do: [ :row |
+			0 to: (aCase at: #width) - 1 do: [ :column |
+					| x y sx sy s d |
+					x := (aCase at: #destX) + column.
+					y := (aCase at: #destY) + row.
+					sx := (aCase at: #sourceX) + column.
+					sy := (aCase at: #sourceY) + row.
+					((x
+						  between: (aCase at: #clipX)
+						  and: (aCase at: #clipX) + (aCase at: #clipWidth) - 1) and: [
+							 (y
+								  between: (aCase at: #clipY)
+								  and: (aCase at: #clipY) + (aCase at: #clipHeight) - 1) and: [
+									 (sx between: 0 and: sourceWidth - 1) and: [
+										 sy between: 0 and: sourceHeight - 1 ] ] ]) ifTrue: [
+							s := source at: sy * sourceWidth + sx + 1.
+							d := dest at: y * destWidth + x + 1.
+							result
+								at: y * destWidth + x + 1
+								put: (self combineSource: s destination: d rule: rule) ] ] ].
+	^ result
 ]
 
 { #category : 'running' }
@@ -1020,6 +1206,73 @@ InterpreterTest >> runCalleeOf: caller bytecodes: bytecodes receiver: receiver [
 		           sender: caller.
 	self activate: context.
 	bytecodes size timesRepeat: [ interpreter cycle ]
+]
+
+{ #category : 'private - copy bits' }
+InterpreterTest >> runCopyBitsCase: aCase [
+	"Run one copy of bits (see #randomCopyBitsCase:) with the primitive of the VM, and with the native BitBlt of the host. Answer the pixels of the destination after each of them, an Array of the two, the guest first."
+
+	| destination source blt guestPixels hostDestination hostSource hostBlt |
+	"The guest"
+	destination := self
+		               newGuestFormWidth: (aCase at: #destWidth)
+		               height: (aCase at: #destHeight)
+		               pixels: (aCase at: #destPixels).
+	source := (aCase at: #sameForm)
+		          ifTrue: [ destination ]
+		          ifFalse: [
+				          self
+					          newGuestFormWidth: (aCase at: #sourceWidth)
+					          height: (aCase at: #sourceHeight)
+					          pixels: (aCase at: #sourcePixels) ].
+	blt := self
+		       newBitBltOn: destination
+		       source: source
+		       rule: (aCase at: #rule).
+	self setBitBlt: blt field: 4 to: (aCase at: #destX).
+	self setBitBlt: blt field: 5 to: (aCase at: #destY).
+	self setBitBlt: blt field: 6 to: (aCase at: #width).
+	self setBitBlt: blt field: 7 to: (aCase at: #height).
+	self setBitBlt: blt field: 8 to: (aCase at: #sourceX).
+	self setBitBlt: blt field: 9 to: (aCase at: #sourceY).
+	self setBitBlt: blt field: 10 to: (aCase at: #clipX).
+	self setBitBlt: blt field: 11 to: (aCase at: #clipY).
+	self setBitBlt: blt field: 12 to: (aCase at: #clipWidth).
+	self setBitBlt: blt field: 13 to: (aCase at: #clipHeight).
+	self useHAL.
+	self runPrimitive: #primitiveCopyBits with: { blt }.
+	guestPixels := self
+		               pixelsOfGuestForm: destination
+		               width: (aCase at: #destWidth)
+		               height: (aCase at: #destHeight).
+
+	"The host"
+	hostDestination := self
+		                   newHostFormWidth: (aCase at: #destWidth)
+		                   height: (aCase at: #destHeight)
+		                   pixels: (aCase at: #destPixels).
+	hostSource := (aCase at: #sameForm)
+		              ifTrue: [ hostDestination ]
+		              ifFalse: [
+				              self
+					              newHostFormWidth: (aCase at: #sourceWidth)
+					              height: (aCase at: #sourceHeight)
+					              pixels: (aCase at: #sourcePixels) ].
+	hostBlt := BitBlt
+		           destForm: hostDestination
+		           sourceForm: hostSource
+		           halftoneForm: nil
+		           combinationRule: (aCase at: #rule)
+		           destOrigin: (aCase at: #destX) @ (aCase at: #destY)
+		           sourceOrigin: (aCase at: #sourceX) @ (aCase at: #sourceY)
+		           extent: (aCase at: #width) @ (aCase at: #height)
+		           clipRect:
+			           ((aCase at: #clipX) @ (aCase at: #clipY) extent:
+				            (aCase at: #clipWidth) @ (aCase at: #clipHeight)).
+	hostBlt copyBits.
+	^ {
+		  guestPixels.
+		  (self pixelsOfHostForm: hostDestination) }
 ]
 
 { #category : 'private - methods' }
@@ -2513,6 +2766,28 @@ InterpreterTest >> testCopyBitsIsClippedToTheClipRectangle [
 		assert:
 		(memory fetchWord: 0 ofObject: (self bitsOfForm: destination))
 		equals: 16rF000
+]
+
+{ #category : 'tests - copy bits primitive' }
+InterpreterTest >> testCopyBitsMatchesTheDefinitionOnRandomCopies [
+	"25 random copies of bits (rules 0 to 15, forms of random sizes, destination and source origins that are not word aligned, negative or outside the forms, clipping rectangles, a source that is the destination) give the same destination as the definition of BitBlt (see #referenceCopyBitsCase:), worked out pixel by pixel with no word arithmetic. For the rule 7, Form under, that draws the pictures of the Pen examples, the native BitBlt of the host gives the same result too. (The native BitBlt differs for some rules that ignore the source, 0, 10 and 15, when the source pixel is outside of the source form, so it is not compared for them.) Each copy runs on a fresh fixture, the test memory is small."
+
+	| rng |
+	rng := Random seed: 987.
+	1 to: 25 do: [ :index |
+			| aCase results |
+			index > 1 ifTrue: [ self setUp ].
+			aCase := self randomCopyBitsCase: rng.
+			results := self runCopyBitsCase: aCase.
+			self
+				assert: results first = (self referenceCopyBitsCase: aCase)
+				description: 'copy ' , index printString , ', rule '
+					, (aCase at: #rule) printString , ' differs from the definition'.
+			(aCase at: #rule) = 7 ifTrue: [
+					self
+						assert: results first = results last
+						description:
+						'copy ' , index printString , ' differs from the native BitBlt' ] ]
 ]
 
 { #category : 'tests - copy bits primitive' }
