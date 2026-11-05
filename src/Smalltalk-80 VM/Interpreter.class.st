@@ -2719,15 +2719,17 @@ Interpreter >> primitiveInputWord [
 	"Get the next word from the input buffer and remove the word from the
    buffer. This message should be sent just after the input semaphore
    finished a wait (was sent a signal by an I/O device). Fail if the input
-   buffer is empty. (BB 648)"	
-			
+   buffer is empty. (BB 648)"
+
 	| word |
 	word := hal nextInputWord.
-	self success: word notNil. 
-	
+	self success: word isNotNil.
+
 	self success
-		ifTrue: [ self pop: 1. "remove receiver from stack"
-			       self push: (self positive16BitIntegerFor: word) ]
+		ifTrue: [
+				self pop: 1. "remove receiver from stack"
+				self push: (self positive16BitIntegerFor: word).
+				self noteActivity ]
 		ifFalse: [ self primitiveFail ]
 ]
 
@@ -4173,10 +4175,12 @@ Interpreter >> refreshDisplayRect: aRectangle ofForm: aForm [
 	"Not BB code. Show on the host display the rectangle aRectangle that a BitBlt operation
 	has changed in the ST80 form aForm, when aForm is the current display. As in
 	primitiveCopyBits, a change of the display size is passed on to the host first, except
-	the shrinking to 100 lines that the ST80 system does before saving a snapshot."
+	the shrinking to 100 lines that the ST80 system does before saving a snapshot.
+	Drawing on the display is an activity of the guest (see noteActivity)."
 
 	| width height |
 	aForm oop = currentDisplay ifFalse: [ ^ self ].
+	self noteActivity.
 	width := self fetchInteger: WidthInForm ofObject: currentDisplay.
 	height := self fetchInteger: HeightInForm ofObject: currentDisplay.
 	((currentDisplayWidth ~= width or: [ currentDisplayHeight ~= height ])
@@ -4184,7 +4188,7 @@ Interpreter >> refreshDisplayRect: aRectangle ofForm: aForm [
 			hal displayWidth: width displayHeight: height.
 			currentDisplayWidth := width.
 			currentDisplayHeight := height ].
-	(aRectangle notNil and: [ aRectangle hasPositiveExtent ]) ifTrue: [
+	(aRectangle isNotNil and: [ aRectangle hasPositiveExtent ]) ifTrue: [
 		hal updateDisplayRect: aRectangle fromForm: aForm ]
 ]
 
