@@ -6,7 +6,8 @@ Class {
 	#superclass : 'Object',
 	#instVars : [
 		'savedCount',
-		'interpreter'
+		'interpreter',
+		'keyboard'
 	],
 	#category : 'Smalltalk-80 VM-Tests',
 	#package : 'Smalltalk-80 VM-Tests'
@@ -22,6 +23,13 @@ InterpreterTestVM >> interpreter [
 InterpreterTestVM >> interpreter: anInterpreter [
 
 	interpreter := anInterpreter
+]
+
+{ #category : 'vm protocol' }
+InterpreterTestVM >> keyboard [
+	"The keyboard layout of the host, US unless a test says otherwise"
+
+	^ keyboard ifNil: [ 'US' ]
 ]
 
 { #category : 'vm protocol' }

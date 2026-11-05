@@ -728,6 +728,20 @@ InterpreterTest >> newInterpreter [
 		  debug: false
 ]
 
+{ #category : 'private - io' }
+InterpreterTest >> newKeyboardEventOf: aKeyValue scanCode: aScanCode buttons: buttons [
+	"A key down event of the host, as the display morph receives it: aKeyValue is the ASCII code of the key, buttons the modifiers held (see UserInputEvent class variables CTRL_KEY_MASK, CMD_KEY_MASK, SHIFT_KEY_MASK and ALT_KEY_MASK)"
+
+	| event |
+	event := KeyboardEvent new.
+	event
+		instVarNamed: 'keyValue' put: aKeyValue;
+		instVarNamed: 'scanCode' put: aScanCode;
+		instVarNamed: 'buttons' put: buttons;
+		instVarNamed: 'type' put: #keyDown.
+	^ event
+]
+
 { #category : 'private - scheduling' }
 InterpreterTest >> newLinkedList [
 	"A LinkedList of the guest (BB p. 641): field 0 is its first Link, field 1 its last one, both nil when it is empty"
@@ -1257,6 +1271,23 @@ InterpreterTest >> tempFrameStart [
 	"Index of the first temporary in a context, which is also the number of fields that precede the stack"
 
 	^ Interpreter classVarNamed: 'TempFrameStart'
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testANewPasteReplacesTheOneThatIsStillRunning [
+	"A paste in progress is stopped by the next one: its remaining characters are forgotten"
+
+	| hal first |
+	hal := self useClockHALListening.
+	first := [ (Delay forSeconds: 30) wait ] forkAt:
+		         Processor userSchedulingPriority.
+	hal instVarNamed: 'pasteProcess' put: first.
+	self assert: hal isPasting.
+
+	hal cancelPaste.
+
+	self deny: hal isPasting.
+	self assert: first isTerminated
 ]
 
 { #category : 'tests - special selectors' }
@@ -2311,6 +2342,25 @@ InterpreterTest >> testConditionalJumpOnANonBooleanSendsMustBeBoolean [
 		assert: (interpreter instVarNamed: 'messageSelector')
 		equals: (Interpreter classVarNamed: 'MustBeBooleanSelector').
 	self assert: (interpreter instVarNamed: 'method') equals: handler
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testControlIsNotPassedToTheGuestWhileAPasteRuns [
+	"While the characters of a paste are being typed, a Control key down (the shortcut, or its repeat) is not passed on. Outside a paste it is, as before."
+
+	| hal control |
+	hal := self useClockHALListening.
+	control := self
+		           newKeyboardEventOf: 0
+		           scanCode: 224
+		           buttons: (UserInputEvent classVarNamed: 'CTRL_KEY_MASK').
+
+	hal handleKeyboardEvent: control way: #down.
+	self assert: (hal wordsOfType: 3) asArray equals: #( 138 ).
+
+	hal instVarNamed: 'pasteProcess' put: Processor activeProcess.
+	hal handleKeyboardEvent: control way: #down.
+	self assert: (hal wordsOfType: 3) asArray equals: #( 138 )
 ]
 
 { #category : 'tests - copy bits primitive' }
@@ -5061,6 +5111,191 @@ InterpreterTest >> testPageNumberOfAPage [
 	self assert: interpreter success
 ]
 
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteConvertsLineEndingsToReturn [
+	"CR, LF and CRLF are all one Return (13) for the guest"
+
+	| hal |
+	hal := self useClockHAL.
+
+	self
+		assert: (hal asST80Characters:
+				 'a' , (String with: Character cr) , 'b'
+				 , (String with: Character lf) , 'c'
+				 , (String with: Character cr with: Character lf) , 'd')
+		equals: #( 97 13 98 13 99 13 100 )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteConvertsTheAssignmentOfPharoToTheOneOfSmalltalk80 [
+	"x := 1 is typed x _ 1, the assignment of the guest. The conversion can be switched off."
+
+	| hal saved |
+	hal := self useClockHAL.
+	saved := ST80HardwareAbstractionLayer convertAssignmentOnPaste.
+	self onTearDown: [
+		ST80HardwareAbstractionLayer convertAssignmentOnPaste: saved ].
+
+	ST80HardwareAbstractionLayer convertAssignmentOnPaste: true.
+	self
+		assert: (hal asST80Characters: 'x := 1')
+		equals: #( 120 32 95 32 49 ).
+
+	ST80HardwareAbstractionLayer convertAssignmentOnPaste: false.
+	self
+		assert: (hal asST80Characters: 'x := 1')
+		equals: #( 120 32 58 61 32 49 )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteDoesNothingWhenTheGuestDoesNotListen [
+	"With no input semaphore the guest has not asked for input events: nothing is queued"
+
+	| hal |
+	hal := self useClockHAL.
+
+	hal pasteText: 'abc'.
+
+	self deny: hal isPasting.
+	self assert: (hal wordsOfType: 3) isEmpty
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteDropsWhatTheGuestCanNotType [
+	"The guest only knows 7 bit ASCII: accents, symbols and control characters are dropped, not replaced by a question mark"
+
+	| hal |
+	hal := self useClockHAL.
+
+	self
+		assert:
+			(hal asST80Characters:
+				 'caf' , (String with: (Character value: 233))
+				 , (String with: (Character value: 16r20AC))
+				 , (String with: (Character value: 7))
+				 , (String with: (Character value: 127)) , 'e')
+		equals: #( 99 97 102 101 )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteIsFedByBatchesSoThatTheSemaphoreBufferDoesNotOverflow [
+	"The interpreter buffers 4096 signals and a character costs 3: a long text is fed in batches, and the guest reads the input between two batches (here the test drains the queue at each wait)."
+
+	| hal text |
+	hal := self useClockHALListening.
+	text := String new: 1000 withAll: $a.
+
+	hal pasteCodes: (hal asST80Characters: text).
+
+	self assert: hal keysTyped size equals: 1000.
+	self
+		assert: hal drainCount
+		equals: (1000 / hal pasteBatchSize) ceiling.
+	self assert: hal pasteBatchSize * 3 < 4096
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteKeepsTabsAndPrintableCharacters [
+	"Tab (9) and the characters from space to tilde are typed as they are"
+
+	| hal |
+	hal := self useClockHAL.
+
+	self
+		assert:
+		(hal asST80Characters: (String with: Character tab) , ' ~Az09')
+		equals: #( 9 32 126 65 122 48 57 )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteOfNilOrAnEmptyTextIsEmpty [
+
+	| hal |
+	hal := self useClockHAL.
+
+	self assert: (hal asST80Characters: nil) equals: #(  ).
+	self assert: (hal asST80Characters: '') equals: #(  )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteReplacesTypographicCharactersByTheirAsciiLookAlike [
+	"What word processors and web pages put in the text: curly quotes, dashes, non breaking space"
+
+	| hal |
+	hal := self useClockHAL.
+
+	self
+		assert:
+			(hal asST80Characters: (String with: (Character value: 16r2019))
+				 , (String with: (Character value: 16r201C))
+				 , (String with: (Character value: 16r201D))
+				 , (String with: (Character value: 16r2013))
+				 , (String with: (Character value: 16r2014))
+				 , (String with: (Character value: 16rA0)))
+		equals: #( 39 34 34 45 45 32 )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteShortcutIsControlVOrCommandV [
+	"Ctrl-V (Linux, Windows) and Cmd-V (macOS) paste. Plain v, other letters and the combinations with Shift or Alt do not."
+
+	| morph ctrl cmd shift alt v |
+	morph := ST80DisplayMorph basicNew.
+	ctrl := UserInputEvent classVarNamed: 'CTRL_KEY_MASK'.
+	cmd := UserInputEvent classVarNamed: 'CMD_KEY_MASK'.
+	shift := UserInputEvent classVarNamed: 'SHIFT_KEY_MASK'.
+	alt := UserInputEvent classVarNamed: 'ALT_KEY_MASK'.
+	v := [ :buttons :keyName |
+		     | event |
+		     event := self
+			              newKeyboardEventOf: keyName first asInteger
+			              scanCode: 25
+			              buttons: buttons.
+		     event instVarNamed: 'key' put: (KeyboardKey named: keyName).
+		     morph isPasteShortcut: event ].
+
+	self assert: (v value: ctrl value: #V).
+	self assert: (v value: cmd value: #V).
+	self deny: (v value: 0 value: #V).
+	self deny: (v value: ctrl value: #C).
+	self deny: (v value: ctrl + shift value: #V).
+	self deny: (v value: ctrl + alt value: #V)
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteTellsTheGuestThatControlIsReleased [
+	"The user holds Control for the shortcut, and the guest was told: pasted characters would arrive as control characters (ctrl-c is the user interrupt). The guest is told that Control is up before the first character."
+
+	| hal controlUp |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHALListening.
+
+	hal pasteText: 'c'.
+	(Delay forMilliseconds: 200) wait.
+
+	controlUp := hal wordsOfType: 4.
+	self assert: controlUp first equals: 138.
+	self assert: hal keysTyped equals: #( 99 )
+]
+
+{ #category : 'tests - paste' }
+InterpreterTest >> testPasteTypesTheCharactersInTheGuest [
+	"Each character is typed as a time word followed by the immediate down and up of its key (BB p. 649): the guest reads the same input as if the text had been typed. Each input word signals the input semaphore once."
+
+	| hal |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHALListening.
+
+	hal pasteCodes: (hal asST80Characters: 'Ab 1').
+
+	self assert: hal keysTyped equals: #( 65 98 32 49 ).
+	self assert: (hal wordsOfType: 4) asArray equals: #( 65 98 32 49 ).
+	self
+		assert: (interpreter instVarNamed: 'semaphoreIndex')
+		equals: hal wordsRead.
+	self assert: hal wordsRead >= 12
+]
+
 { #category : 'tests - perform and value primitives' }
 InterpreterTest >> testPerform [
 	"Primitive 83 (perform:) sends the message whose selector is its argument: the method found for that selector is the one that runs, on the same receiver, with the selector taken off the stack. Here perform: is sent with the selector of a method that takes no argument."
@@ -7407,6 +7642,16 @@ InterpreterTest >> useClockHAL [
 	hal := InterpreterTestClockHAL withVM: vm.
 	hal uptime: 1000.
 	interpreter instVarNamed: 'hal' put: hal.
+	^ hal
+]
+
+{ #category : 'private - io' }
+InterpreterTest >> useClockHALListening [
+	"The real hardware layer with a clock that the test sets (see #useClockHAL), and an input semaphore of the guest to signal: the guest listens to the input events."
+
+	| hal |
+	hal := self useClockHAL.
+	hal inputSemaphore: self newSemaphore.
 	^ hal
 ]
 

@@ -15,7 +15,6 @@ Class {
 	#name : 'ST80HardwareAbstractionLayer',
 	#superclass : 'Object',
 	#instVars : [
-		'display',
 		'displayWidth',
 		'displayHeight',
 		'window',
@@ -31,7 +30,8 @@ Class {
 		'cursorLink',
 		'scheduledSemaphore',
 		'blueEmulated',
-		'scheduledTime'
+		'scheduledTime',
+		'pasteProcess'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -40,6 +40,7 @@ Class {
 		'BackspaceKey',
 		'BlueButton',
 		'ControlKey',
+		'ConvertAssignmentOnPaste',
 		'DeleteKey',
 		'DeltaTime',
 		'DeviceOff',
@@ -71,6 +72,20 @@ Class {
 	#category : 'Smalltalk-80 VM',
 	#package : 'Smalltalk-80 VM'
 }
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer class >> convertAssignmentOnPaste [
+	"Not BB code. True (the default) if pasting text replaces the Pharo assignment := by the Smalltalk-80 one: _ "
+
+	^ ConvertAssignmentOnPaste ifNil: [ true ]
+]
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer class >> convertAssignmentOnPaste: aBoolean [
+	"Not BB code. Set to false to paste the text of the clipboard as it is. Can be changed at any time, even while a VM is running."
+
+	ConvertAssignmentOnPaste := aBoolean
+]
 
 { #category : 'class initialization' }
 ST80HardwareAbstractionLayer class >> initialize [
@@ -197,6 +212,45 @@ ST80HardwareAbstractionLayer class >> withVM: aVm [
 	^ self basicNew initializeWithVM: aVm; yourself
 ]
 
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> asST80Characters: aString [
+	"Not BB code. Convert the text of the host clipboard into the codes of the keys to
+	type in the guest: an Array of integers. The guest only knows 7 bit ASCII, so:
+	- CR, LF and CRLF, whatever the host, are one Return (13)
+	- Tab (9) and the printable characters (32 to 126) are kept
+	- a few typographic characters are replaced by their ASCII look alike
+	- everything else (control characters, accents, symbols,..) is dropped
+	- when ConvertAssignmentOnPaste is true (see #convertAssignmentOnPaste:),
+	  the Pharo assignment := is replaced by the Smalltalk-80 one: _ (underscore).
+	  Note that the replacement is blind: it also changes := inside a string literal."
+
+	| text codes previous |
+	text := aString ifNil: [ '' ] ifNotNil: [ :string | string asString ].
+	self class convertAssignmentOnPaste ifTrue: [
+		text := text copyReplaceAll: ':=' with: '_' ].
+	codes := OrderedCollection new: text size.
+	previous := nil.
+	text do: [ :each |
+			| code |
+			code := each asInteger.
+			(code = 10 and: [ previous = 13 ])
+				ifTrue: [ "second half of a CRLF: the Return was already sent" ]
+				ifFalse: [
+					(self st80CodeFor: each) ifNotNil: [ :st80Code |
+						codes add: st80Code ] ].
+			previous := code ].
+	^ codes asArray
+]
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> cancelPaste [
+	"Not BB code. Stop the paste that is running, if any: the characters that were not typed yet are forgotten"
+
+	pasteProcess ifNotNil: [ :process |
+			pasteProcess := nil.
+			process terminate ]
+]
+
 { #category : 'time management' }
 ST80HardwareAbstractionLayer >> checkScheduledSemaphore [
 	"Not BB code. Signal the Semaphore of the outstanding request (see #signal:atMilliseconds:) when its time has passed, and forget it: it is signaled only once. Called regularly by the interpreter."
@@ -302,65 +356,38 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 	shift or control information (i.e,, the key with 'A' on it produces the
 	ASCII for 'a'' and the key with '2' and '@' on it produces the ASCII
 	for '2'"
-	
+
 	"ljulliard: here we apply a mixed strategy when it comes to keyboard
 	event handling:
 	  - Modifier states and special keys (down and up) such as CTRL, Caps Lock,...
 	     are passed to the ST80 VM as is or in other words undecoded
      - All other ASCII chars including those shifted are decoded and sent
        as immediate device on/off input events."
-	
+
 	| eventType keyValue parameter mappedChar |
-	
-	eventType := (way = #down) ifTrue: [ DeviceOn ] ifFalse: [ DeviceOff ].
+	eventType := way = #down
+		             ifTrue: [ DeviceOn ]
+		             ifFalse: [ DeviceOff ].
 	keyValue := anEvent keyValue.
-	
+
 	"Extract valid key scan code or value upfront. Ignore keystroke if
 	not valid for the ST-80 VM"
-	(parameter := self keyValueFrom: anEvent)
-		ifNil: [ ^ self ]. "Ignore if not a valid key"
+	(parameter := self keyValueFrom: anEvent) ifNil: [ ^ self ]. "Ignore if not a valid key"
 	"Transcript show: 'parameter'; nextPutAll:  parameter printString; cr."
 
-	parameter < 128
-		ifTrue: [
-			"For regular ASCII value we only process key down events (or DeviceOn in
-			ST-80 VM parlance) as we transmit	decoded key values to the ST-80 VM. Key
-			up events (or DeviceOff) are simply ignored."
-			(eventType = DeviceOn) ifTrue: [ 
+	"Not BB code: while a paste is running (see #pasteText:) the guest must not
+	think that Control is held, or the pasted characters would be taken for 
+	control characters (ctrl-c is the user interrupt !). The Control key that 
+	was used for the paste shortcut (and any repeat of it) is not passed on."
+	(self isPasting and: [
+		 parameter = ControlKey and: [ eventType = DeviceOn ] ]) ifTrue: [
+		^ self ].
 
-				"Shifted and AltGr'ed keys are treated as decoded keys right here 
-				either because they do not match the shifted keys of the original 
-				Alto keyboard (e.g. Shift-6 is ~ on the Alto keyboard or because
-				an improper key value is received from keyDown: Morph handler events"
-				anEvent shiftPressed ifTrue: [ 
-					mappedChar := ((ShiftKeyMap at: vm keyboard) at: (keyValue + 1)) asInteger.
-				].
-				anEvent altKeyPressed ifTrue: [ 
-					"Note: at this level we cannot distinguish between ALT_L and ALT_R
-					so treat both as if they were AltGr. Regular ALT didn't exist anyway
-					on the original Alto keyboard.
-					See https://www.flickr.com/photos/walkingsf/31415192416"
-					mappedChar  := ((AltGrKeyMap at: vm keyboard) at: (keyValue + 1)) asInteger.
-				].
-			
-				"If still nil then it is a regular key that was typed wwith no modifiers"
-				mappedChar ifNil: [ 
-					mappedChar := ((KeyMap at: vm keyboard) at: (keyValue + 1)) asInteger.
-				].
-				
-				"Transcript show: '>> keyboard down+up ';
-					nextPutAll: ' param: ';
-					nextPutAll: mappedChar printString; cr; flush."
-				self inputTimeWord.
-				self inputWordType: DeviceOn parameter: mappedChar.
-				self inputWordType: DeviceOff parameter: mappedChar.
-				 ]
-			]
-		
-		"Special undecoded key with value > 127 : Caps Lock, Ctrl,...
-		sent as is to the ST-80 VM which handles them directly"
-		
-		"FIXME: the Caps Lock input events transmitted to the ST800 VM
+	parameter < 128
+		ifTrue: [ "For regular ASCII value we only process key down events (or DeviceOn in
+			ST-80 VM parlance) as we transmit	decoded key values to the ST-80 VM. Key
+			up events (or DeviceOff) are simply ignored.""Special undecoded key with value > 127 : Caps Lock, Ctrl,...
+		sent as is to the ST-80 VM which handles them directly""FIXME: the Caps Lock input events transmitted to the ST800 VM
 		has no effect. The reason seems to be that on the original Alto
 		keyboard when you press the Caps Lock key down it stays down
 		and only a down input event is sent to the ST80 VM. Then when 
@@ -369,15 +396,34 @@ ST80HardwareAbstractionLayer >> handleKeyboardEvent: anEvent way: way [
 		is like any other key that generates an down+up transition 
 		at once therefore nullifying the effect of the key from the
 		point of view of the ST80-VM "
-		ifFalse: [ 
-			"Transcript show: '>> Undecoded keyboard event type: ';
+				eventType = DeviceOn ifTrue: [ "Shifted and AltGr'ed keys are treated as decoded keys right here 
+				either because they do not match the shifted keys of the original 
+				Alto keyboard (e.g. Shift-6 is ~ on the Alto keyboard or because
+				an improper key value is received from keyDown: Morph handler events"
+						anEvent shiftPressed ifTrue: [
+								mappedChar := ((ShiftKeyMap at: vm keyboard) at: keyValue + 1)
+									              asInteger ].
+						anEvent altKeyPressed ifTrue: [ "Note: at this level we cannot distinguish between ALT_L and ALT_R
+					so treat both as if they were AltGr. Regular ALT didn't exist anyway
+					on the original Alto keyboard.
+					See https://www.flickr.com/photos/walkingsf/31415192416"
+								mappedChar := ((AltGrKeyMap at: vm keyboard) at: keyValue + 1)
+									              asInteger ].
+
+						"If still nil then it is a regular key that was typed wwith no modifiers"
+						mappedChar ifNil: [
+							mappedChar := ((KeyMap at: vm keyboard) at: keyValue + 1)
+								              asInteger ].
+
+						"Transcript show: '>> keyboard down+up ';
+					nextPutAll: ' param: ';
+					nextPutAll: mappedChar printString; cr; flush."
+						self inputKeyCode: mappedChar ] ]
+		ifFalse: [ "Transcript show: '>> Undecoded keyboard event type: ';
 				nextPutAll: eventType printString; 
 				nextPutAll: ' param: ';
 				nextPutAll: parameter printString; cr; flush."
-			self inputWordType: eventType parameter: parameter.
-			 ].
-	 
-
+			self inputWordType: eventType parameter: parameter ]
 ]
 
 { #category : 'event handling' }
@@ -437,7 +483,6 @@ ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	at 640x480"
 	displayWidth := nil.
 	displayHeight := nil.
-	display := nil.
 
 	"I/O Device (keyboard, mouse, location,...) 
 	Input event queue"
@@ -456,6 +501,18 @@ ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	None to start with"
 	scheduledSemaphore := nil.
 	scheduledTime := 0
+]
+
+{ #category : 'event handling' }
+ST80HardwareAbstractionLayer >> inputKeyCode: aCode [
+	"Not BB code. Type a key of a decoded keyboard in the guest: the code is the
+	one of the character (see BB p. 650), sent as a time word followed by the 
+	immediate down and up transitions of the key. Used for the keys typed on the 
+	host keyboard and for the characters pasted from the host clipboard."
+
+	self inputTimeWord.
+	self inputWordType: DeviceOn parameter: aCode.
+	self inputWordType: DeviceOff parameter: aCode
 ]
 
 { #category : 'event handling' }
@@ -543,6 +600,13 @@ ST80HardwareAbstractionLayer >> isInputEventDriven [
 	^ true
 ]
 
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> isPasting [
+	"Not BB code. True while the characters of a paste are being typed in the guest (see #pasteText:)"
+
+	^ pasteProcess isNotNil
+]
+
 { #category : 'event handling' }
 ST80HardwareAbstractionLayer >> keyValueFrom: anEvent [
 	"Map native key scan code to valid values for ST80 keyboard 
@@ -610,6 +674,57 @@ ST80HardwareAbstractionLayer >> nextInputWord [
 
 ]
 
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> pasteBatchSize [
+	"Not BB code. Number of characters typed in the guest at once when pasting. Each one makes about 
+	3 input words (a time word and 2 key transitions) and each word signals the input semaphore, 
+	while the interpreter buffers 4096 signals: 64 characters is about 200 signals."
+
+	^ 64
+]
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> pasteCodes: anArray [
+	"Not BB code. Type the keys of anArray (see #asST80Characters:) in the guest, #pasteBatchSize at 
+	a time. Between two batches wait for the guest to read the input events (see 
+	#waitForGuestToReadInput). Give up if it does not: the guest is not running."
+
+	| start |
+	start := 1.
+	[ start <= anArray size ] whileTrue: [
+			| stop |
+			stop := start + self pasteBatchSize - 1 min: anArray size.
+			start to: stop do: [ :index |
+			self inputKeyCode: (anArray at: index) ].
+			self waitForGuestToReadInput ifFalse: [ ^ self ].
+			start := stop + 1 ]
+]
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> pasteText: aString [
+	"Not BB code. Type the text of the host clipboard in the guest, as if it was typed on the keyboard, 
+	where the cursor of the guest is. Called by the display morph for the paste shortcut (Ctrl-V, 
+	Cmd-V), which is not sent to the guest: only the characters are (see #asST80Characters:).
+	- The guest is told that Control is released: the user holds it for the shortcut, and the guest
+	  would take every pasted character for a control character (ctrl-c is its user interrupt).
+	  The Control key is not passed on while the paste runs (see #handleKeyboardEvent:way:).
+	- The characters are fed by a process, a few at a time (see #pasteCodes:), so that a long text 
+	  does not overflow the buffer of semaphores of the interpreter. A new paste replaces the 
+	  one that is still running.
+	- Nothing is done when the guest does not listen to the input events (no input semaphore)."
+
+	| codes |
+	inputSemaphore ifNil: [ ^ self ].
+	codes := self asST80Characters: aString.
+	codes ifEmpty: [ ^ self ].
+	self cancelPaste.
+	self inputWordType: DeviceOff parameter: ControlKey.
+	pasteProcess := [
+	                [ self pasteCodes: codes ] ensure: [
+		                pasteProcess := nil ] ] forkAt:
+		                Processor userSchedulingPriority
+]
+
 { #category : 'protocol' }
 ST80HardwareAbstractionLayer >> quit [
 	"message sent by primitiveQuit"
@@ -652,6 +767,24 @@ ST80HardwareAbstractionLayer >> signal: aST80Semaphore atMilliseconds: time [
 	scheduledSemaphore := aST80Semaphore.
 	scheduledTime := time.
 	aST80Semaphore ifNotNil: [ self checkScheduledSemaphore ]
+]
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> st80CodeFor: aCharacter [
+	"Not BB code. The code of the key that types aCharacter in the guest, or nil if the guest can not type it (see #asST80Characters:)"
+
+	| code |
+	code := aCharacter asInteger.
+	(#( 10 13 ) includes: code) ifTrue: [ ^ ReturnKey ].
+	code = 9 ifTrue: [ ^ TabKey ].
+	(code between: 32 and: 126) ifTrue: [ ^ code ].
+	"Typographic look alikes"
+	(#( 16r2018 16r2019 16r2032 ) includes: code) ifTrue: [ ^ 39 ].
+	(#( 16r201C 16r201D ) includes: code) ifTrue: [ ^ 34 ].
+	(code between: 16r2010 and: 16r2015) ifTrue: [ ^ 45 ].
+	code = 16r2212 ifTrue: [ ^ 45 ].
+	(#( 16rA0 16r2007 16r202F ) includes: code) ifTrue: [ ^ SpaceKey ].
+	^ nil
 ]
 
 { #category : 'settings' }
@@ -712,4 +845,18 @@ ST80HardwareAbstractionLayer >> vm [
 	"Return the ST80VirtualMachine instance that owns this HAL.
 	Used by the Interpreter to reach host-side VM operations such as saveSnapshot."
 	^ vm
+]
+
+{ #category : 'clipboard' }
+ST80HardwareAbstractionLayer >> waitForGuestToReadInput [
+	"Not BB code. Wait until the guest has read all the input words queued so far. Answer false if it
+	did not after 5 seconds (the guest does not run, or has stopped listening): the paste is given up."
+
+	| deadline |
+	deadline := Time millisecondClockValue + 5000.
+	[ inputQueue isEmpty ] whileFalse: [
+			inputSemaphore ifNil: [ ^ false ].
+			Time millisecondClockValue > deadline ifTrue: [ ^ false ].
+			(Delay forMilliseconds: 5) wait ].
+	^ true
 ]

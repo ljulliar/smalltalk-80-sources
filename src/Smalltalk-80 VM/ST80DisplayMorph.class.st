@@ -107,8 +107,19 @@ ST80DisplayMorph >> initWithExtent: anExtentPoint vm: aVm [
 ]
 
 { #category : 'event handling' }
+ST80DisplayMorph >> isPasteShortcut: anEvent [
+	"Not BB code. True for Ctrl-V (Linux, Windows) and Cmd-V (macOS), the usual shortcuts to paste the 
+	clipboard of the host. Shift and Alt must not be held, they make other shortcuts."
+
+	^ (anEvent commandKeyPressed or: [ anEvent controlKeyPressed ]) and: [
+			  anEvent shiftPressed not and: [
+				  anEvent altKeyPressed not and: [ anEvent key name = #V ] ] ]
+]
+
+{ #category : 'event handling' }
 ST80DisplayMorph >> keyDown: anEvent [
 	"A key on the keyboard was pressed"
+
 	"Transcript show: '-----------------------------'; cr; show: 'Key down: '; cr;
 		show: ' keyValue: '; nextPutAll: anEvent keyValue printString; 
 		show: ' key: '; nextPutAll: anEvent key printString; cr;
@@ -122,8 +133,16 @@ ST80DisplayMorph >> keyDown: anEvent [
 		show: ' AltGr : '; nextPutAll: (anEvent key name = #ALT_R) printString; cr;
 		show: ' modifier: '; nextPutAll:  anEvent modifierString printString; 
 		cr; flush."
-		
-	hal handleKeyboardEvent: anEvent way: #down.
+
+	"Not BB code: the paste shortcut is handled here, by the host. It is not sent to the 
+	guest: only the characters of the host clipboard are (see ST80HardwareAbstractionLayer>>pasteText:).
+	The repeats of a key held down are ignored: they would restart the paste."
+
+	(self isPasteShortcut: anEvent) ifTrue: [
+			anEvent isRepeat ifFalse: [ hal pasteText: Clipboard clipboardText ].
+			^ self ].
+
+	hal handleKeyboardEvent: anEvent way: #down
 ]
 
 { #category : 'event handling' }
