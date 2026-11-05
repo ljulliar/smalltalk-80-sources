@@ -32,7 +32,20 @@ But does it actually work ? the answer is yes it does :-) As seeing is believing
 The Smalltalk-80 startup screen that you see here is exactly as presented in the 1983 Blue Book _Smalltalk-80: The Language and Its Implementation
 By Adele Goldberg and David Robson_. Notice the date of the VM image in the System Transcript window. Using your own machine keyboard and mouse you can interact with the environment: browse the class hierachy and its sources, execute some Smalltalk-80 code in a Workspace...
 
-Mouse buttons mapping:
+# Mouse and keyboard mapping
+The Smalltalk-80 VM only supports ASCII characters with values 0 from 128. Typing characters outside of this range won't do any harm to the Smalltalk-80 VM as they will be either filtered out by the host VM.
+
+The CTRL-V (or Cmd-V) shortcut allows for copy-pasting text from the host to the Smalltalk-80 guest VM. Give it a try: start the guest VM, right-click and open a new Workspace, copy the code below from the Blue Book page 372, select the code block, left-click and `do it`.
+
+~~~Smalltalk
+|bic|
+  bic := Pen new defaultNib: 4.
+  bic dragon: 9
+~~~
+
+You'll notice that the paste operation automatically turn the modern Smalltalk `:=` assignement into the Smalltalk-80 `_`(underscore) character  displayed as a left arrow &larr; .
+
+Here is the mouse buttons mapping for a right handed mouse :
 * left click is the Smalltalk-80 red button (select)
 * right click is the yellow button (menus, do it, print it)
 * Cmd/Alt/Ctrl + left click is the blue button (window menu: under, move, frame, collapse, close). To move a window, blue-click its title bar and choose `move`, then click to drop it.
