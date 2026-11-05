@@ -31,7 +31,8 @@ Class {
 		'scheduledSemaphore',
 		'blueEmulated',
 		'scheduledTime',
-		'pasteProcess'
+		'pasteProcess',
+		'wakeUpSemaphore'
 	],
 	#classVars : [
 		'AbsoluteTime',
@@ -469,6 +470,36 @@ ST80HardwareAbstractionLayer >> hasMillisecondClockReached: aTime [
 	^ (self millisecondsUptime - aTime bitAnd: 16rFFFFFFFF) < 16r80000000
 ]
 
+{ #category : 'idle' }
+ST80HardwareAbstractionLayer >> idleFor: requestedMilliseconds [
+	"Not BB code. Called by the interpreter when it takes the guest for idle (see Interpreter>>noteProcessSwitch): put the interpreter to sleep, so as not to burn a CPU for nothing, until the first of:
+	- the time asked for, at most #maximumIdleMilliseconds
+	- the time of the outstanding timer request (see #signal:atMilliseconds:)
+	- an input word (see #inputWord:), which signals the wake up Semaphore.
+	The old signals of the wake up Semaphore are dropped first, then the interpreter is looked at: an input word that comes in after that leaves a signal, so the wait ends at once and no word is missed. The timer is checked when the interpreter wakes up."
+
+	| milliseconds |
+	self wakeUpSemaphore consumeAllSignals.
+	vm interpreter hasBufferedSignals ifFalse: [
+			milliseconds := self idleMillisecondsFor: requestedMilliseconds.
+			milliseconds > 0 ifTrue: [
+				self wakeUpSemaphore waitTimeoutMilliseconds: milliseconds ] ].
+	self checkScheduledSemaphore
+]
+
+{ #category : 'idle' }
+ST80HardwareAbstractionLayer >> idleMillisecondsFor: requestedMilliseconds [
+	"Not BB code. How long the interpreter may sleep when asking for requestedMilliseconds: at most that long (and #maximumIdleMilliseconds), and not past the time of the outstanding timer request (see #signal:atMilliseconds:), whose Semaphore the guest waits for. 0 when that time has passed."
+
+	| milliseconds |
+	milliseconds := (requestedMilliseconds max: 0) min:
+		                self maximumIdleMilliseconds.
+	scheduledSemaphore ifNil: [ ^ milliseconds ].
+	(self hasMillisecondClockReached: scheduledTime) ifTrue: [ ^ 0 ].
+	^ milliseconds min:
+		  (scheduledTime - self millisecondsUptime bitAnd: 16rFFFFFFFF)
+]
+
 { #category : 'initialization' }
 ST80HardwareAbstractionLayer >> initializeWithVM: aVm [
 	"Make sure to initialize class variables"
@@ -557,12 +588,14 @@ ST80HardwareAbstractionLayer >> inputWord: aValue [
 	"Push a 16 bit value in the input event queue
 	and signal the input semaphore. BB p. 648.
 	Not BB code: with no input semaphore (not set yet, or reset to nil by 
-	the guest) nobody listens: the word is dropped, as the C++ VM does."
+	the guest) nobody listens: the word is dropped, as the C++ VM does.
+	An interpreter that sleeps because the guest is idle (see #idleFor:) is woken up."
 
 	self assert: (aValue between: 0 and: 16rFFFF).
 	inputSemaphore ifNil: [ ^ self ].
 	inputQueue add: aValue.
-	vm interpreter asynchronousSignal: inputSemaphore
+	vm interpreter asynchronousSignal: inputSemaphore.
+	self wakeUpSemaphore signal
 ]
 
 { #category : 'event handling' }
@@ -632,6 +665,13 @@ ST80HardwareAbstractionLayer >> keyValueFrom: anEvent [
 	
 	"Should not be reached but just in case..."
 	^ nil
+]
+
+{ #category : 'idle' }
+ST80HardwareAbstractionLayer >> maximumIdleMilliseconds [
+	"Not BB code. The longest the interpreter sleeps in one go, whatever it asks for"
+
+	^ 1000
 ]
 
 { #category : 'time management' }
@@ -859,4 +899,11 @@ ST80HardwareAbstractionLayer >> waitForGuestToReadInput [
 			Time millisecondClockValue > deadline ifTrue: [ ^ false ].
 			(Delay forMilliseconds: 5) wait ].
 	^ true
+]
+
+{ #category : 'idle' }
+ST80HardwareAbstractionLayer >> wakeUpSemaphore [
+	"Not BB code. Signaled when something happens that the sleeping interpreter must see (an input word, see #inputWord:)"
+
+	^ wakeUpSemaphore ifNil: [ wakeUpSemaphore := Semaphore new ]
 ]

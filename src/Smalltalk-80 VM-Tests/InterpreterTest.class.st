@@ -1519,11 +1519,43 @@ InterpreterTest >> superSenderWith: literals bytecodes: bytecodes methodClass: a
 		  bytecodes: bytecodes
 ]
 
+{ #category : 'private - idle' }
+InterpreterTest >> switchProcessesTimes: aCount [
+	"Make the interpreter switch aCount times between two Processes of the scheduler of the test, as the guest does when its scheduler and its controllers loop on Processor yield"
+
+	| other |
+	other := self newProcessAt: 3.
+	memory storePointer: 1 ofObject: other withValue: context.
+	aCount timesRepeat: [
+			interpreter transferTo: other.
+			interpreter checkProcessSwitch.
+			"Back to the first Process, so that the same one can be switched to again"
+			memory storePointer: 1 ofObject: scheduler withValue: activeProcess ]
+]
+
 { #category : 'private' }
 InterpreterTest >> tempFrameStart [
 	"Index of the first temporary in a context, which is also the number of fields that precede the stack"
 
 	^ Interpreter classVarNamed: 'TempFrameStart'
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testAFileAccessIsAnActivity [
+	"The private primitives 128 to 133 are file system accesses, an activity of the guest: it is not idle"
+
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	self useFileSystemOn: self newTemporaryDirectory.
+	Interpreter idleSwitchThreshold: 0.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+	self switchProcessesTimes: 4.
+	self assert: interpreter quietSwitches equals: 4.
+
+	self runPrimitive: #primitivePosixLastError with: { nilPointer }.
+	interpreter instVarNamed: 'primitiveIndex' put: 132.
+	interpreter dispatchPrivatePrimitives.
+
+	self assert: interpreter quietSwitches equals: 0
 ]
 
 { #category : 'tests - paste' }
@@ -1596,6 +1628,40 @@ InterpreterTest >> testActiveProcessIsTheOneOfTheScheduler [
 
 	self assert: interpreter activeProcess equals: activeProcess.
 	self assert: interpreter schedulerPointer equals: scheduler
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testActivityKeepsTheInterpreterAwake [
+	"A guest that does something between its process switches is not idle, however many switches it makes: the interpreter never sleeps."
+
+	| hal |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useHAL.
+	Interpreter idleSwitchThreshold: 10.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+
+	20 timesRepeat: [
+			self switchProcessesTimes: 5.
+			interpreter noteActivity ].
+
+	self assert: (hal callsTo: #idleFor:) isEmpty.
+	self assert: interpreter processSwitchCount equals: 100
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testActivityStartsTheCountOfQuietSwitchesAgain [
+	"Something that an idle guest does not do (see Interpreter>>noteActivity) makes the guest not idle: the quiet switches are counted from zero again, the total of switches is not."
+
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	self useHAL.
+	Interpreter idleSwitchThreshold: 0.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+	self switchProcessesTimes: 5.
+
+	interpreter noteActivity.
+
+	self assert: interpreter quietSwitches equals: 0.
+	self assert: interpreter processSwitchCount equals: 5
 ]
 
 { #category : 'tests - arithmetic primitives' }
@@ -3320,6 +3386,30 @@ InterpreterTest >> testDoubleExtendedSuperSend [
 		equals: 1
 ]
 
+{ #category : 'tests - idle' }
+InterpreterTest >> testDrawingOnTheDisplayIsAnActivity [
+	"The guest draws on the screen (copyBits on the Form that is the display): it is not idle. Drawing on another Form is not a sign of activity on the screen, and does not count."
+
+	| hal destination blt |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useHAL.
+	Interpreter idleSwitchThreshold: 0.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+	destination := self newFormWidth: 32 height: 120 words: 240.
+	self runPrimitive: #primitiveBeDisplay with: { destination }.
+	blt := self newBitBltOn: destination source: nil rule: 15.
+	self setBitBlt: blt field: 6 to: 10.
+	self setBitBlt: blt field: 7 to: 7.
+	self setBitBlt: blt field: 12 to: 32.
+	self setBitBlt: blt field: 13 to: 120.
+	self switchProcessesTimes: 4.
+	self assert: interpreter quietSwitches equals: 4.
+
+	self runPrimitive: #primitiveCopyBits with: { blt }.
+
+	self assert: interpreter quietSwitches equals: 0
+]
+
 { #category : 'tests - stack bytecodes' }
 InterpreterTest >> testDuplicateTop [
 	"Bytecode 136 pushes a second copy of the top of the stack"
@@ -4541,6 +4631,108 @@ InterpreterTest >> testHeaderFields [
 	self assert: (interpreter temporaryCountof: method) equals: 5.
 	self assert: (interpreter largeContextFlagOf: method) equals: 1.
 	self assert: (interpreter literalCountOf: method) equals: 2
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testIdleDetectionCanBeSwitchedOff [
+	"A threshold of 0 switches the idle detection off: the interpreter never sleeps"
+
+	| hal |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useHAL.
+	Interpreter idleSwitchThreshold: 0.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+
+	self switchProcessesTimes: 200.
+
+	self assert: (hal callsTo: #idleFor:) isEmpty
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testIdleDoesNotSleepWhenSemaphoresAreWaitingToBeSignaled [
+	"With Semaphores buffered for the interpreter (an input event, a timer) it has something to do: the host does not let it sleep."
+
+	| hal started |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHALListening.
+	hal inputWord: 16r1234.
+	self assert: interpreter hasBufferedSignals.
+
+	started := Time millisecondClockValue.
+	hal idleFor: 800.
+
+	self assert: Time millisecondClockValue - started < 400
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testIdleDoesNotSleepWhenTheTimerOfTheGuestIsDue [
+	"A timer request whose time has passed is not slept on: the Semaphore of the guest is buffered at once"
+
+	| hal timer started |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	timer := self newSemaphore.
+	hal signal: timer atMilliseconds: 1500.
+	hal uptime: 2000.
+
+	started := Time millisecondClockValue.
+	hal idleFor: 800.
+
+	self assert: Time millisecondClockValue - started < 400.
+	self assert: (interpreter instVarNamed: 'semaphoreIndex') equals: 1
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testIdleSleepIsCappedAndNeverNegative [
+	"The interpreter never sleeps longer than the maximum, so that it looks at the host often enough, and a negative time is no time."
+
+	| hal |
+	hal := self useClockHAL.
+
+	self assert: (hal idleMillisecondsFor: 5) equals: 5.
+	self
+		assert: (hal idleMillisecondsFor: 100000)
+		equals: hal maximumIdleMilliseconds.
+	self assert: (hal idleMillisecondsFor: -3) equals: 0
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testIdleSleepIsInterruptedByAnInputWord [
+	"The interpreter sleeping for the idle guest wakes up as soon as the host queues an input word (a key, a mouse move), long before the time that was asked for. The word was queued: nothing is lost."
+
+	| hal started woken |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHALListening.
+	[
+		(Delay forMilliseconds: 50) wait.
+		hal inputWord: 16r1234 ] forkAt: Processor userInterruptPriority.
+
+	started := Time millisecondClockValue.
+	hal idleFor: 5000.
+	woken := Time millisecondClockValue - started.
+
+	self assert: woken < 2000.
+	self assert: woken >= 20.
+	self assert: hal wordsRead equals: 1.
+	self assert: interpreter hasBufferedSignals
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testIdleSleepStopsAtTheTimerOfTheGuest [
+	"The guest waits for the Semaphore of its timer request (see primitiveSignalAtTick): the interpreter does not sleep past the time of that request, and not at all when the time has passed."
+
+	| hal timer |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useClockHAL.
+	timer := self newSemaphore.
+	hal signal: timer atMilliseconds: 1040.
+
+	self assert: (hal idleMillisecondsFor: 500) equals: 40.
+	self assert: (hal idleMillisecondsFor: 10) equals: 10.
+
+	hal uptime: 1040.
+	hal checkScheduledSemaphore.
+	self assert: (hal idleMillisecondsFor: 500) equals: 500
 ]
 
 { #category : 'tests - input and cursor primitives' }
@@ -6028,6 +6220,21 @@ InterpreterTest >> testQuickReturnSelf [
 	self assert: interpreter stackTop equals: receiver
 ]
 
+{ #category : 'tests - idle' }
+InterpreterTest >> testQuietProcessSwitchesAreCounted [
+	"Each switch between Processes with no activity in between is one more quiet switch: this is what the guest does when it has nothing to do (see Interpreter>>noteProcessSwitch)."
+
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	self useHAL.
+	Interpreter idleSwitchThreshold: 0.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+
+	self switchProcessesTimes: 7.
+
+	self assert: interpreter quietSwitches equals: 7.
+	self assert: interpreter processSwitchCount equals: 7
+]
+
 { #category : 'tests - system primitives' }
 InterpreterTest >> testQuit [
 	"Primitive 113 leaves the system: the VM asks the host to stop. The stand-in host only records it, so the test goes on."
@@ -6060,6 +6267,24 @@ InterpreterTest >> testQuo [
 InterpreterTest >> testQuoByZeroFails [
 
 	self assertFailureOf: #primitiveQuo with: 7 with: 0
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testReadingAnInputWordIsAnActivity [
+	"The guest reads the input words that the host queued: it is not idle"
+
+	| hal |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useHAL.
+	Interpreter idleSwitchThreshold: 0.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+	hal queueInputWord: 16r1234.
+	self switchProcessesTimes: 4.
+	self assert: interpreter quietSwitches equals: 4.
+
+	self runPrimitive: #primitiveInputWord with: { nilPointer }.
+
+	self assert: interpreter quietSwitches equals: 0
 ]
 
 { #category : 'tests - sends' }
@@ -7513,6 +7738,49 @@ InterpreterTest >> testSystemPrimitiveEquivalentFromASend [
 
 	self assert: self stackDepth equals: 1.
 	self assert: interpreter stackTop equals: self truePointer
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testTheGuestIsIdleAfterEnoughQuietSwitches [
+	"After idleSwitchThreshold quiet switches in a row the host is asked to put the interpreter to sleep, for idleMilliseconds. Not before. And it keeps being asked at the next switches, while the guest stays quiet."
+
+	| hal |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useHAL.
+	Interpreter idleSwitchThreshold: 10.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+
+	self switchProcessesTimes: 9.
+	self assert: (hal callsTo: #idleFor:) isEmpty.
+
+	self switchProcessesTimes: 1.
+	self
+		assert: (hal callsTo: #idleFor:)
+		equals: { { Interpreter idleMilliseconds } }.
+
+	self switchProcessesTimes: 2.
+	self assert: (hal callsTo: #idleFor:) size equals: 3.
+	self assert: interpreter idleSleepCount equals: 3
+]
+
+{ #category : 'tests - idle' }
+InterpreterTest >> testTheInterpreterDoesNotSleepWithSemaphoresToSignal [
+	"With Semaphores buffered by the host (an input event, a timer) the guest has something to do: the interpreter does not sleep, even after many quiet switches. And the Semaphores are an activity that starts the count again when they are signaled."
+
+	| hal semaphore |
+	self setUpSchedulerWithPriorities: 4 activeAt: 3.
+	hal := self useHAL.
+	Interpreter idleSwitchThreshold: 3.
+	self onTearDown: [ Interpreter idleSwitchThreshold: nil ].
+	semaphore := self newSemaphore.
+	self switchProcessesTimes: 2.
+
+	interpreter asynchronousSignal: semaphore.
+	interpreter idle.
+
+	self assert: (hal callsTo: #idleFor:) isEmpty.
+	interpreter checkProcessSwitch.
+	self assert: interpreter quietSwitches equals: 0
 ]
 
 { #category : 'tests - time primitives' }

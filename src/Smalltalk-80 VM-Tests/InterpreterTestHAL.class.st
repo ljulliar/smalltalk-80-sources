@@ -82,6 +82,12 @@ InterpreterTestHAL >> eventDriven: aBoolean [
 	eventDriven := aBoolean
 ]
 
+{ #category : 'hal protocol' }
+InterpreterTestHAL >> idleFor: milliseconds [
+
+	calls add: #idleFor: -> { milliseconds }
+]
+
 { #category : 'initialization' }
 InterpreterTestHAL >> initialize [
 

@@ -39,7 +39,10 @@ Class {
 		'lowSpaceSemaphore',
 		'oopsLeftLimit',
 		'wordsLeftLimit',
-		'semaphoreMutex'
+		'semaphoreMutex',
+		'quietSwitches',
+		'processSwitchCount',
+		'idleSleepCount'
 	],
 	#classVars : [
 		'ActiveProcessIndex',
@@ -74,6 +77,8 @@ Class {
 		'HeaderIndex',
 		'HeightInForm',
 		'HomeIndex',
+		'IdleMilliseconds',
+		'IdleSwitchThreshold',
 		'InitialIPIndex',
 		'InstanceSpecificationIndex',
 		'InstructionPointerIndex',
@@ -121,6 +126,34 @@ Class {
 	#category : 'Smalltalk-80 VM',
 	#package : 'Smalltalk-80 VM'
 }
+
+{ #category : 'idle' }
+Interpreter class >> idleMilliseconds [
+	"Not BB code. How long the interpreter sleeps each time it takes the guest for idle, at most: an input word or a timer ends the sleep at once (see ST80HardwareAbstractionLayer>>idleFor:)."
+
+	^ IdleMilliseconds ifNil: [ 5 ]
+]
+
+{ #category : 'idle' }
+Interpreter class >> idleMilliseconds: anInteger [
+	"Not BB code. See #idleMilliseconds. Can be changed at any time, even while a VM is running."
+
+	IdleMilliseconds := anInteger
+]
+
+{ #category : 'idle' }
+Interpreter class >> idleSwitchThreshold [
+	"Not BB code. The number of process switches in a row with no outside activity (see Interpreter>>noteActivity) after which the guest is taken for idle and the interpreter sleeps (see Interpreter>>noteProcessSwitch). 0 switches the idle detection off: the interpreter then never sleeps."
+
+	^ IdleSwitchThreshold ifNil: [ 50 ]
+]
+
+{ #category : 'idle' }
+Interpreter class >> idleSwitchThreshold: anInteger [
+	"Not BB code. See #idleSwitchThreshold. Can be changed at any time, even while a VM is running."
+
+	IdleSwitchThreshold := anInteger
+]
 
 { #category : 'class initialization' }
 Interpreter class >> initialize [
@@ -354,11 +387,16 @@ Interpreter >> checkProcessSwitch [
    the interpret routine) and performs the actual process switch if one has 
    been called for. It stores the active context pointer in the old Process, 
    stores the new Process in the ProcessorScheduler's active process field, 
-   and loads the new active context out of that Process. (BB 643)"
+   and loads the new active context out of that Process. (BB 643)
+
+	Not BB code: a Semaphore that the host buffered (an input event, a timer) is 
+	an activity of the guest, and a switch is counted to detect that the guest has 
+	nothing to do (see noteActivity and noteProcessSwitch)."
 
 	| activeProcess |
 	[ semaphoreIndex > 0 ] whileTrue: [
-		self synchronousSignal: self nextBufferedSemaphore ].
+			self noteActivity.
+			self synchronousSignal: self nextBufferedSemaphore ].
 	newProcessWaiting ifTrue: [
 			newProcessWaiting := false.
 			activeProcess := self activeProcess.
@@ -374,7 +412,8 @@ Interpreter >> checkProcessSwitch [
 				(memory fetchPointer: SuspendedContextIndex ofObject: newProcess).
 			"From dbanay: Need to remove reference"
 			memory decreaseReferencesTo: newProcess.
-			newProcess := NilPointer ]
+			newProcess := NilPointer.
+			self noteProcessSwitch ]
 ]
 
 { #category : 'main loop' }
@@ -649,10 +688,14 @@ Interpreter >> dispatchPrivatePrimitives [
 	  130 - primitivePosixFileOperation  (file read/write/open/close/size/truncate)
 	  131 - primitivePosixDirectoryOperation  (create/delete/rename/enumerate files)
 	  132 - primitivePosixLastError  (retrieve last OS error code)
-	  133 - primitivePosixErrorString  (retrieve error string for a code)"
+	  133 - primitivePosixErrorString  (retrieve error string for a code)
+	Not BB code: they are all file system accesses, an activity of the guest (see noteActivity)."
+
+	self noteActivity.
 	primitiveIndex = 128 ifTrue: [ ^ self primitiveBeSnapshotFile ].
 	primitiveIndex = 130 ifTrue: [ ^ self primitivePosixFileOperation ].
-	primitiveIndex = 131 ifTrue: [ ^ self primitivePosixDirectoryOperation ].
+	primitiveIndex = 131 ifTrue: [
+		^ self primitivePosixDirectoryOperation ].
 	primitiveIndex = 132 ifTrue: [ ^ self primitivePosixLastError ].
 	primitiveIndex = 133 ifTrue: [ ^ self primitivePosixErrorString ]
 ]
@@ -1014,6 +1057,13 @@ flag value	meaning
 	^ self extractBits: 0 to: 2 of: (self headerOf: methodPointer)
 ]
 
+{ #category : 'idle' }
+Interpreter >> hasBufferedSignals [
+	"Not BB code. True if the host has buffered Semaphores that checkProcessSwitch has not signaled yet (see asynchronousSignal:)"
+
+	^ semaphoreIndex > 0
+]
+
 { #category : 'classes' }
 Interpreter >> hash: objectPointer [
 	"The selectors are instances of Symbol, so they may be tested for equality by testing 
@@ -1049,6 +1099,23 @@ Interpreter >> highByteOf: anInteger [
 	 the low-order bit with index 15) (BB 575)"
 
 	^ self extractBits: 0 to: 7 of: anInteger
+]
+
+{ #category : 'idle' }
+Interpreter >> idle [
+	"Not BB code. The guest has nothing to do (see noteProcessSwitch): let the host put the interpreter to sleep for a short while (see ST80HardwareAbstractionLayer>>idleFor:). Not when the host has Semaphores waiting to be signaled: the guest has something to do then. The count of quiet process switches is kept, so that the next switch sleeps again until there is some activity."
+
+	self hasBufferedSignals ifTrue: [ ^ self ].
+	hal ifNil: [ ^ self ].
+	idleSleepCount := idleSleepCount + 1.
+	hal idleFor: self class idleMilliseconds
+]
+
+{ #category : 'idle' }
+Interpreter >> idleSleepCount [
+	"Not BB code. How many times the interpreter has slept because the guest was taken for idle. For tuning the idle detection (see noteProcessSwitch)."
+
+	^ idleSleepCount
 ]
 
 { #category : 'primitive methods' }
@@ -1346,6 +1413,11 @@ Interpreter >> initializeWithMemory: anObjectMemory hal: hwAbstractionLayer file
 
 	"Cycle counter"
 	cycleCounter := 0.
+
+	"Not BB code: counters of the idle detection (see noteProcessSwitch)"
+	quietSwitches := 0.
+	processSwitchCount := 0.
+	idleSleepCount := 0.
 
 	"ST80 Memory space parameters"
 	lowSpaceSemaphore := NilPointer.
@@ -1714,6 +1786,25 @@ Interpreter >> nilContextFields [
    memory storePointer: InstructionPointerIndex
           ofObject: activeContext
           withValue: NilPointer
+]
+
+{ #category : 'idle' }
+Interpreter >> noteActivity [
+	"Not BB code. Called when something happens that a guest that has nothing to do would not cause: an input word read, something drawn, a file read or written, a Semaphore signaled by the host (input, timer). The guest is not idle: start counting the process switches again (see noteProcessSwitch)."
+
+	quietSwitches := 0
+]
+
+{ #category : 'idle' }
+Interpreter >> noteProcessSwitch [
+	"Not BB code. Called when the interpreter has switched to another Process (see checkProcessSwitch). The guest never runs out of Processes to run: when it has nothing to do, its window scheduler and its controllers loop on Processor yield, which switches Processes over and over, with no input, no drawing and no file access in between. After idleSwitchThreshold such switches in a row the guest is taken for idle and the interpreter sleeps for a few milliseconds, instead of burning a CPU for nothing. Any activity (see noteActivity) starts the count again, and the sleep ends at once for an input word or a timer."
+
+	| threshold |
+	processSwitchCount := processSwitchCount + 1.
+	quietSwitches := quietSwitches + 1.
+	threshold := self class idleSwitchThreshold.
+	(threshold > 0 and: [ quietSwitches >= threshold ]) ifTrue: [
+		self idle ]
 ]
 
 { #category : 'compiled method header access' }
@@ -3885,6 +3976,13 @@ Interpreter >> primitiveWait [
                 self suspendActive]
 ]
 
+{ #category : 'idle' }
+Interpreter >> processSwitchCount [
+	"Not BB code. How many process switches the interpreter has made. For tuning the idle detection (see noteProcessSwitch)."
+
+	^ processSwitchCount
+]
+
 { #category : 'contexts' }
 Interpreter >> push: object [
 	"push an object on the stack of the active context (BB 585)"
@@ -4061,6 +4159,13 @@ Interpreter >> quickReturnSelf [
    "Returning self is a no-op as far as the interpreter is concerned since 
     self's object pointer occupies the same place on the stack as the message
     receiver that it should occupy as the message response. (BB 620)"
+]
+
+{ #category : 'idle' }
+Interpreter >> quietSwitches [
+	"Not BB code. How many process switches in a row there have been with no activity (see noteProcessSwitch)."
+
+	^ quietSwitches
 ]
 
 { #category : 'io primitives' }
